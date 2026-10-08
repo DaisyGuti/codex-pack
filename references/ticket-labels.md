@@ -56,7 +56,7 @@ in. On a review that must not merge yet, the label goes on the review; merge
 automation and people both read it as "do not merge". No skill works or plans a
 ticket that carries the label.
 
-Waiting on review is not a hold. A worker's ordinary review (the repo lands work by pull
+Waiting on review is not a hold. A worker's ordinary review (every change lands by pull
 or merge request) is open for its reviewer to merge, so it never carries the blocked
 label, and its issue stays unlabelled.
 
@@ -86,9 +86,9 @@ When the ticket, the repo's `AGENTS.md` or the registry names who can clear a ki
 
 **Clearing it.** Only a `dependency` block clears itself: when the last open issue a
 blocked ticket depends on closes and that ticket's most recent `Blocked:` comment has
-the kind `dependency`, the label comes off with a comment saying so. The worker that
-closes the issue does it; `$daily-grooming` does it for an issue closed by a merged
-review or by hand. Every other kind is cleared by a person: remove the label, move the
+the kind `dependency`, the label comes off with a comment saying so. `$daily-grooming`
+does it, on its next pass after the issue closes, whether a merged review closed it or a
+person did; a worker never closes an issue and so never clears one. Every other kind is cleared by a person: remove the label, move the
 ticket back to the ready lane (or the backlog lane), and comment what changed. A
 blocked label with no `Blocked:` comment is never cleared automatically; whoever finds
 one asks on the ticket what it is waiting for.

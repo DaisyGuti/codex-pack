@@ -48,4 +48,4 @@ Evaluate first, then build using whatever is already there — or recommend an u
 - Update README to reflect any new dependencies, endpoints, or run instructions
 
 ### 5. Commit
-When complete, create a concise git commit message that resolves this ticket. The closing commit message must use the `Closes #<ticket-number>` keyword so the ticket auto-closes on merge, and the worker should leave a closing comment on the ticket confirming acceptance criteria are met and tests pass.
+When complete, create a concise git commit message that resolves this ticket. The closing commit message must use the `Closes #<ticket-number>` keyword so the ticket auto-closes on merge, and the worker should comment on the ticket with the review link, confirming acceptance criteria are met and tests pass.

@@ -100,14 +100,13 @@ safety is a per-ticket property decided when the ticket is groomed
   a slot table. Run one orchestrator per board and login at a time:
   a worker moves its card out of Ready as soon as it starts, but two orchestrators
   would queue the same Ready tickets until then.
-- **Pushes.** Each worker decides how its repo lands work, from the repo's own rules
-  (protocol section 8). A repo that lands directly gets a push to the default branch
-  with no review, and the worker's one-shot rebase-retry absorbs push races. A repo
-  that lands by pull or merge request gets its branch pushed and a review opened with
-  no blocked label; the ticket ends `review_opened`, a successful end, and merging the
-  review closes the issue. A ticket that ends in `needs_manual_action` pushes its own
-  branch and opens a review carrying the registry's blocked label, on every repo, so
-  nobody merges it before the live step.
+- **Pushes.** Every worker lands its change by review, whatever the repo's own rules
+  say (protocol section 8): it pushes its own branch, never the default branch, and
+  opens a pull or merge request with no blocked label. The ticket ends `review_opened`,
+  a successful end, and merging the review closes the issue. No worker closes an issue
+  or moves a card to done; `$daily-grooming` settles closed issues to done. A ticket that
+  ends in `needs_manual_action` pushes its own branch and opens a review carrying the
+  registry's blocked label, on every repo, so nobody merges it before the live step.
 - **Blocker isolation.** A blocked ticket halts only its own slot; the rest of the
   wave finishes and the next wave dispatches.
 - **Preflight**, before the first slot is created: you can write under `STATE_ROOT`,
@@ -277,7 +276,7 @@ the first `--limit`.
 
 With `--dry-run`, print the queue, the skipped list and the existing `blocked[]`,
 then exit. The only side effects are Phase 1 capture and `--clear-skipped`. The "In
-review" lines come from `completed[]` entries marked `landed: "review"`, each checked
+review" lines come from the `completed[]` entries that carry `review_refs`, each checked
 with **review-state** on its first `review_refs` entry; list only those still `open`,
 with their links. A review that merged or closed drops out of the line.
 
@@ -383,19 +382,15 @@ record, so do not ask for logs. Wait for every worker in the wave before reaping
   ticket was touched, and it will not be dispatched again until it is assigned back.
 - `status == "review_opened"`: the worker built and tested the ticket and opened a
   review; this is successful work, not a block. Copy `{ticket_number, repos,
-  ticket_repo, commit_sha, review_refs, landed: "review", started_at, resolved_tier,
-  resolved_model, resolved_effort}` into `completed[]`, remove it from `active[]`, then
-  remove the worktree and branch exactly as for a closed ticket below. The branch is
-  on the remote, so nothing is lost; the report says the worktree was removed. The
-  issue is still open until the review merges.
-- `step == "ticket_closed"` and `status == "running"`: copy `{ticket_number, repos,
-  ticket_repo, commit_sha, close_method, closed_at, started_at, resolved_tier,
-  resolved_model, resolved_effort}` into `completed[]`, remove it from `active[]`, then
+  ticket_repo, commit_sha, review_refs, started_at, resolved_tier, resolved_model,
+  resolved_effort}` into `completed[]`, remove it from `active[]`, then
   ```bash
   git -C <primary_clone> worktree remove --force <wt-path>
   git -C <primary_clone> worktree prune
   git -C <primary_clone> branch -D <slot_branch> 2>/dev/null || true
   ```
+  The branch is on the remote, so nothing is lost; the report says the worktree was
+  removed. The issue stays open until the review merges.
 - `status == "running"` at an intermediate step (the worker returned without finishing
   or blocking): anomalous. Leave it in `active[]` to resume next run, log a warning,
   and dispatch no further waves this run.
@@ -406,8 +401,6 @@ record, so do not ask for logs. Wait for every worker in the wave before reaping
 
 ```text
 === work-tickets complete: board <board key> for <login> ===
-Completed: <N>
-  #182 <repo>: keyword close, commit abc1234 (slot-1, workhorse <slug> medium, 12m)
 In review: <R>
   #190 <repo>: <review URL> (slot-2, workhorse <slug> medium, 9m; merging closes the issue)
 Blocked: <M>
@@ -424,7 +417,7 @@ Held (carry the blocked label, not dispatched): <H>
 
 An "In review" line is not a problem to fix: the ticket is built and tested and waits
 for its reviewer, so the sentence on what needs the user says which reviews are open to
-merge, with their links. A `needs_manual_action` line's reason names the live action and the review
+merge, with their links. A ticket stays open until its review merges. A `needs_manual_action` line's reason names the live action and the review
 links from `manual_action_refs`; that tells the user at a glance which Blocked items
 are a bug to fix and which are a click to make. Follow the block with one plain
 sentence on what needs the user: the held tickets and the blocked tickets of this run,
@@ -434,8 +427,8 @@ each with the kind of its most recent `Blocked:` comment (**read-issue**; a run'
 the manual actions with their links, and say that the "left alone" tickets are not this
 person's to work (the unassigned ones need an assignee before `$work-tickets` will
 pick them up). Then send the notification:
-`Ready worker complete: N done, R in review, M blocked, K skipped (board <board key>, <login>)`.
-In review counts only this run's `review_opened` tickets, apart from Completed.
+`Ready worker complete: R in review, M blocked, K skipped (board <board key>, <login>)`.
+In review counts this run's `review_opened` tickets.
 
 ## Notes
 

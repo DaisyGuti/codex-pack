@@ -42,12 +42,13 @@ project number or a repo list.
   Waves are capped at `--max-parallel` (3 by default) and at the Codex config's
   `agents.max_concurrent_threads_per_session` (older name `agents.max_threads`) when
   that is lower.
-- A worker whose repo lands work by pull or merge request opens a review and ends
-  `review_opened`. That is finished work: reap it into `completed[]` with
-  `landed: review` and the review link, count it separately ("in review"), and never
-  treat it as blocked. Merging the review closes the issue.
-- Finish the queue, then report with the counts first: how many tickets were completed,
-  in review, blocked and skipped, and what needs the user.
+- Every worker lands its change by pull or merge request, whatever the repo's own rules
+  say, and ends `review_opened`. That is finished work: reap it into `completed[]` with
+  the review link, count it as "in review", and never treat it as blocked. Merging the
+  review closes the issue and `$daily-grooming` settles it to done; no worker closes
+  an issue or moves a card to done.
+- Finish the queue, then report with the counts first: how many tickets are in review,
+  blocked and skipped, and what needs the user.
 - `--dry-run` has no side effects beyond capturing the board's fields. It prints each
   ticket's tier, resolved model and effort, the counts of Ready tickets left alone, and
   an "In review" line with the link for each earlier run's review that is still open.

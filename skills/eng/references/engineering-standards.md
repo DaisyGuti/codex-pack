@@ -159,10 +159,9 @@ back as evidence.
   (`if: github.actor != 'dependabot[bot]'`) and run for major bumps.
 
 **Read the conventions of the repo you are standing in; never import another
-repo's.** Repos differ in layout, in how work lands (a direct commit or a pull
-request) and in where durable output goes (research, designs, decisions). Before
-you write a durable artifact or land a change in an unfamiliar tree, list the
-directory you are about to write into and read a neighbouring file for its naming,
+repo's.** Repos differ in layout and in where durable output goes (research,
+designs, decisions). Before you write a durable artifact in an unfamiliar tree, list
+the directory you are about to write into and read a neighbouring file for its naming,
 dating and citation style; check its instruction files, `.github/workflows/` and
 recent `git log`. Match the local precedent even where another repo's is better,
 and when two conventions conflict in a way that matters, say which you chose and

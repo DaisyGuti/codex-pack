@@ -1,10 +1,11 @@
 # Ticket worker protocol
 
-One worker, one issue, one run: plan, implement, test, commit, push, then land the work
-the way the repo lands work (a direct push that closes the issue, or an open review that
-closes it on merge), and move the board card. The tracker (GitHub or GitLab), board, lanes, labels and repo set come
-from [registry.md](registry.md); a dispatched worker receives them through the state
-file, a direct one reads the registry itself.
+One worker, one issue, one run: plan, implement, test, commit on a branch, push the
+branch, open a review into the default branch, and move the board card to review. Every
+change lands by review, and the worker never closes the issue: merging the review does.
+The tracker (GitHub or GitLab), board, lanes, labels and repo set come from
+[registry.md](registry.md); a dispatched worker receives them through the state file, a
+direct one reads the registry itself.
 
 **Tracker operations.** Every action on the tracker below is a named operation, shown
 in bold (**set-lane**, **comment**, ...). The exact commands for each are in
@@ -120,8 +121,8 @@ When this session works the ticket, continue:
 
 Then run every step below, board moves and terminal states included, skipping only
 the state-file writes. Keep the slot's fields in your head and put them in the report.
-After `ticket_closed` or `review_opened`, remove your worktree and local branch (a
-review's branch is on the remote); after any stop, leave both for inspection.
+After `review_opened`, remove your worktree and local branch (the review's branch is on
+the remote); after any stop, leave both for inspection.
 
 **Anything else** (invalid JSON, no issue number, or a payload with no `assignee`):
 stop before touching the board and say what is missing.
@@ -175,17 +176,14 @@ those belong to the orchestrator.
 At every checkpoint update your slot's `step`, `status`, `reason` and whatever else
 changed, and move the board card as section 4 says. Fields you maintain:
 `pre_step_sha`, `changed_files`, `commit_sha`, `plan`, `ticket_repo`, `model`,
-`close_method`, `closed_at`, `manual_action_refs`, `landing` (`direct` or `review`,
-set in section 8), `review_refs` (`{ "<repo>": "<review URL>" }`), `unblock_skipped`,
-`unblock_check_error`.
+`manual_action_refs`, `review_refs` (`{ "<repo>": "<review URL>" }`).
 
 Steps: `fetched`, `synced`, `planned`, `implemented_<repo>`, `tested_<repo>`,
-`committed_<repo>`, `pushed_<repo>`, `ticket_closed`, `downstream_unblocked`,
-`review_opened` (terminal) or `needs_manual_action` (terminal).
+`committed_<repo>`, `pushed_<repo>`, `review_opened` (terminal) or
+`needs_manual_action` (terminal).
 
 ```
-fetched > synced > planned > implemented_<repo> > tested_<repo> -+-> committed_<repo> > pushed_<repo> > ticket_closed > downstream_unblocked   (landing: direct)
-                                                                  +-> committed_<repo> > pushed_<repo> > review_opened (terminal)          (landing: review)
+fetched > synced > planned > implemented_<repo> > tested_<repo> -+-> committed_<repo> > pushed_<repo> > review_opened (terminal)
                                                                   +-> needs_manual_action (terminal, section 11)
 ```
 
@@ -223,13 +221,13 @@ up in `lanes[<role>]` and applies it.
 | Checkpoint | Lane role |
 | --- | --- |
 | `synced`, `planned` | `in_progress` |
-| last `pushed_<repo>` (landing `direct`, ticket about to close) | `done` |
 | `review_opened` | `review` if the registry defines that lane, otherwise no move |
 | any `blocked_*`, `needs_decision`, `needs_manual_action` | `blocked` |
 
-A ticket whose review is open stays out of `done` until the merge closes it. All three stops share the one blocked lane. The `status` values stay distinct in the
-state file, and the comment's kind says which it is. A stopped ticket never goes to
-`in_progress`.
+The worker never moves a card to `done`: the merge closes the issue and `$daily-grooming`
+settles it to done (section 9). All three stops share the one blocked lane. The `status`
+values stay distinct in the state file, and the comment's kind says which it is. A
+stopped ticket never goes to `in_progress`.
 
 If a lane value is missing from the board, **set-lane** skips the move and you log a
 warning; never block on it.
@@ -267,7 +265,7 @@ Per repo, with `WT=worktree_paths[<repo>]`; run every git command as `git -C $WT
 3. Never `git checkout <default_branch>` in the worktree; it may be checked out elsewhere. If
    no local commits exist yet and `origin/<default_branch>` has advanced since the worktree was
    made, run `git -C $WT merge --ff-only origin/<default_branch>`. After your first
-   commit, section 8's rebase-retry does the reconciling.
+   commit, the review absorbs a moved default branch when it merges (section 8).
 
 Set `fetched` once all repos are fetched, then `synced`.
 
@@ -312,7 +310,8 @@ ticket's latest `### Final Plan` comment. With neither, stop with
 
 Read the repo's `AGENTS.md` (or `CONTRIBUTING.md` and the other rules files at its
 root when it has none) and the rules files those point to, and follow them with the
-standards below.
+standards below. One rule in them does not apply: a rule to commit or push to the default
+branch gives way to section 8.
 
 **Review before writing.** Read the dependency manifest, find the existing patterns
 for state, navigation, styling, networking, caching, payment, auth and storage, and
@@ -360,29 +359,23 @@ with a summary of the output, do not commit, and leave the tree dirty. Advisory:
 passed only if you ran it in the worktree and saw it pass; a timeout or unreadable
 output is a failure.
 
-## 8. Land the work: commit, push, and review when the repo asks for one
+## 8. Land the work: commit, push the branch, open a review
 
 Skip this section and section 9 for a `needs_manual_action` ticket; section 11 has
 its own rules.
 
-**Landing rule.** Before committing, decide per repo how it lands work, from its own
-words first:
+**Every change lands by review.** The worker commits on the slot branch, pushes that
+branch and opens a review into `<default_branch>`. It never commits to or pushes
+`<default_branch>`, never merges, and never closes the issue, even where the repo's own
+rules say to commit or push straight to the default branch: this overrides them. A
+rejected push to the slot branch is a blocker; do not push anywhere else.
 
-1. **Rules files.** The repo's `AGENTS.md` chain, `CLAUDE.md`, `CONTRIBUTING*` and the
-   files those point to (section 7 already read them). A rule that requires a pull or
-   merge request, or a reviewer, means `review`. A rule that says to commit or push to
-   the default branch means `direct`.
-2. **History, only when the files are silent.** Read the last 20 commits on
-   `origin/<default_branch>` (`git -C $WT log --first-parent -20 --format=%s%n%P
-   origin/<default_branch>`). Mostly merge commits, `Merge pull request` / `Merge branch`
-   subjects or `(#123)` suffixes means `review`; mostly plain commits, or too little
-   history to tell, means `direct`.
-3. **Conflicting or unclear signals mean `review`.** It is the safer choice: a review
-   can always be merged, a push cannot be taken back.
-
-A multi-repo ticket lands as one: if any repo in `repos[]` lands by `review`, every
-repo does, so the code arrives together. Record the result in `landing` and say in the
-report which rule decided it (the file and the sentence, or "recent history").
+**What the repo's rules still decide.** The rules files section 7 read matter here only
+for what a review needs, and you apply them when you open it: a pull or merge request
+template (build the body from it, keeping its required parts and adding the content
+below), a title or label convention, a branch-name rule, and required reviewers. The
+host requests code owners itself. A reviewer the rules name that the host would not
+request: ask for them in the body and say in the report that **open-review** sets none.
 
 **Commit** on the slot branch (never on `<default_branch>` directly):
 
@@ -391,53 +384,24 @@ git -C $WT add -A
 git -C $WT commit -m "<msg>"
 ```
 
-The message describes the change itself and ends with a closing keyword in
-the syntax of the tracker adapter's **close-issue** section:
+The message describes the change itself and ends with a closing keyword, in the syntax
+the tracker adapter lists under "Closing keywords for a commit message":
 
 - Owning repo: `Closes #<n>`, or `Fixes #<n>` when the ticket has a `bug` label.
 - Any other repo: `Refs <owning remote>#<n>`, which does not close.
 
-The owning repo is the board item's `repo`, else the first entry of
-`repos[]`; store its name in `ticket_repo`. Record the SHA in `commit_sha[<repo>]`.
-The keyword is the same for both landings; with `review` it fires when the review
-merges, with `direct` when the push lands.
+The owning repo is the board item's `repo`, else the first entry of `repos[]`; store its
+name in `ticket_repo`. Record the SHA in `commit_sha[<repo>]`. The keyword is what closes
+the issue when the review merges, so it goes in the commit and in the review body. Set
+`committed_<repo>`.
 
-**Push (landing `direct`)**, per repo: `git -C $WT push origin HEAD:<default_branch>`. Never force-push. On a
-non-fast-forward or branch-protection rejection, try one rebase-retry, which is
-normal when another worker pushed first:
+**Review.** A review is a normal, successful end for a ticket, never a hold. Per repo, in
+`repos[]` order, after the commit:
 
-1. `LOCAL_SHA=$(git -C $WT rev-parse HEAD)` for diagnostics.
-2. `git -C $WT fetch origin --prune`.
-3. `git -C $WT rebase origin/<default_branch>`; on conflict `git -C $WT rebase --abort` and go
-   to the block path.
-4. Re-run the test command; on failure go to the block path.
-5. `git -C $WT push origin HEAD:<default_branch>`; on success update `commit_sha[<repo>]` (the
-   rebase rewrote it) and continue; on failure go to the block path.
-
-**Protected branch.** When the remote rejects the push because the default branch is
-protected (it requires a pull or merge request, a review or passing checks), the repo
-lands by review even though its rules files did not say so: switch to review landing
-for this ticket, record why in the slot, and continue from there.
-
-**Block path:** `blocked_push_rejected`, with the exact remote error and whether the
-retry ran and why it failed (`rebase-conflict`, `tests-failed-after-rebase` or
-`push-still-rejected`).
-
-**Rollback advisories** for any blocker, for the user to run after inspecting
-`git -C $WT status` and `log`: local-only commits, `git -C $WT reset --hard
-<pre_step_sha>` (or `origin/<default_branch>` after a rejected push); pushed commits, `git -C $WT
-revert <sha> && git -C $WT push origin HEAD:<default_branch>`. Never force-push.
-
-Set `committed_<repo>` and `pushed_<repo>` as they complete. Before the last push,
-move the card to `done` per section 4.
-
-**Review landing.** A review is a normal, successful end for a ticket, never a hold.
-Per repo, in `repos[]` order, after the commit:
-
-1. **Push the branch**, not `<default_branch>`: `git -C $WT push origin
-   HEAD:<slot_branch>`. Never force-push; a rejection is `blocked_push_rejected` with
-   the exact remote error. There is no rebase-retry here: the review absorbs a moved
-   default branch when it merges. Set `pushed_<repo>`.
+1. **Push the branch**: `git -C $WT push origin HEAD:<slot_branch>`. Never force-push. A
+   rejection is `blocked_push_rejected` with the exact remote error. There is no
+   rebase-retry: the review absorbs a moved default branch when it merges. Set
+   `pushed_<repo>`.
 2. **open-review** from `<slot_branch>` into `<default_branch>` with **no label**. Do
    not run **ensure-label**, do not pass `labels.blocked`, and leave out the adapter's
    label argument; the blocked label tells people and merge automation "do not merge",
@@ -456,37 +420,28 @@ Then, on the owning repo:
 
 3. **comment** once on the issue, plain and short, not in the `Blocked:` shape: the
    review link (every link, per repo, when multi-repo), one line on what was built, the
-   tests run and that they passed, and that merging closes #<n>.
+   tests run and that they passed, and that merging closes #<n>. Section 9's model-fit
+   note, when it applies, is a second comment right after this one.
 4. **set-lane** with role `review` when the registry defines that lane. Otherwise
    leave the card where it is, in `in_progress`. The issue stays open and unlabelled.
-5. **Set the slot** `step=review_opened`, `status=review_opened` (terminal) and
-   `landing=review`. Stop.
+5. **Set the slot** `step=review_opened` and `status=review_opened` (terminal). Stop.
 
-Section 9 never runs for this ticket: the merge closes the issue, `$daily-grooming`
-settles closed issues to done. No close verification, no model-fit note, no downstream
-unblock now, so a dependent ticket's `dependency` hold stays on until a person clears it
-(nothing else clears one when a merge, not a worker, closes the issue). If the ticket also needs a live step, section 11
-applies instead: its review is held with the blocked label because both facts are true.
+If the ticket also needs a live step, section 11 applies instead: its review is held with
+the blocked label because both facts are true.
 
-## 9. Close, model fit, downstream
+**Rollback advisories** for any blocker, for the user to run after inspecting
+`git -C $WT status` and `log`: local-only commits, `git -C $WT reset --hard
+<pre_step_sha>`. A commit already pushed is on the slot branch only, so nothing needs
+undoing on `<default_branch>`; delete the remote branch. Never force-push.
 
-Also skipped for a `needs_manual_action` ticket (no closing keyword was committed) and
-for landing `review` (the merge closes the issue, section 8).
-
-**Verify the close** after the owning repo's push lands with **verify-closed**. Still
-open: **close-issue** with the comment "Auto-closed by ticket worker (keyword did not
-fire; commit <sha>)". If that fails too, stop with
-`blocked_close_failed` and do not report the ticket completed. Record
-`close_method` as `keyword`, `fallback` or `blocked_close_failed`. Pushes to
-non-owning repos need no verification. Set `ticket_closed` and `closed_at`
-(ISO 8601), leave `status=running`; the orchestrator reaps the slot.
+## 9. After the review opens: model fit, and what happens at merge
 
 **Model-fit note.** Post one only when the tier you ran on was visibly wrong: the
 ticket needed several redo passes or you doubted the plan or the diff (too weak), or
 it was pure mechanical work any cheaper tier would have finished the same (over-tiered).
 It changes nothing about your run; it tells whoever assigns the `model:` label next.
-Post it with **comment** on the owning repo, even after an auto-close (both trackers
-allow comments on closed issues), and say nothing when the tier fit:
+Post it with **comment** on the owning repo, as a second short comment right after
+section 8's, and say nothing when the tier fit:
 
 ```text
 Model-fit note: <tier> (<slug>) felt <too weak|over-tiered> for this ticket: <one line why>.
@@ -495,45 +450,29 @@ Model-fit note: <tier> (<slug>) felt <too weak|over-tiered> for this ticket: <on
 Name the tier (`fast`, `workhorse`, `frontier`) and the slug you were spawned on. It
 is found later with **search-issues** on the keywords `Model-fit note`.
 
-**Clear downstream blocked labels**, on the owning repo only, once the issue is
-confirmed closed, and only for a dependent whose hold is a dependency hold:
-
-1. **list-blocked** on the owning repo, with `labels.blocked`'s name.
-2. For each, match case-insensitively a `Depends on:`, `Blocked by:` or `Blocked on:`
-   line containing `#<n>` or `<repo>#<n>`, or a `#<n>` under a heading containing
-   "depend" or "block". A blocked issue with no such block is skipped; only a person
-   can clear a reason the issue never states.
-3. Run **read-issue** on it. Its most recent `**Blocked:` comment must have the kind
-   `dependency`. Any other kind, or no such comment, is skipped with that reason
-   (`kind <kind>` or `no Blocked comment`): append `{downstream: d, reason: "..."}` to
-   `unblock_skipped[]` and leave the label.
-4. Parse every ticket number in the dependency block; check each other one with
-   **issue-state**.
-5. All others closed: **remove-label** `labels.blocked`'s name from `<d>`, then
-   **comment** on it: "Unblocked by #<n> (last remaining dependency closed)."
-6. Any other still open: leave the label and append `{downstream: d, reason: "still
-   blocked by #M"}` to `unblock_skipped[]`.
-
-Failures here (rate limit, network, a failed label edit) go in
-`unblock_check_error` and never block a ticket that has shipped. Set
-`downstream_unblocked`. Cross-repo chains are out of scope.
+**What the worker leaves to the merge.** The worker does not close the issue, check that
+it closed, move the card to `done`, or clear the `dependency` hold on a ticket that
+waited on this one. The merge closes the issue through the closing keyword; the next
+`$daily-grooming` pass settles it to done and removes the blocked label from a dependent
+whose dependencies are all closed ([ticket-labels.md](ticket-labels.md), "Clearing it").
+A dependent's hold therefore stays on until that pass runs, or a person clears it.
 
 ## 10. Report
 
 Your final message goes to whoever dispatched you, or to the user in direct mode:
-one short paragraph that leads with the outcome (closed, in review, blocked or waiting
-on a live step), then the ticket, its final step and status, commit SHAs or review links, how it
-closed (or, for a ticket in review, the landing rule that decided it), what blocks it and what would clear it, and the model-fit note if you posted
-one. In direct mode, if you worked the ticket in the session because of the model rules
+one short paragraph that leads with the outcome (in review, blocked or waiting on a live
+step), then the ticket, its final step and status, the review links and commit SHAs, what
+blocks it and what would clear it, and the model-fit note if you posted one. A ticket in
+review is not closed: say that merging the review closes it. In direct mode, if you worked the ticket in the session because of the model rules
 above, say why in one clause (for example "the ticket had no model label"). With a state
 file, the file is the record and this is the summary.
 
 ## 11. `needs_manual_action`
 
 Triggers when the work is complete and tested and the ticket still cannot close
-without a live action no worker can take (section 4). It applies whatever the repo's
-landing rule says, and a repo that lands by review gets the one held review described
-here, not a second ordinary one. You usually know at
+without a live action no worker can take (section 4). It lands by review like every
+ticket, and the review is the one held review described here; no second, ordinary
+review is opened. You usually know at
 planning time from the acceptance criteria; if it only becomes clear after
 implementation, decide then. It is a whole-ticket decision: every repo in `repos[]`
 runs steps 1 to 3, then steps 4 to 7 run once, against the owning repo.
@@ -545,8 +484,7 @@ Per repo, with `WT`:
    Progresses #<n>"`. The message must not contain `Closes` or `Fixes`; the ticket is
    not done.
 2. **Push the branch**, not `<default_branch>`: `git -C $WT push origin HEAD:<slot_branch>`.
-3. **Open a review on every repo**, including one whose own rules say to commit
-   straight to the default branch: a review is the only container that holds code back
+3. **Open a review on every repo**: a review is the container that holds code back
    until the live step is done. Run **ensure-label** for `labels.blocked` on the repo,
    then **open-review** from `<slot_branch>` into `<default_branch>` with the ticket's
    title, a body saying what was built, what tests pass, and exactly what must be done
@@ -579,6 +517,6 @@ Then, on the owning repo:
 7. **Set the slot** `status=needs_manual_action` (its own value, neither `blocked_*`
    nor `needs_decision`) with a `reason` naming the live action.
 
-Stop. Section 9's close verification and downstream unblock never run: nothing was
-committed with a closing keyword, so there is nothing to verify and nothing to
-unblock yet.
+Stop. Section 8's ordinary review and comment never run for this ticket, and section 9's
+model-fit note is skipped: nothing was committed with a closing keyword, so merging the
+held review closes nothing.

@@ -1,9 +1,10 @@
 # Global instructions for Codex
 
 These apply in every repository for everyone who installs this pack. Project
-`AGENTS.md` files load after this one and win where they differ; the user's
-instructions in the conversation win over both. Personal preferences belong in
-your own `~/.codex/config.toml` as `developer_instructions`, never in this file.
+`AGENTS.md` files load after this one and win where they differ, except for how code
+lands (see Working); the user's instructions in the conversation win over both.
+Personal preferences belong in your own `~/.codex/config.toml` as
+`developer_instructions`, never in this file.
 
 A repo with no `AGENTS.md` but a root `CLAUDE.md` keeps its rules there: read its
 headings, then the sections that bear on the task (conventions, how work lands,
@@ -22,6 +23,10 @@ for the P variants; `/write-ticket` is `$write-ticket`, `/plan-next` is
   `$work-tickets`, `$accessibility-fix`, `$prompt-optimizer`,
   `$codex-project-setup`). A question about how a screen looks or reads is
   `$ux-review`'s.
+- Every code change lands by pull request (merge request on GitLab) into the default
+  branch: commit on a branch, push the branch, open the review. Never commit or push
+  to the default branch yourself. This outranks a project file or `CLAUDE.md` that
+  allows direct pushes.
 - Ask before anything public, paid, contractual or production, before deleting
   data or files you did not create, before migrations against a shared database,
   before rotating secrets, and before force-pushing. An approval covers only the
@@ -67,9 +72,11 @@ for the P variants; `/write-ticket` is `$write-ticket`, `/plan-next` is
 - When sources or instructions conflict, follow the order above and name the
   conflict in your report instead of reconciling it silently.
 - Issues on a tracked board (GitHub or GitLab, whichever the ticket registry
-  names): move the issue to the in-progress lane when you start, and when the work
-  lands and meets the acceptance criteria, close it and move it to the done lane in
-  the same turn. Read board and lane ids through the tracker, never from memory.
+  names): move the issue to the in-progress lane when you start, and when the review
+  is open and the work meets the acceptance criteria, move it to the in-review lane if
+  the board has one. Never close the issue or move it to done yourself: merging the
+  review closes it, and `$daily-grooming` settles it to done. Read board and lane ids
+  through the tracker, never from memory.
   When the work stops on something you cannot clear, move it to the blocked lane,
   add the blocked label and post one comment saying what it is blocked on and
   what would clear it, in the shape

@@ -5,11 +5,11 @@ description: Use when asked to fix a bug, build a feature, refactor, change arch
 
 # Engineering pass
 
-Do the job end to end in the repo you were pointed at, and land it the way that
-repo lands work. Invoking this skill is a request to verify: add the tests the
+Do the job end to end in the repo you were pointed at, and land it by pull request
+(a merge request on GitLab) into the default branch. Invoking this skill is a request to verify: add the tests the
 standards call for and run the gates in step 9.
 
-Carry the work through to the landed change and the report in this turn. When a
+Carry the work through to the open review and the report in this turn. When a
 detail is missing, pick the most reasonable assumption, write it in the report and
 keep going. Stop to ask only for the cases step 3 names, for an approval the repo's
 rules require (anything public, paid or production, deleting data), for a secret or
@@ -119,10 +119,17 @@ plus the standards when the unit writes code; skip the rest of this list.
      agent is not installed, review inline and say so.
    - Fix what you find before step 9, so the tests run on the fixed state.
 9. **Verify, then land.**
-   - Find the landing rule in the repo's instruction files; failing that, read
-     recent `git log` and `.github/workflows/` to see whether work arrives by direct
-     commit or by pull request. When the repo names a push helper or a verification
-     recipe, use it.
+   - **Every change lands by review.** Never commit or push to the default branch,
+     even where the repo's instruction files allow direct pushes. Read those files
+     for what a review needs (a pull or merge request template, reviewers, a branch
+     name or title convention) and for a verification recipe, and use them.
+   - **Branch first, named for the change** (for example `fix/export-duplicate-rows`),
+     from the latest `origin/<default-branch>`. In a shared tree that holds other
+     people's uncommitted changes (`git status --short` lists paths you did not
+     touch), make the branch in a separate worktree (`git worktree add <path> -b
+     <branch> origin/<default-branch>`) and work there from the start. Never switch
+     the shared tree's branch, and never stash. If you already edited in the shared
+     tree, apply your own paths' diff to the worktree and say so in the report.
    - Commit by path. Never run `git add -A`, `git add .` or `git commit -a`. Run
      `git status --short` right before committing and confirm every staged path is
      yours. Never rebase in a shared tree, amend, or force-push unless the user
@@ -133,6 +140,15 @@ plus the standards when the unit writes code; skip the rest of this list.
      commit, from a clean checkout of it when `git status` still shows other
      changes. Beyond what the standards require each change to ship with, broaden
      or repeat test runs only when a new failure or concern justifies it.
+   - **Push the branch and open the review.** `git push -u origin <branch>`, then
+     choose the CLI from the host in `git remote get-url origin`: `gh pr create
+     --base <default-branch> --head <branch> --title "<title>" --body-file <file>` for
+     GitHub, `glab mr create --source-branch <branch> --target-branch <default-branch>
+     --title "<title>" --description-file <file> --yes` for GitLab. The body says what
+     changed, the checks you ran and their result, and which test covers the change.
+     Never force-push and never merge it; report the link.
+   - **No remote, an unknown host, or a CLI that is missing or not signed in:** the
+     commit stays on the branch. Say so in the report with the branch name, and stop.
    - The default `workspace-write` sandbox keeps `.git` read-only, so a commit may
      need approval or fail. When it is refused, say so in your report and leave the
      change ready to commit; never loop on it.
@@ -223,10 +239,11 @@ the write units one at a time in this tree and say so in the report.
 
 ## Report
 
-Done means the work is landed, the checks ran, and the real path was exercised.
-Your final message is for the user:
+Done means the change is committed on a branch with its review open, the checks ran,
+and the real path was exercised. Your final message is for the user:
 
-- Lead with what changed and what it does for them now.
+- Lead with what changed and what it does for them now, then the branch and the review
+  link (or, when no review could be opened, why not and where the branch is).
 - Files touched, as clickable repo paths, and the commands you ran with their
   results, and how you confirmed the covering test ran the changed path.
 - A docs line: "Docs: updated" with the files, or "Docs: not needed" with the

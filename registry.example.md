@@ -59,8 +59,9 @@ missing from the board is skipped with a warning when a ticket moves, and `ready
 missing stops a run. Only the column for the tracker above is read.
 
 The `review` lane is optional: delete its row if the board has no such lane. A worker
-that opens a review for a repo that lands work by pull or merge request then leaves the
-card in `in_progress` instead of moving it. The other lanes are required as before.
+that opens a review (every change lands by one) then leaves the card in `in_progress`
+instead of moving it. A worker never moves a card to `done`: merging closes the issue and
+`$daily-grooming` moves it. The other lanes are required as before.
 
 | Role | GitHub (Status option) | GitLab (label) | Meaning |
 | --- | --- | --- | --- |

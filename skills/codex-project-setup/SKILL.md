@@ -26,8 +26,8 @@ step below says the choice is the user's (steps 3 and 5).
 1. **Read what exists.** Any `AGENTS.md` or `AGENTS.override.md` from the repo root
    down to the working directory, `CLAUDE.md`, `CONTRIBUTING.md`, `README.md`, the
    dependency manifests, `Makefile` or `package.json` scripts,
-   `.github/workflows/`, and the last 30 commits (`git log --oneline -30`) to see
-   whether work lands by direct commit or by pull request.
+   `.github/workflows/`, any pull or merge request template and `CODEOWNERS`, and the
+   last 30 commits (`git log --oneline -30`) to see how the repo reviews work.
 2. **Fill the template** at [assets/AGENTS.template.md](assets/AGENTS.template.md).
    - Link to existing rules files and copy nothing from them. When `CLAUDE.md` holds
      the project's rules, `AGENTS.md` names it and adds only what Codex needs on
@@ -35,8 +35,14 @@ step below says the choice is the user's (steps 3 and 5).
    - Every command must appear in the repo: in a manifest, a script, CI or the
      README. Never guess one.
    - Write `UNKNOWN` for a fact that applies here and that the repo does not state,
-     such as a command or the landing rule. Delete any line or section that does not
+     such as a command or a required reviewer. Delete any line or section that does not
      apply to this repo or that the repo has nothing for.
+   - The landing line always reads: branch, then open a pull request (merge request
+     on GitLab) into the default branch, never a commit to it. Add the repo's own
+     review requirements after it, each from a file that states it: required
+     reviewers or code owners, the pull or merge request template to fill, title or
+     label conventions, and what must pass before a merge. Never write "commit
+     straight to main", whatever the history shows.
    - Include only facts that change how an agent works in this repo. Leave out
      history, progress notes and anything the code already makes obvious.
    - For Models and delegation, take the tier and effort from the table in
@@ -57,7 +63,10 @@ step below says the choice is the user's (steps 3 and 5).
    repo root and the working directory (the closest file wins). Fix each conflict by
    changing the draft so the file that owns the fact stays its only copy, and leave
    every other file unchanged. List a conflict for the user when the right answer is
-   theirs to choose.
+   theirs to choose. A rule in any of those files that says to commit or push to the
+   default branch always goes in the report as a conflict with the pack's review-only
+   rule: the draft keeps the review-only landing line, and the file holding the old
+   rule stays as it is for the user to change.
 4. **Check it.** Run both checks and see them pass:
    - `grep -nE '\{\{|<!--' AGENTS.md` returns nothing, apart from comments that were
      already in an existing file you kept.
@@ -65,12 +74,13 @@ step below says the choice is the user's (steps 3 and 5).
      root to the working directory stays under 32 KiB (32768 bytes), measured with
      `wc -c`. When it is over, shorten the draft by linking to the document that owns
      the detail.
-5. **Land it** the way the repo lands work, committing only `AGENTS.md` by path so
-   another session's staged changes stay out. A direct-commit repo gets a commit and
-   a push; a pull-request repo gets a branch and a pull request. When the history
-   does not show which, leave the file in the working tree and ask the user which
-   way to land. Retry a transient network failure up to twice, then stop and report
-   with the file committed locally or left in the working tree.
+5. **Land it** by review: a branch, a commit of only `AGENTS.md` by path so another
+   session's staged changes stay out, a push of the branch, and a pull request (merge
+   request on GitLab) opened with the CLI of the remote's host, filling the repo's
+   template when it has one. Never commit or push to the default branch. With no
+   remote, or a CLI that is missing or not signed in, leave the commit on the branch
+   and say so. Retry a transient network failure up to twice, then stop and report
+   with the file committed on the branch locally or left in the working tree.
 
 When an `AGENTS.md` already exists, refresh it in place: keep rules that are still
 true, correct stale commands and paths, and say in your report what you removed and
@@ -78,5 +88,6 @@ why.
 
 ## Report
 
-The file path, a few lines on what it now tells Codex, every `UNKNOWN` left for the user
-to fill, and any conflict you resolved or left for them.
+The file path, the review link, a few lines on what it now tells Codex, every `UNKNOWN`
+left for the user to fill, and any conflict you resolved or left for them, including any
+existing rule that says to commit to the default branch.

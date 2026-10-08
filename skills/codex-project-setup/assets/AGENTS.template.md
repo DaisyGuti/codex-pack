@@ -1,7 +1,7 @@
 # AGENTS.md — {{project name}}
 
 <!--
-Template from codex/skills/codex-project-setup; its SKILL.md says how to fill it.
+Template from the codex-project-setup skill; its SKILL.md says how to fill it.
 Delete this comment. Keep the file a short router: durable rules, one owner per
 fact, links in place of copies. Codex follows it closely, so a stale line becomes a
 wrong instruction. The whole AGENTS.md chain stays under 32 KiB.
@@ -35,8 +35,11 @@ the only rules file.}}
 
 ## Landing changes
 
-- {{"Commit straight to `main` and push" or "Branch and open a pull request; merge
-  when CI is green unless it carries label X".}}
+- Branch and open a pull request (merge request on GitLab) into `{{default branch}}`;
+  never commit or push to it directly.
+- {{Review requirements the repo's files state: required reviewers or code owners,
+  the pull request template to fill, title or label conventions, what must pass
+  before a merge. Delete the line if there are none.}}
 - Commit messages: {{style, for example Conventional Commits}}.
 - {{Push helper or release script, if the repo has one.}}
 

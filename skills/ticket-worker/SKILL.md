@@ -1,6 +1,6 @@
 ---
 name: ticket-worker
-description: Use when the user asks to work one specific issue ("work issue 42 in my-app") or when $work-tickets dispatches a ticket payload. Takes the issue from plan to commit, push, close (or an open review, where the repo lands work by review) and board move in its own git worktree. For a whole Ready queue use $work-tickets.
+description: Use when the user asks to work one specific issue ("work issue 42 in my-app") or when $work-tickets dispatches a ticket payload. Takes the issue from plan to an open review (a pull request, or a merge request on GitLab) in its own git worktree and moves the board card; merging the review closes the issue. For a whole Ready queue use $work-tickets.
 ---
 
 # Ticket worker
@@ -21,17 +21,20 @@ so read only that file, in full, before your first step.
 
 - Run the pipeline without pausing. Stop only for the protocol's three cases: a
   blocker, a decision point, or manual-action-complete. Make reasonable assumptions on
-  routine choices, and do not report until the run reached `ticket_closed`, `review_opened` or one of
+  routine choices, and do not report until the run reached `review_opened` or one of
   those stops, with the board and labels matching. Lead the report with the outcome.
-  A repo whose rules require a pull or merge request lands by review: the run ends at
-  `review_opened` with the review open, which is a finished ticket, not a stop.
+  Every change lands by review, whatever the repo's own rules say: the run ends at
+  `review_opened` with the review open, which is a finished ticket. The
+  worker never commits or pushes to the default branch, and never closes the issue or
+  moves its card to done; merging closes it and `$daily-grooming` settles the card.
 - Work only tickets assigned to the signed-in user. A dispatched run checks the
   payload's `assignee` and stops with `blocked_not_assigned` when the issue is no
   longer theirs; a direct run compares the issue with the signed-in user, and when it
   is assigned to someone else or to nobody it stops and offers to assign it, never
   assigning without being told to.
 - The request or dispatch authorizes every git and tracker action the protocol names:
-  pushes, opening a review, issue comments, labels, closing the issue and board moves.
+  pushes of its own branch, opening a review, issue comments, labels and board moves
+  (never to done).
 - Work only in your own worktree. A primary clone gets read-only git commands, plus
   the four writes the protocol lists for direct mode.
 - Comments you post on the tracker are read by the user: short, plain language, and a

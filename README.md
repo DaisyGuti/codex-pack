@@ -12,13 +12,13 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | Path | What it is |
 | --- | --- |
 | [`AGENTS.md`](AGENTS.md) | Global Codex instructions for the team: working rules, ticket boards, models and delegation |
-| [`skills/eng/`](skills/eng/SKILL.md) | `$eng`: the engineering pass for any repo, held to [the engineering standards](skills/eng/references/engineering-standards.md), splitting work onto cheaper subagents |
+| [`skills/eng/`](skills/eng/SKILL.md) | `$eng`: the engineering pass for any repo, held to [the engineering standards](skills/eng/references/engineering-standards.md), splitting work onto cheaper subagents; lands every change by pull request or merge request, never on the default branch |
 | [`skills/prompt-optimizer/`](skills/prompt-optimizer/SKILL.md) | `$prompt-optimizer`: optimizes a prompt or instruction file for the model that runs it and says which model and effort to use |
 | [`skills/write-ticket/`](skills/write-ticket/SKILL.md) | `$write-ticket`: checks the premise against the real repo, then files an issue in the shape and with the labels the ticket workers need |
 | [`skills/plan-ticket/`](skills/plan-ticket/SKILL.md) | `$plan-ticket`: writes a ticket's short build plan (files, pattern to copy, how to tell it's done) and sets its model and run labels, so the plan can be read before a worker builds it |
 | [`skills/daily-grooming/`](skills/daily-grooming/SKILL.md) | `$daily-grooming`: tidies the whole board: settles closed items, syncs priorities, flags duplicates and gaps, promotes to Ready and plans what is unplanned |
 | [`skills/work-tickets/`](skills/work-tickets/SKILL.md) | `$work-tickets`: works your Ready tickets in parallel waves, each on the model its label names |
-| [`skills/ticket-worker/`](skills/ticket-worker/SKILL.md) | `$ticket-worker`: works one issue from plan to close |
+| [`skills/ticket-worker/`](skills/ticket-worker/SKILL.md) | `$ticket-worker`: works one issue from plan to an open pull or merge request; merging closes the issue |
 | [`skills/ux-review/`](skills/ux-review/SKILL.md) | `$ux-review`: reviews a screen, flow, mockup or screenshot for usability, accessibility and visual craft |
 | [`skills/web-design-guidelines/`](skills/web-design-guidelines/SKILL.md) | `$web-design-guidelines`: audits UI code against Vercel's Web Interface Guidelines, fetched fresh each run |
 | [`skills/accessibility-scan/`](skills/accessibility-scan/SKILL.md) | `$accessibility-scan`: automated WCAG scan of one live page |
@@ -84,6 +84,11 @@ copies, so rerun `./install.sh` after changing anything in `agents/`.
    so each person's paths stay on their machine.
 3. They sign in to `gh` (or `glab`) as themselves. The ticket skills work only tickets
    assigned to that login.
+   On GitLab, also let git use that sign-in, or pushes start failing once the stored
+   token expires:
+   `git config --global credential.https://gitlab.com.helper ''` then
+   `git config --global --add credential.https://gitlab.com.helper '!glab auth git-credential'`
+   (use your GitLab host in place of `gitlab.com` if it is self-managed).
 4. They set a session default in `~/.codex/config.toml` (the "Recommended team
    default" in [references/model-selection.md](references/model-selection.md)) and put
    any personal preferences there as `developer_instructions`.
@@ -94,7 +99,7 @@ Updates reach everyone with `git pull` (and `./install.sh` when `agents/` change
 ## Ticket trackers
 
 The ticket skills describe their work as tracker operations (list the board, move a
-card to a lane, comment, close, open a review request) and read how to do each one
+card to a lane, comment, open a review request) and read how to do each one
 from `references/trackers/<tracker>.md`, where `<tracker>` comes from `registry.md`.
 GitHub uses Projects with a Status and a Priority field; GitLab uses an issue board
 whose lanes and priorities are labels, and merge requests in place of pull requests.
@@ -106,6 +111,13 @@ registry.
   person can read the plan first; `$daily-grooming` does that for the whole board.
   `$work-tickets` builds your Ready tickets in parallel, and `$ticket-worker` builds
   one. A worker writes the plan itself when a ticket has none.
+- **How work lands.** Every change the pack makes goes on a branch and into the
+  default branch by pull request (merge request on GitLab); Codex never commits or
+  pushes to the default branch itself, even where a repo's own instructions allow
+  direct pushes. A ticket worker ends with the review open and never closes the issue
+  or moves its card to Done: merging closes the issue, and `$daily-grooming` settles
+  it to Done and clears the dependency holds that waited on it. `$codex-project-setup`
+  writes the same rule into a repo's `AGENTS.md`.
 - **Whose tickets.** `$work-tickets`, `$ticket-worker` and `$plan-ticket` work only
   tickets assigned to whoever is signed in to `gh` or `glab` on the machine. Unassigned
   tickets are reported and left alone until someone is assigned. `$daily-grooming`
