@@ -1,0 +1,82 @@
+[
+  {
+    "query": "is http://localhost:3000 accessible? run a check",
+    "should_trigger": true
+  },
+  {
+    "query": "check a11y on this URL: https://staging.example.com/checkout",
+    "should_trigger": true
+  },
+  {
+    "query": "find all the contrast and alt-text problems on my homepage",
+    "should_trigger": true
+  },
+  {
+    "query": "run an automated accessibility scan on the pricing page and tell me which element and file each issue comes from",
+    "should_trigger": true
+  },
+  {
+    "query": "I just changed the header component. Can you verify the page still has no accessibility violations?",
+    "should_trigger": true
+  },
+  {
+    "query": "scan localhost:6006 (storybook) for wcag violations",
+    "should_trigger": true
+  },
+  {
+    "query": "quick a11y lint of the live login page please",
+    "should_trigger": true
+  },
+  {
+    "query": "what does axe-style checking say about https://example.com/contact?",
+    "should_trigger": true
+  },
+  {
+    "query": "List every WCAG 2.2 violation a rule engine can detect on the dashboard route",
+    "should_trigger": true
+  },
+  {
+    "query": "using the default target in accesslint.config.json, scan and give me counts by impact",
+    "should_trigger": true
+  },
+  {
+    "query": "Walk the checkout page with only the keyboard and tell me if focus order makes sense",
+    "should_trigger": false
+  },
+  {
+    "query": "Check what a screen reader gets from the accessibility tree on the nav menu, and test 200% zoom",
+    "should_trigger": false
+  },
+  {
+    "query": "Do a full accessibility audit of our entire site with a conformance report",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix the unlabeled buttons and missing alt text on the homepage",
+    "should_trigger": false
+  },
+  {
+    "query": "Did my branch introduce any new accessibility violations compared with main?",
+    "should_trigger": false
+  },
+  {
+    "query": "Review this screenshot of the form for usability and accessibility",
+    "should_trigger": false
+  },
+  {
+    "query": "Check my React components against the Web Interface Guidelines",
+    "should_trigger": false
+  },
+  {
+    "query": "Why is my page slow? Check Core Web Vitals",
+    "should_trigger": false
+  },
+  {
+    "query": "Run the unit tests and tell me what fails",
+    "should_trigger": false
+  },
+  {
+    "query": "Check my site for broken links and missing meta tags for SEO",
+    "should_trigger": false
+  }
+]

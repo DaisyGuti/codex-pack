@@ -1,0 +1,82 @@
+[
+  {
+    "query": "Here's a screenshot of our new onboarding screen. Can you review it for usability before we show it to the team?",
+    "should_trigger": true
+  },
+  {
+    "query": "roast this landing page design, be brutal. it's in /tmp/hero-v3.png",
+    "should_trigger": true
+  },
+  {
+    "query": "why does this dashboard look so generic? feels like every AI-made site",
+    "should_trigger": true
+  },
+  {
+    "query": "Does this checkout flow make sense? Three screens attached: cart, address, payment. I think the pay button gets lost.",
+    "should_trigger": true
+  },
+  {
+    "query": "critique my mockup: is the hierarchy right and is the contrast OK for older users?",
+    "should_trigger": true
+  },
+  {
+    "query": "grade this settings page design out of 100 and tell me the top 3 things to fix",
+    "should_trigger": true
+  },
+  {
+    "query": "my designer sent a Figma export of the pricing table. anything wrong with it from a user's point of view?",
+    "should_trigger": true
+  },
+  {
+    "query": "Is this modal accessible? Only have a picture of it, no code yet.",
+    "should_trigger": true
+  },
+  {
+    "query": "quick gut check on this signup form screenshot, would a first-time user get stuck anywhere",
+    "should_trigger": true
+  },
+  {
+    "query": "Review the empty state, loading state and error state mockups I pasted and tell me if they read clearly",
+    "should_trigger": true
+  },
+  {
+    "query": "Audit src/components/CheckoutForm.tsx against the Web Interface Guidelines and give me file:line findings",
+    "should_trigger": false
+  },
+  {
+    "query": "Check my Next.js app's components for hydration problems, missing focus-visible styles and forms without labels",
+    "should_trigger": false
+  },
+  {
+    "query": "Run an accessibility scan on http://localhost:3000/pricing and list every contrast violation",
+    "should_trigger": false
+  },
+  {
+    "query": "Walk through the signup page with the keyboard only and tell me where focus gets lost",
+    "should_trigger": false
+  },
+  {
+    "query": "Audit our whole marketing site for WCAG 2.2 AA and give me a conformance report",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix the missing alt text and unlabeled inputs in the checkout page",
+    "should_trigger": false
+  },
+  {
+    "query": "Did my uncommitted changes add any new accessibility violations on the login page?",
+    "should_trigger": false
+  },
+  {
+    "query": "Change the primary button color to #1d4ed8 and make the card radius 12px in our theme file",
+    "should_trigger": false
+  },
+  {
+    "query": "Write the copy for the pricing page hero in a friendly tone",
+    "should_trigger": false
+  },
+  {
+    "query": "Why is my page's Largest Contentful Paint so slow? Profile it with DevTools",
+    "should_trigger": false
+  }
+]

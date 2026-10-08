@@ -1,0 +1,41 @@
+# codex-pack: the dev toolchain only. The scripts themselves are stdlib-only and run under
+# any Python 3.12+, so there are no runtime dependencies to declare.
+[project]
+name = "codex-pack"
+version = "0.1.0"
+description = "Codex skills, custom agents and helper scripts, installed into ~/.codex"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "mypy>=1.11",
+    "pytest>=8.0",
+    "pyyaml>=6.0",
+    "ruff>=0.6",
+    "types-pyyaml>=6.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+# skills/*/scripts/ are symlinks to scripts/; linting them would count every file twice.
+extend-exclude = ["skills"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_ignores = true
+# Only the code this repo authors. skills/*/scripts/ are symlinks to scripts/*.py, and mypy
+# following them registers each script as a second module with the same name ("Duplicate
+# module named ..."), so skills/ is not a mypy target at all.
+files = ["scripts", "tests"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

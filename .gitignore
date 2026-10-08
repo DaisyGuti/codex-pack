@@ -1,0 +1,12 @@
+# Per-machine config: the repos this person's tickets live in. Created by install.sh from
+# registry.example.md the first time; never committed.
+/registry.md
+
+__pycache__/
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Per-machine list of strings no tracked file may contain; scripts/validate_skills.sh reads it.
+/.personal-strings

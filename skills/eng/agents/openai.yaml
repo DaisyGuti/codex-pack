@@ -1,0 +1,7 @@
+interface:
+  display_name: "Engineering Pass"
+  short_description: "Fix, build or review code on right-sized models"
+  icon_small: "./assets/eng-small.svg"
+  icon_large: "./assets/eng.png"
+  brand_color: "#2563EB"
+  default_prompt: "Use $eng to fix or build this, splitting the work onto cheaper subagents where it can."

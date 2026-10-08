@@ -1,0 +1,82 @@
+[
+  {
+    "query": "how many tokens did my last codex run use?",
+    "should_trigger": true
+  },
+  {
+    "query": "how much did our OpenAI API bill come to last month",
+    "should_trigger": false
+  },
+  {
+    "query": "what did that eng run cost me, split out by subagent",
+    "should_trigger": true
+  },
+  {
+    "query": "how do I cut the token count of this prompt",
+    "should_trigger": false
+  },
+  {
+    "query": "export this month's codex usage to a csv so I can look at it in a spreadsheet",
+    "should_trigger": true
+  },
+  {
+    "query": "which model tier should I use for a mechanical rename across 200 files",
+    "should_trigger": false
+  },
+  {
+    "query": "how much of my 5-hour limit did the grooming run take",
+    "should_trigger": true
+  },
+  {
+    "query": "add token usage logging around the OpenAI calls in our app",
+    "should_trigger": false
+  },
+  {
+    "query": "which model burned the most credits this week",
+    "should_trigger": true
+  },
+  {
+    "query": "what are the Codex usage limits on Plus versus Pro",
+    "should_trigger": false
+  },
+  {
+    "query": "compare the usage of the daily-grooming skill since Monday against the week before",
+    "should_trigger": true
+  },
+  {
+    "query": "summarize what the last run actually changed in the repo",
+    "should_trigger": false
+  },
+  {
+    "query": "did that parallel run blow through my weekly allowance?",
+    "should_trigger": true
+  },
+  {
+    "query": "how many lines of code did we change this week",
+    "should_trigger": false
+  },
+  {
+    "query": "show the estimated credits for my last 3 runs",
+    "should_trigger": true
+  },
+  {
+    "query": "estimate what it would cost to run these 200 prompts through the API",
+    "should_trigger": false
+  },
+  {
+    "query": "my codex usage feels high today, what is eating it",
+    "should_trigger": true
+  },
+  {
+    "query": "check my Claude Code usage for today",
+    "should_trigger": false
+  },
+  {
+    "query": "$codex-usage --last 1",
+    "should_trigger": true
+  },
+  {
+    "query": "turn off Fast mode in my config.toml",
+    "should_trigger": false
+  }
+]

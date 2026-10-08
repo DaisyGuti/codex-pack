@@ -1,0 +1,82 @@
+[
+  {
+    "query": "fix the a11y issues on the checkout page",
+    "should_trigger": true
+  },
+  {
+    "query": "make this component accessible: src/components/Modal.tsx",
+    "should_trigger": true
+  },
+  {
+    "query": "add the missing alt text and form labels across the marketing pages",
+    "should_trigger": true
+  },
+  {
+    "query": "apply the fixes from the accessibility scan you just ran",
+    "should_trigger": true
+  },
+  {
+    "query": "here's the findings list from our audit, please remediate the mechanical ones and leave TODOs for the rest",
+    "should_trigger": true
+  },
+  {
+    "query": "the page has color-contrast and button-name violations. Fix them and make sure they're gone afterward",
+    "should_trigger": true
+  },
+  {
+    "query": "clean up accessibility problems in the components/ folder, then re-check",
+    "should_trigger": true
+  },
+  {
+    "query": "remediate the WCAG failures in http://localhost:3000/signup and verify",
+    "should_trigger": true
+  },
+  {
+    "query": "our icon buttons have no accessible names and the inputs have no labels, can you sort that out in code",
+    "should_trigger": true
+  },
+  {
+    "query": "please repair the a11y violations flagged by the inspection of the dashboard",
+    "should_trigger": true
+  },
+  {
+    "query": "Which accessibility violations does the homepage have? Don't change anything",
+    "should_trigger": false
+  },
+  {
+    "query": "Test the modal with a keyboard and report what's broken",
+    "should_trigger": false
+  },
+  {
+    "query": "Audit the whole site and give me a conformance report",
+    "should_trigger": false
+  },
+  {
+    "query": "Did my changes introduce any new a11y problems versus main?",
+    "should_trigger": false
+  },
+  {
+    "query": "Review this mockup screenshot for usability",
+    "should_trigger": false
+  },
+  {
+    "query": "Check my React code against the Web Interface Guidelines and list findings",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix the failing unit tests in the checkout module",
+    "should_trigger": false
+  },
+  {
+    "query": "Refactor the Modal component to use a portal",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix the layout bug where the sidebar overlaps the content on mobile",
+    "should_trigger": false
+  },
+  {
+    "query": "Translate the UI strings to Spanish",
+    "should_trigger": false
+  }
+]

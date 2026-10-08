@@ -1,0 +1,82 @@
+[
+  {
+    "query": "groom the board",
+    "should_trigger": true
+  },
+  {
+    "query": "clean up my backlog, it's a mess, there are tickets that were closed weeks ago still showing in progress",
+    "should_trigger": true
+  },
+  {
+    "query": "do the daily grooming for the portfolio board, dry run first",
+    "should_trigger": true
+  },
+  {
+    "query": "make sure every ticket in Ready has a plan, a priority and the right labels before the team starts tomorrow",
+    "should_trigger": true
+  },
+  {
+    "query": "sync priorities across all the repos and move anything that shipped to Done",
+    "should_trigger": true
+  },
+  {
+    "query": "tidy up the project board at https://github.com/orgs/my-group/projects/2",
+    "should_trigger": true
+  },
+  {
+    "query": "look for duplicate tickets across the board and flag them, and also promote what's ready",
+    "should_trigger": true
+  },
+  {
+    "query": "what is the state of the board? fix anything that looks off, moving nothing that's in progress",
+    "should_trigger": true
+  },
+  {
+    "query": "our Ready lane has tickets with no plan and no model label. sort that out for everyone, not just me",
+    "should_trigger": true
+  },
+  {
+    "query": "run the morning board pass",
+    "should_trigger": true
+  },
+  {
+    "query": "plan the next ticket assigned to me",
+    "should_trigger": false
+  },
+  {
+    "query": "write a ticket for the login timeout bug in acme-web",
+    "should_trigger": false
+  },
+  {
+    "query": "work all the ready tickets",
+    "should_trigger": false
+  },
+  {
+    "query": "work issue 42 in my-app",
+    "should_trigger": false
+  },
+  {
+    "query": "tidy up the code in src/utils, lots of dead functions",
+    "should_trigger": false
+  },
+  {
+    "query": "organize my downloads folder",
+    "should_trigger": false
+  },
+  {
+    "query": "close the duplicate tickets I flagged yesterday: 14, 15 and 31",
+    "should_trigger": false
+  },
+  {
+    "query": "show me a count of open tickets per priority, read only",
+    "should_trigger": false
+  },
+  {
+    "query": "clean up old git branches in acme-api",
+    "should_trigger": false
+  },
+  {
+    "query": "reassign all of a teammate's open tickets to me",
+    "should_trigger": false
+  }
+]

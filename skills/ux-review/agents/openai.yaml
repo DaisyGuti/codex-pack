@@ -1,0 +1,7 @@
+interface:
+  display_name: "UX Review"
+  short_description: "Review a UI for usability, accessibility and craft"
+  icon_small: "./assets/ux-review-small.svg"
+  icon_large: "./assets/ux-review.png"
+  brand_color: "#C026D3"
+  default_prompt: "Use $ux-review to review this screen for usability, accessibility and visual craft."

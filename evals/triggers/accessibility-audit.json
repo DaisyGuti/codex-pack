@@ -1,0 +1,82 @@
+[
+  {
+    "query": "Audit our site for accessibility against WCAG 2.2 AA and give me a report I can hand to legal",
+    "should_trigger": true
+  },
+  {
+    "query": "is this product accessible? we have about 40 pages and 5 main flows",
+    "should_trigger": true
+  },
+  {
+    "query": "I need a Section 508 conformance report for the customer portal",
+    "should_trigger": true
+  },
+  {
+    "query": "do an a11y audit of the whole web app, sample the important pages and flows",
+    "should_trigger": true
+  },
+  {
+    "query": "our enterprise customer asked for a VPAT-style assessment of the site. Can you assess conformance per success criterion?",
+    "should_trigger": true
+  },
+  {
+    "query": "run a WCAG-EM style evaluation of https://example.com and tell me which criteria fail, which pass and which need a human",
+    "should_trigger": true
+  },
+  {
+    "query": "full accessibility review of the entire checkout journey plus account pages, not just one page",
+    "should_trigger": true
+  },
+  {
+    "query": "give me a multi-page accessibility assessment with severity ratings and what to hand to assistive-technology testers",
+    "should_trigger": true
+  },
+  {
+    "query": "can you assess our docs site for WCAG compliance? every template type please",
+    "should_trigger": true
+  },
+  {
+    "query": "audit accessibility across the app, then tell me the root-cause fixes that would clear the most issues",
+    "should_trigger": true
+  },
+  {
+    "query": "Scan just the homepage for accessibility violations",
+    "should_trigger": false
+  },
+  {
+    "query": "Check the keyboard order on the login page only",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix every accessibility issue in the report you just wrote",
+    "should_trigger": false
+  },
+  {
+    "query": "Which accessibility issues did my latest commit add?",
+    "should_trigger": false
+  },
+  {
+    "query": "Critique the visual design of this screenshot",
+    "should_trigger": false
+  },
+  {
+    "query": "Review src/components for compliance with Vercel's Web Interface Guidelines",
+    "should_trigger": false
+  },
+  {
+    "query": "Audit our npm dependencies for security vulnerabilities",
+    "should_trigger": false
+  },
+  {
+    "query": "Audit our SEO across all pages and suggest fixes",
+    "should_trigger": false
+  },
+  {
+    "query": "Write an accessibility statement for our website footer",
+    "should_trigger": false
+  },
+  {
+    "query": "Run a performance audit across the whole site with Lighthouse",
+    "should_trigger": false
+  }
+]

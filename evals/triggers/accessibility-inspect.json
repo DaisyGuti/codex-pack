@@ -1,0 +1,82 @@
+[
+  {
+    "query": "Test the signup page with just a keyboard. Can I reach and operate everything, and is the focus order sensible?",
+    "should_trigger": true
+  },
+  {
+    "query": "check the focus order and focus visibility on the checkout page, http://localhost:3000/checkout",
+    "should_trigger": true
+  },
+  {
+    "query": "is my modal really operable? lint passes but I worry about keyboard traps and what screen readers will hear",
+    "should_trigger": true
+  },
+  {
+    "query": "review the accessibility tree for the nav and the data table: names, roles, states",
+    "should_trigger": true
+  },
+  {
+    "query": "does the page still work at 200% zoom and 320px width without horizontal scrolling?",
+    "should_trigger": true
+  },
+  {
+    "query": "verify reduced motion is respected on the live homepage and the carousel has a pause control",
+    "should_trigger": true
+  },
+  {
+    "query": "manually go through the form errors on the login page: are they announced and tied to the fields?",
+    "should_trigger": true
+  },
+  {
+    "query": "check target sizes and drag alternatives on the kanban board page",
+    "should_trigger": true
+  },
+  {
+    "query": "I need the hands-on part of an a11y review for /settings: the stuff automated tools can't decide",
+    "should_trigger": true
+  },
+  {
+    "query": "tab through the whole page and tell me what's confusing about the keyboard experience",
+    "should_trigger": true
+  },
+  {
+    "query": "Run the automated accessibility rule engine on this URL and list the violations",
+    "should_trigger": false
+  },
+  {
+    "query": "Is this page accessible? Just a quick scan please",
+    "should_trigger": false
+  },
+  {
+    "query": "Do a complete WCAG-EM audit of the product with sampled pages",
+    "should_trigger": false
+  },
+  {
+    "query": "Add aria-labels and fix tabindex problems in the code",
+    "should_trigger": false
+  },
+  {
+    "query": "What a11y issues did this pull request add?",
+    "should_trigger": false
+  },
+  {
+    "query": "Critique this mockup for accessibility, I only have a PNG",
+    "should_trigger": false
+  },
+  {
+    "query": "Review my component code for focus-visible and form best practices",
+    "should_trigger": false
+  },
+  {
+    "query": "Write Playwright tests that tab through the checkout flow",
+    "should_trigger": false
+  },
+  {
+    "query": "Make the carousel autoplay pause on hover",
+    "should_trigger": false
+  },
+  {
+    "query": "Explain the difference between aria-label and aria-labelledby",
+    "should_trigger": false
+  }
+]

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Prompt Optimizer"
+  short_description: "Tighten a prompt and pick its model and effort"
+  icon_small: "./assets/prompt-optimizer-small.svg"
+  icon_large: "./assets/prompt-optimizer.png"
+  brand_color: "#7C3AED"
+  default_prompt: "Use $prompt-optimizer to optimize the prompt in this file and tell me which model and effort to run it on."

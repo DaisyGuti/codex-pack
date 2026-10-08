@@ -1,0 +1,82 @@
+[
+  {
+    "query": "Review my UI code in src/components/ against Vercel's Web Interface Guidelines",
+    "should_trigger": true
+  },
+  {
+    "query": "can you audit app/page.tsx for ui best practices? forms, focus states, the usual",
+    "should_trigger": true
+  },
+  {
+    "query": "check my site's components for hydration mismatches and missing dark mode handling",
+    "should_trigger": true
+  },
+  {
+    "query": "Look over the checkout components and flag anything that breaks good web interface practice, especially transition: all and missing aria-labels",
+    "should_trigger": true
+  },
+  {
+    "query": "review ux of the code in components/Nav.tsx, I want file:line findings",
+    "should_trigger": true
+  },
+  {
+    "query": "do a best-practices pass on all the .tsx files I changed in this branch. UI side only",
+    "should_trigger": true
+  },
+  {
+    "query": "Does my form code handle autocomplete, error focus and URL state for filters properly?",
+    "should_trigger": true
+  },
+  {
+    "query": "audit design of src/app/(shop)/ - things like animation, i18n of dates, safe areas",
+    "should_trigger": true
+  },
+  {
+    "query": "I just built a settings page component. Anything off against the web interface guidelines?",
+    "should_trigger": true
+  },
+  {
+    "query": "Review this pull request's React components for focus, forms, touch targets and anti-patterns",
+    "should_trigger": true
+  },
+  {
+    "query": "Here's a screenshot of the new dashboard, what do you think of the layout?",
+    "should_trigger": false
+  },
+  {
+    "query": "Roast my landing page design, I only have the Figma export",
+    "should_trigger": false
+  },
+  {
+    "query": "Scan https://staging.example.com/cart for accessibility violations with the rule engine",
+    "should_trigger": false
+  },
+  {
+    "query": "Test the modal with a keyboard and check the accessibility tree for names and roles",
+    "should_trigger": false
+  },
+  {
+    "query": "Run a full WCAG audit across the whole product and sample the key flows",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix the accessibility errors the scan found in Header.tsx",
+    "should_trigger": false
+  },
+  {
+    "query": "What accessibility issues did this PR add on the home page?",
+    "should_trigger": false
+  },
+  {
+    "query": "Review this TypeScript service for bugs and missing tests",
+    "should_trigger": false
+  },
+  {
+    "query": "Make the navbar sticky and add a mobile menu",
+    "should_trigger": false
+  },
+  {
+    "query": "Optimize my React components for bundle size and unnecessary re-renders",
+    "should_trigger": false
+  }
+]

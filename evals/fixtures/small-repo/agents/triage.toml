@@ -1,0 +1,8 @@
+name = "triage"
+description = "Classifies support tickets and drafts the first reply."
+model = "gpt-5.2"
+model_reasoning_effort = "high"
+developer_instructions = """
+You triage support tickets. Follow prompts/triage.md. Be thorough. Always double-check
+your reasoning before you answer, and always explain every step you took.
+"""

@@ -1,0 +1,82 @@
+[
+  {
+    "query": "plan my next ticket",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm about to start on #73 in acme-web, can you plan it first",
+    "should_trigger": true
+  },
+  {
+    "query": "which ticket should I pick up next? plan it and get it ready to ship",
+    "should_trigger": true
+  },
+  {
+    "query": "post a plan on issue 118 and set the labels so work-tickets will run it",
+    "should_trigger": true
+  },
+  {
+    "query": "plan the top ticket in my Ready lane, but dont change anything yet, just show the plan",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm starting a new work block. take the next thing assigned to me and write the plan on it",
+    "should_trigger": true
+  },
+  {
+    "query": "plan #73 in my-app, the number exists in two repos",
+    "should_trigger": true
+  },
+  {
+    "query": "anyone's next ready ticket, I want the plan and model label on it before the team picks it up",
+    "should_trigger": true
+  },
+  {
+    "query": "get a short implementation plan onto the next Ready ticket",
+    "should_trigger": true
+  },
+  {
+    "query": "use the brief in docs/product-brief.md to plan the next ticket",
+    "should_trigger": true
+  },
+  {
+    "query": "write a ticket for adding CSV export to my-app",
+    "should_trigger": false
+  },
+  {
+    "query": "groom the board: plan every unplanned Ready ticket and fix priorities",
+    "should_trigger": false
+  },
+  {
+    "query": "work issue 73 end to end",
+    "should_trigger": false
+  },
+  {
+    "query": "work my ready queue",
+    "should_trigger": false
+  },
+  {
+    "query": "give me an architecture plan for migrating our database to Postgres",
+    "should_trigger": false
+  },
+  {
+    "query": "plan my week based on my calendar",
+    "should_trigger": false
+  },
+  {
+    "query": "plan the implementation of the new checkout flow, no ticket involved, just talk it through",
+    "should_trigger": false
+  },
+  {
+    "query": "which tickets are blocked right now and why?",
+    "should_trigger": false
+  },
+  {
+    "query": "review the plan on #73 and tell me if it is any good",
+    "should_trigger": false
+  },
+  {
+    "query": "write the acceptance criteria for a rate limiting feature",
+    "should_trigger": false
+  }
+]

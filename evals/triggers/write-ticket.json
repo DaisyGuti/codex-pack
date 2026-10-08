@@ -1,0 +1,82 @@
+[
+  {
+    "query": "write a ticket for adding rate limiting to the public search endpoint in acme-api",
+    "should_trigger": true
+  },
+  {
+    "query": "can you turn this into a proper ticket: checkout page flashes blank for a second after login",
+    "should_trigger": true
+  },
+  {
+    "query": "file an issue for the broken unsubscribe link in the weekly email, repo is mailer",
+    "should_trigger": true
+  },
+  {
+    "query": "ticket 42 in my-app is just 'fix the thing'. rewrite it so a worker could actually pick it up",
+    "should_trigger": true
+  },
+  {
+    "query": "I want to get 'dark mode toggle' on the board for acme-web. put it in the ready lane and assign it to me",
+    "should_trigger": true
+  },
+  {
+    "query": "log this somewhere the team can see it: our nightly export job silently skips rows with a null customer id",
+    "should_trigger": true
+  },
+  {
+    "query": "draft a ticket for upgrading the node version in acme-web and dont file it yet, just show me",
+    "should_trigger": true
+  },
+  {
+    "query": "before I ask for a new CSV import feature in my-app, check whether we already ticketed or built it, and if not write it up",
+    "should_trigger": true
+  },
+  {
+    "query": "make a ticket out of the notes in docs/ideas/onboarding.md",
+    "should_trigger": true
+  },
+  {
+    "query": "new idea for the mobile app: remember the last tab the user was on. get it onto the backlog with the right labels",
+    "should_trigger": true
+  },
+  {
+    "query": "plan ticket 73 so I can start on it tomorrow",
+    "should_trigger": false
+  },
+  {
+    "query": "groom the whole board and move anything stale to done",
+    "should_trigger": false
+  },
+  {
+    "query": "work issue 42 in my-app",
+    "should_trigger": false
+  },
+  {
+    "query": "work all my ready tickets in parallel",
+    "should_trigger": false
+  },
+  {
+    "query": "write a README for the acme-api repo",
+    "should_trigger": false
+  },
+  {
+    "query": "write a commit message for the changes I just staged",
+    "should_trigger": false
+  },
+  {
+    "query": "why is issue 58 labelled blocked? summarise the comments on it",
+    "should_trigger": false
+  },
+  {
+    "query": "add rate limiting to the search endpoint in acme-api",
+    "should_trigger": false
+  },
+  {
+    "query": "write release notes for version 2.3 from the closed issues",
+    "should_trigger": false
+  },
+  {
+    "query": "close all the duplicate tickets about the login timeout",
+    "should_trigger": false
+  }
+]

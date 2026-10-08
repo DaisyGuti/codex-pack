@@ -1,0 +1,7 @@
+interface:
+  display_name: "Plan Ticket"
+  short_description: "Write a short plan for the next Ready ticket"
+  icon_small: "./assets/plan-ticket-small.svg"
+  icon_large: "./assets/plan-ticket.png"
+  brand_color: "#4F46E5"
+  default_prompt: "Use $plan-ticket to plan the next Ready ticket and label its model and run mode."

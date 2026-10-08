@@ -1,0 +1,82 @@
+[
+  {
+    "query": "get this repo ready for Codex",
+    "should_trigger": true
+  },
+  {
+    "query": "tighten the wording of my AGENTS.md so the model follows it more reliably",
+    "should_trigger": false
+  },
+  {
+    "query": "there's no AGENTS.md in this project. draft one from what's actually in the repo",
+    "should_trigger": true
+  },
+  {
+    "query": "add my personal preferences to my global ~/.codex/AGENTS.md",
+    "should_trigger": false
+  },
+  {
+    "query": "our AGENTS.md is out of date, the test command changed in March. refresh it",
+    "should_trigger": true
+  },
+  {
+    "query": "write a README for this repo",
+    "should_trigger": false
+  },
+  {
+    "query": "audit our AGENTS.md against CLAUDE.md, I think they say different things about how we land changes",
+    "should_trigger": true
+  },
+  {
+    "query": "add a new CLI subcommand for exporting reports, with tests",
+    "should_trigger": false
+  },
+  {
+    "query": "onboard the billing service repo so Codex knows how we land work and what needs approval",
+    "should_trigger": true
+  },
+  {
+    "query": "install Codex on my new laptop",
+    "should_trigger": false
+  },
+  {
+    "query": "add a Code Review Rules section to AGENTS.md based on our contributing guide",
+    "should_trigger": true
+  },
+  {
+    "query": "what does project_doc_max_bytes do",
+    "should_trigger": false
+  },
+  {
+    "query": "does our AGENTS.md chain fit under the size limit Codex has? check it and trim if needed",
+    "should_trigger": true
+  },
+  {
+    "query": "write a CLAUDE.md for this repo for Claude Code",
+    "should_trigger": false
+  },
+  {
+    "query": "set up the monorepo for Codex, root AGENTS.md first",
+    "should_trigger": true
+  },
+  {
+    "query": "set up a CI pipeline that runs the tests on every push",
+    "should_trigger": false
+  },
+  {
+    "query": "the agents keep running the wrong test command in this repo. fix the repo instructions so they stop",
+    "should_trigger": true
+  },
+  {
+    "query": "proofread the contributing guide for typos",
+    "should_trigger": false
+  },
+  {
+    "query": "$codex-project-setup",
+    "should_trigger": true
+  },
+  {
+    "query": "create the ticket registry file so the board commands know which repos to read",
+    "should_trigger": false
+  }
+]

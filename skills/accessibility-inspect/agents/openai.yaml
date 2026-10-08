@@ -1,0 +1,7 @@
+interface:
+  display_name: "Accessibility Inspect"
+  short_description: "Keyboard, screen reader and zoom checks on a page"
+  icon_small: "./assets/accessibility-inspect-small.svg"
+  icon_large: "./assets/accessibility-inspect.png"
+  brand_color: "#1E3A8A"
+  default_prompt: "Use $accessibility-inspect on this page to check keyboard, focus and screen-reader behavior."

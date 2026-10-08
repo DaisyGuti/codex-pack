@@ -1,0 +1,7 @@
+interface:
+  display_name: "Codex Usage"
+  short_description: "Tokens, credits and plan use for each run"
+  icon_small: "./assets/codex-usage-small.svg"
+  icon_large: "./assets/codex-usage.png"
+  brand_color: "#DB2777"
+  default_prompt: "Use $codex-usage to show what my last Codex run used, by model and subagent."

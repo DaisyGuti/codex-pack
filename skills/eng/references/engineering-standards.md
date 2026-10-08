@@ -1,0 +1,169 @@
+# Engineering standards
+
+These are the standing rules for every engineer working with this pack. They bind across
+the whole engineering pass, in any repo.
+
+**Run independent work in parallel.** Independent reads, searches and commands go
+out together, and independent units of work go to subagents (the `$eng` skill's
+Split the work section says how). Sequence only what depends on an earlier answer,
+and never guess an argument to make a call look independent. In the code you
+write, run calls that do not depend on each other concurrently (`asyncio.gather`,
+`Promise.all`, a task group) rather than awaiting them one by one. Do not retrofit
+code you were not asked to touch.
+
+**Hold the industry standard of the technology you are standing in.** Follow each
+framework's documented idioms rather than a generic shape that happens to work;
+code that fights its framework breaks on the next upgrade. The repo's own
+conventions (language version, type checking, test layout, logging, where secrets
+live) are the standard you are held to. Before writing new code against a
+fast-moving library or API, read its current documentation. When it is
+unreachable, mark the line `UNVERIFIED:` with your assumption and say so in your
+report. Never present a guessed API as one you read.
+
+**Use the design pattern the problem calls for, and no more.** A named pattern
+earns its place when it removes a real branch or a real coupling. Applied to one
+call site it is bloat with a good name. Usually the pattern already exists in the
+repo; match it rather than importing a shape from elsewhere.
+
+**Keep it simple while covering the whole requirement.** Cover everything asked and
+add nothing that was not: no helper for a single call site, no abstraction for a
+future that has not arrived, no config flag nobody set, no defensive branch for a
+case that cannot occur. Validate at system boundaries (API responses, database
+reads, tool results, environment), not between your own functions. A fix ships
+with the test that would have caught it, and a feature with tests for the working
+path and the failure mode.
+
+**Mark a deliberate shortcut.** When you take a shortcut on purpose, leave one line
+at the spot: `SIMPLIFIED: <what is skipped>; the full version needs <what>`. A
+reviewer reads the marker as a decision already made and judges only whether the
+shortcut is safe. Never mark one on authentication, validation at a trust
+boundary or secrets, which get the full version. An unmarked shortcut is a finding.
+
+**Find where a bug lives before you fix it there.** A failing test tells you
+something is wrong and leaves open which of four places holds the fault.
+
+| The fault is in | The check that tells it apart |
+| --- | --- |
+| The product code | Call the code by hand with the test's input: the output is wrong there too. |
+| The test setup (fixture, mock, ordering, shared state) | The test passes or fails differently alone, in another order or with a fresh fixture, and the product code gives the right answer by hand. |
+| The assertion | The expected value disagrees with the spec or the ticket, and the code's output matches the spec. |
+| The environment (versions, config, env vars, network, machine) | The same commit behaves differently in a clean checkout or on another machine, or the error names a missing tool, permission or port. |
+
+**Delete code only when you can show it is unused.** Search for callers,
+including the ones a text search misses (names built from strings, reflection,
+config, scripts, other repos). When you still cannot show it is dead, ask before
+you delete it.
+
+**Comment the hard part briefly, for a junior reading it cold.** One or two lines
+above complex code saying why it is shaped that way: the ordering that matters, the
+failure it guards, the constraint the names don't show. Skip comments that restate
+the code, change-log comments, and annotations on code you did not touch. When a
+comment is needed to explain what a function does, a better name usually removes
+the need.
+
+**Say what could be better; don't go build it.** When you notice something outside
+your brief that should improve (a rule stated in two places, a test that asserts
+nothing, a query that will not scale), note it with the file path and report it.
+Building it is scope creep; leaving it unsaid loses the observation.
+
+**Before you call it built, consider the next version up.** Once the simple version
+works, ask once whether a meaningfully better shape exists: fewer moving parts, one
+less round trip, a failure mode removed, a seam that makes the next changes easier.
+Inside the brief and no larger than what you have: build it, and say so. Larger, or
+it costs money or overturns a recorded decision: land the simple version, describe
+both with their costs, and let the user pick. If the simple version is the right
+shape, say so in one line.
+
+**Review your own diff adversarially, before anything runs the tests.** Read the
+diff as an engineer who wants it rejected.
+
+- **Correctness:** what input makes it wrong: an empty result, a null, a failed
+  call, a timeout, a duplicate run, a partial write, two agents running the same
+  code at once?
+- **Concurrency:** shared state mutated from two tasks, an await held inside a lock,
+  a cache two writers share.
+- **Blast radius:** what else calls this, and did a shared signature, schema or
+  state shape shift under someone?
+- **Authority:** does any new action publish, spend, commit contractually or touch
+  production without the approval the repo requires?
+- **Identifiers:** every database id, table name and external resource id is read
+  at runtime, never invented.
+- **Trim:** would a smaller version do the same job? Does every comment earn its
+  place?
+- **Design:** name the seam the change adds, the registry it extends, and which of
+  the five disciplines below it bends, with the reason.
+
+Fix what you find. A finding you decide not to fix goes in your report with its
+reason: a finding left on purpose is a call the user can overrule, and a finding
+dropped silently is invisible to them. The review comes before the verification
+pass, so the tests run on the fixed state.
+
+**Look at anything rendered before calling it done.** Markup existing and tests
+passing show the code runs; they say nothing about whether a screen reads
+correctly. Before reporting any change to visible output, render it for real (the
+repo's dev server or build, a headless browser), screenshot it at the viewports
+that matter, and look at the images.
+
+**Build to five system-design disciplines.**
+
+- **Separation of concerns.** One module owns one job. A behaviour change that
+  forces edits in three layers is a seam problem: fix the seam or report it.
+- **Encapsulation.** Callers see a contract, not internals, and a tool's
+  description tells the truth about what it does. A private helper stays private
+  until a second real caller exists.
+- **Loose coupling, high cohesion.** Modules meet at narrow, named seams: a function
+  contract, a table, a schema, a registry row. Extend an existing registry before
+  inventing a new wire.
+- **Scalability.** Independent I/O runs concurrently; reads on tables that grow
+  with content are paged or windowed; a per-item cost that will multiply at five
+  times today's volume is named in the report even when today's volume hides it.
+- **Resilience.** Every external call has a timeout and a named failure state; one
+  branch failing never cancels its siblings; partial results are kept and labelled;
+  a guard that cannot answer refuses (a caught error never returns a permissive
+  value); and a failure reaches a surface someone reads, never only a log or a
+  silent retry loop.
+
+**Anything that runs records its own timing.** A job, pipeline or multi-stage run
+records per-stage and end-to-end duration, compares each stage with the median of
+its own earlier runs (and says when there is too little history to compare), flags
+a stage past about 1.5 times its baseline as slow by name, and shows that on a
+surface the user already reads. Derive timings from timestamps the system already
+records before adding a second clock.
+
+**Nothing is created without a surface.** Every output a build writes (a row, a
+file, a queue entry) has a named place where the user or the next stage actually
+encounters it, declared in the same change. An output with no reader is refused,
+not deferred.
+
+**Everything is sourced.** A produced fact (a number, a claim, a quote) carries the
+source it came from (a URL, the command that measured it, a file path) or it is
+refused when stored. A guessed value never enters a store that later runs read
+back as evidence.
+
+**Give a GitHub Actions setup cost controls on day one.**
+
+- A workflow triggered by `push` or `pull_request` carries a concurrency block, so a
+  superseded run is cancelled:
+
+  ```yaml
+  concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+  ```
+
+- A repo that auto-merges Dependabot pull requests does it from a scheduled batch.
+  Merging on `pull_request` frees a slot in Dependabot's open-PR cap and starts
+  the next update and its full CI run immediately.
+- Expensive jobs (end-to-end, integration, anything that provisions infrastructure)
+  skip Dependabot's patch and minor bumps
+  (`if: github.actor != 'dependabot[bot]'`) and run for major bumps.
+
+**Read the conventions of the repo you are standing in; never import another
+repo's.** Repos differ in layout, in how work lands (a direct commit or a pull
+request) and in where durable output goes (research, designs, decisions). Before
+you write a durable artifact or land a change in an unfamiliar tree, list the
+directory you are about to write into and read a neighbouring file for its naming,
+dating and citation style; check its instruction files, `.github/workflows/` and
+recent `git log`. Match the local precedent even where another repo's is better,
+and when two conventions conflict in a way that matters, say which you chose and
+why.

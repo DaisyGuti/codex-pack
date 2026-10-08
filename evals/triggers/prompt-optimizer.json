@@ -1,0 +1,82 @@
+[
+  {
+    "query": "optimize the prompt in prompts/triage.md for the newest model and tell me what reasoning effort to run it at",
+    "should_trigger": true
+  },
+  {
+    "query": "create an AGENTS.md for this repo from its README and package scripts",
+    "should_trigger": false
+  },
+  {
+    "query": "this system prompt keeps making the model ask me questions instead of just doing the work. tighten it up",
+    "should_trigger": true
+  },
+  {
+    "query": "write me a prompt that generates product descriptions for a shoe store",
+    "should_trigger": false
+  },
+  {
+    "query": "my AGENTS.md wording feels bloated and some lines contradict each other. clean up the instructions",
+    "should_trigger": true
+  },
+  {
+    "query": "fix the bug in the code that loads prompt files, it crashes when the file is empty",
+    "should_trigger": false
+  },
+  {
+    "query": "which model and effort should I run agents/triage.toml on? and is anything in the file wrong for Codex",
+    "should_trigger": true
+  },
+  {
+    "query": "how much usage did that optimization run cost me",
+    "should_trigger": false
+  },
+  {
+    "query": "here are six transcripts where my agent ignored the rule about never editing test files. figure out why and fix the prompt",
+    "should_trigger": true
+  },
+  {
+    "query": "what does reasoning effort actually change in Codex",
+    "should_trigger": false
+  },
+  {
+    "query": "rewrite this developer message so it works well on a GPT-6 model, it was written for an older one: [prompt pasted below]",
+    "should_trigger": true
+  },
+  {
+    "query": "translate this prompt into Spanish and keep the formatting",
+    "should_trigger": false
+  },
+  {
+    "query": "make this prompt shorter without losing anything it actually does",
+    "should_trigger": true
+  },
+  {
+    "query": "summarize this transcript into five bullet points",
+    "should_trigger": false
+  },
+  {
+    "query": "upgrade the SKILL.md description in skills/deploy so Codex picks it at the right time",
+    "should_trigger": true
+  },
+  {
+    "query": "switch my config.toml to the newest workhorse model",
+    "should_trigger": false
+  },
+  {
+    "query": "the custom agent file .codex/agents/reviewer.toml pins a model and I think that's hurting us. review the instructions",
+    "should_trigger": true
+  },
+  {
+    "query": "review the pull request that changes the retry logic in the worker",
+    "should_trigger": false
+  },
+  {
+    "query": "$prompt-optimizer --file docs/support-bot.md --context 'runs hourly from a scheduler, output is parsed by a script'",
+    "should_trigger": true
+  },
+  {
+    "query": "write a ticket to rewrite the onboarding prompt next sprint",
+    "should_trigger": false
+  }
+]

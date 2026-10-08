@@ -1,0 +1,7 @@
+interface:
+  display_name: "Web Design Guidelines"
+  short_description: "Check UI code against web interface guidelines"
+  icon_small: "./assets/web-design-guidelines-small.svg"
+  icon_large: "./assets/web-design-guidelines.png"
+  brand_color: "#0EA5E9"
+  default_prompt: "Use $web-design-guidelines to review these components against the web interface guidelines."

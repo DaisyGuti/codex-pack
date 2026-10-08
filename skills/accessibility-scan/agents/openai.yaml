@@ -1,0 +1,7 @@
+interface:
+  display_name: "Accessibility Scan"
+  short_description: "Automated WCAG scan of one live page"
+  icon_small: "./assets/accessibility-scan-small.svg"
+  icon_large: "./assets/accessibility-scan.png"
+  brand_color: "#1E3A8A"
+  default_prompt: "Use $accessibility-scan on http://localhost:3000 and list every violation with where it is."

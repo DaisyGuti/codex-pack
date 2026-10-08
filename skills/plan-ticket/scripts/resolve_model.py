@@ -1,0 +1,1 @@
+../../../scripts/resolve_model.py

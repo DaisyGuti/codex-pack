@@ -1,0 +1,7 @@
+interface:
+  display_name: "Work Ready Tickets"
+  short_description: "Run Ready board tickets in parallel waves"
+  icon_small: "./assets/work-tickets-small.svg"
+  icon_large: "./assets/work-tickets.png"
+  brand_color: "#EA580C"
+  default_prompt: "Use $work-tickets --dry-run to show the Ready queue and the model each ticket would run on."

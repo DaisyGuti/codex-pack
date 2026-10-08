@@ -1,0 +1,7 @@
+interface:
+  display_name: "Accessibility Fix"
+  short_description: "Fix accessibility violations and verify each fix"
+  icon_small: "./assets/accessibility-fix-small.svg"
+  icon_large: "./assets/accessibility-fix.png"
+  brand_color: "#1E3A8A"
+  default_prompt: "Use $accessibility-fix to fix the accessibility issues on this page and re-check them."

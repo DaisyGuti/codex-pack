@@ -1,0 +1,82 @@
+[
+  {
+    "query": "work issue 42 in my-app",
+    "should_trigger": true
+  },
+  {
+    "query": "ship #42",
+    "should_trigger": true
+  },
+  {
+    "query": "pick up issue 118 in acme-api and take it all the way to done",
+    "should_trigger": true
+  },
+  {
+    "query": "can you handle ticket 73 for me? plan, build, test, push and close it",
+    "should_trigger": true
+  },
+  {
+    "query": "implement https://github.com/acme/acme-web/issues/204 and move the card on the board",
+    "should_trigger": true
+  },
+  {
+    "query": "work this one ticket: group/project#66 on our gitlab. Don't touch the rest of the queue",
+    "should_trigger": true
+  },
+  {
+    "query": "do ticket 15 in mailer on whatever model its label says",
+    "should_trigger": true
+  },
+  {
+    "query": "I assigned myself #91 in my-app. go work it, commit and close it when the tests pass",
+    "should_trigger": true
+  },
+  {
+    "query": "{\"slot_id\": \"slot-1\", \"ticket_number\": 182, \"repos\": [\"acme-web\"], \"assignee\": \"me\", \"validate_plan_first\": true}",
+    "should_trigger": true
+  },
+  {
+    "query": "take issue 7 in acme-api through to a closed ticket, and tell me if it needs me for anything",
+    "should_trigger": true
+  },
+  {
+    "query": "work all my ready tickets",
+    "should_trigger": false
+  },
+  {
+    "query": "plan #73 before I start",
+    "should_trigger": false
+  },
+  {
+    "query": "write a ticket for the broken export",
+    "should_trigger": false
+  },
+  {
+    "query": "groom the board",
+    "should_trigger": false
+  },
+  {
+    "query": "fix the null pointer in src/orders.py",
+    "should_trigger": false
+  },
+  {
+    "query": "explain what issue 42 in my-app is asking for",
+    "should_trigger": false
+  },
+  {
+    "query": "add a comment to issue 42 saying we are looking into it",
+    "should_trigger": false
+  },
+  {
+    "query": "close issue 42, it was fixed last week",
+    "should_trigger": false
+  },
+  {
+    "query": "review the pull request for issue 42",
+    "should_trigger": false
+  },
+  {
+    "query": "run the ready worker on my board, P1 only",
+    "should_trigger": false
+  }
+]

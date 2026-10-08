@@ -1,0 +1,7 @@
+interface:
+  display_name: "Accessibility Diff"
+  short_description: "Catch accessibility regressions in a change"
+  icon_small: "./assets/accessibility-diff-small.svg"
+  icon_large: "./assets/accessibility-diff.png"
+  brand_color: "#1E3A8A"
+  default_prompt: "Use $accessibility-diff to see which accessibility issues my uncommitted changes add."

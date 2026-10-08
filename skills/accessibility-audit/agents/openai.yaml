@@ -1,0 +1,7 @@
+interface:
+  display_name: "Accessibility Audit"
+  short_description: "WCAG 2.2 audit and conformance report for a site"
+  icon_small: "./assets/accessibility-audit-small.svg"
+  icon_large: "./assets/accessibility-audit.png"
+  brand_color: "#1E3A8A"
+  default_prompt: "Use $accessibility-audit to audit this site against WCAG 2.2 AA."

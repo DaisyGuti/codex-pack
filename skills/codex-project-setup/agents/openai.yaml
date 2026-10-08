@@ -1,0 +1,7 @@
+interface:
+  display_name: "Codex Project Setup"
+  short_description: "Write or refresh this repo's AGENTS.md"
+  icon_small: "./assets/codex-project-setup-small.svg"
+  icon_large: "./assets/codex-project-setup.png"
+  brand_color: "#475569"
+  default_prompt: "Use $codex-project-setup to create or refresh this repo's AGENTS.md."

@@ -1,0 +1,82 @@
+[
+  {
+    "query": "work the ready tickets",
+    "should_trigger": true
+  },
+  {
+    "query": "run my queue",
+    "should_trigger": true
+  },
+  {
+    "query": "work the P1s on the portfolio board",
+    "should_trigger": true
+  },
+  {
+    "query": "https://github.com/users/me/projects/6 - work what's ready on this board",
+    "should_trigger": true
+  },
+  {
+    "query": "show me what work-tickets would run right now and which model each one gets, dry run",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm heading out for lunch. have the agents knock out everything assigned to me that's ready, in parallel",
+    "should_trigger": true
+  },
+  {
+    "query": "go through my Ready lane and ship as many tickets as you can, three at a time",
+    "should_trigger": true
+  },
+  {
+    "query": "dispatch workers for the ready P0 and P1 tickets only",
+    "should_trigger": true
+  },
+  {
+    "query": "start the ready worker for the gitlab board my-group/development",
+    "should_trigger": true
+  },
+  {
+    "query": "clear my ready queue, at most 5 tickets",
+    "should_trigger": true
+  },
+  {
+    "query": "work issue 42 in my-app",
+    "should_trigger": false
+  },
+  {
+    "query": "ship #42",
+    "should_trigger": false
+  },
+  {
+    "query": "plan the next ticket assigned to me",
+    "should_trigger": false
+  },
+  {
+    "query": "groom the board and promote tickets to Ready",
+    "should_trigger": false
+  },
+  {
+    "query": "write a ticket for the new onboarding flow",
+    "should_trigger": false
+  },
+  {
+    "query": "run the test suite in parallel across all packages",
+    "should_trigger": false
+  },
+  {
+    "query": "what is in my Ready lane? just list it, no work",
+    "should_trigger": false
+  },
+  {
+    "query": "fan out five subagents to review this pull request from different angles",
+    "should_trigger": false
+  },
+  {
+    "query": "fix the failing test in tests/test_orders.py",
+    "should_trigger": false
+  },
+  {
+    "query": "reorder my todo list by priority",
+    "should_trigger": false
+  }
+]

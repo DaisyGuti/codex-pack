@@ -1,0 +1,82 @@
+[
+  {
+    "query": "the nightly export job in services/export writes duplicate rows when it retries after a timeout. can you find the cause and fix it",
+    "should_trigger": true
+  },
+  {
+    "query": "does the new pricing page look balanced? the three cards feel cramped on mobile and the heading doesn't pop",
+    "should_trigger": false
+  },
+  {
+    "query": "add a CSV download button to the invoices page, with the backend endpoint and tests",
+    "should_trigger": true
+  },
+  {
+    "query": "check the signup form component against the web interface guidelines, mainly focus states and labels",
+    "should_trigger": false
+  },
+  {
+    "query": "refactor the retry logic in billing/retry.py so the backoff is configurable, but keep the public function signatures the same",
+    "should_trigger": true
+  },
+  {
+    "query": "write up a ticket for the flaky checkout test with the right priority and labels",
+    "should_trigger": false
+  },
+  {
+    "query": "review my branch feature/rate-limits against main before I merge, I'm nervous about how the redis keys are handled",
+    "should_trigger": true
+  },
+  {
+    "query": "what's the difference between a rebase and a merge, and when would you use each",
+    "should_trigger": false
+  },
+  {
+    "query": "this PR touches 40 files and I have to approve it today. give it a proper code review",
+    "should_trigger": true
+  },
+  {
+    "query": "tighten the system prompt for our support agent so it stops asking so many questions",
+    "should_trigger": false
+  },
+  {
+    "query": "ci is red on the migration step but everything passes on my machine, figure out why and fix it",
+    "should_trigger": true
+  },
+  {
+    "query": "how many tokens did that last run use, split by subagent",
+    "should_trigger": false
+  },
+  {
+    "query": "login throws a 500 when the email has a plus sign in it. fix it and add a regression test",
+    "should_trigger": true
+  },
+  {
+    "query": "run a full accessibility audit on our marketing site and give me a conformance report",
+    "should_trigger": false
+  },
+  {
+    "query": "we need pagination on the /orders API. build it, and farm the boring parts out to cheaper agents so it doesn't eat my usage",
+    "should_trigger": true
+  },
+  {
+    "query": "set up an AGENTS.md for this repo so Codex knows our test commands",
+    "should_trigger": false
+  },
+  {
+    "query": "is there a simpler way to get notifications to users than standing up our own websocket server? if so, build that",
+    "should_trigger": true
+  },
+  {
+    "query": "plan the next ticket on the board before anyone starts it",
+    "should_trigger": false
+  },
+  {
+    "query": "Use $eng to move the config loading out of main.py into its own module without changing behavior",
+    "should_trigger": true
+  },
+  {
+    "query": "pick the next three ready tickets and work them in parallel worktrees",
+    "should_trigger": false
+  }
+]

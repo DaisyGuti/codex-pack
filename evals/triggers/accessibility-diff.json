@@ -1,0 +1,82 @@
+[
+  {
+    "query": "did my change break accessibility?",
+    "should_trigger": true
+  },
+  {
+    "query": "what a11y issues did this PR add on the dashboard page?",
+    "should_trigger": true
+  },
+  {
+    "query": "compare accessibility violations on http://localhost:3000/settings between my uncommitted changes and what was there before",
+    "should_trigger": true
+  },
+  {
+    "query": "diff the page against main and tell me which WCAG violations are new",
+    "should_trigger": true
+  },
+  {
+    "query": "I need an accessibility regression check I can run in CI for the pricing page",
+    "should_trigger": true
+  },
+  {
+    "query": "after my refactor of the header, are there new a11y errors? and did I fix any?",
+    "should_trigger": true
+  },
+  {
+    "query": "check my branch against the default branch for newly introduced accessibility issues on the live app",
+    "should_trigger": true
+  },
+  {
+    "query": "how many pre-existing accessibility violations are there versus the ones I added in this change?",
+    "should_trigger": true
+  },
+  {
+    "query": "verify that my last fix actually removed the violations and added no new ones, using before and after on the page",
+    "should_trigger": true
+  },
+  {
+    "query": "before I merge: run a11y diff for the login page with --branch",
+    "should_trigger": true
+  },
+  {
+    "query": "Scan the login page and list all its accessibility violations",
+    "should_trigger": false
+  },
+  {
+    "query": "Do a hands-on keyboard and screen reader pass of the login page",
+    "should_trigger": false
+  },
+  {
+    "query": "Audit the entire site for WCAG conformance",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix the accessibility problems my change introduced",
+    "should_trigger": false
+  },
+  {
+    "query": "Show me the git diff of my uncommitted changes",
+    "should_trigger": false
+  },
+  {
+    "query": "Review this screenshot of the new design for accessibility",
+    "should_trigger": false
+  },
+  {
+    "query": "Check my components against the Web Interface Guidelines",
+    "should_trigger": false
+  },
+  {
+    "query": "Did my change slow down the page? Compare Lighthouse scores to main",
+    "should_trigger": false
+  },
+  {
+    "query": "Compare these two branches and summarize what changed in the API",
+    "should_trigger": false
+  },
+  {
+    "query": "Run the visual regression tests and show me the screenshot differences",
+    "should_trigger": false
+  }
+]

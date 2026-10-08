@@ -1,0 +1,7 @@
+interface:
+  display_name: "Daily Grooming"
+  short_description: "Tidy the board and fill the Ready lane"
+  icon_small: "./assets/daily-grooming-small.svg"
+  icon_large: "./assets/daily-grooming.png"
+  brand_color: "#65A30D"
+  default_prompt: "Use $daily-grooming --dry-run to show today's board changes before applying them."
