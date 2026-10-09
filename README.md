@@ -106,6 +106,9 @@ whose lanes and priorities are labels, and merge requests in place of pull reque
 To support another tracker, add a file with the same operations and name it in the
 registry.
 
+**Cheat sheet:** [How a ticket moves through the agent cycle](https://claude.ai/artifact/WoEV4xWJGHVEREggxpojnX)
+is a one-page picture of the flow below, from filing to merge.
+
 - **How they fit together.** `$write-ticket` files a ticket (what and why).
   `$plan-ticket` writes its build plan (how) and sets its model and run labels, so a
   person can read the plan first; `$daily-grooming` does that for the whole board.
