@@ -353,11 +353,29 @@ previous checkpoint.
 5. none: stop with `blocked_no_test_command`, "no test command detected"
 
 Never hardcode a command. Run it inside the worktree, together with any check the
-repo's rules require before a commit. On failure stop with `blocked_tests_failed`,
-with a summary of the output, do not commit, and leave the tree dirty. Advisory:
-`git -C $WT restore :/` discards the changes. Set `tested_<repo>` on success. A test
-passed only if you ran it in the worktree and saw it pass; a timeout or unreadable
-output is a failure.
+repo's rules require before a commit. A failed check starts diagnosis: read the
+failure and the code it exercises, and determine whether the fault is in the
+implementation, the test or its setup, or the environment.
+
+When the failure concerns behavior you are editing and is within the ticket's
+scope and your available context, fix it in this run without asking. Fix the
+implementation when it violates the requirements; fix tests, fixtures or mocks
+when they are wrong or stale against those requirements. Preserve meaningful
+coverage: never skip a failing test, weaken an assertion or change the expected
+behavior merely to get a pass. Rerun the failing check while iterating, then rerun
+the required checks on the final changes. Update `changed_files[<repo>]` after
+repairs so a resumed run recognizes every path you changed.
+
+After two failed attempts at the same fix, change the approach and state which
+assumption was wrong. If progress stops, use section 4's `blocked_no_progress`.
+If a failure needs work outside the ticket, unavailable context or access, or
+cannot be cleared within this run, stop with `blocked_tests_failed` and report the
+exact error, what you tried, and what would unblock it. Conflicting or ambiguous
+requirements that need a decision use section 4's `needs_decision`. Leave the
+changes for inspection. Do not commit while required checks are failing.
+
+Set `tested_<repo>` only after all required checks pass. A test passed only if you
+ran it in the worktree and saw it pass; a timeout or unreadable output is a failure.
 
 ## 8. Land the work: commit, push the branch, open a review
 
