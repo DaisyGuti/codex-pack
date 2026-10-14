@@ -40,9 +40,9 @@ plus the standards when the unit writes code; skip the rest of this list.
   With no findings, say so plainly and name the residual risks and test gaps. When
   the target is a diff or a branch above the size step 8 gives, run it past the
   `reviewer` agent as step 8 describes, so the review comes from a fresh context.
-  For any diff, tell the user that Codex's built-in `/review` gives another
-  independent pass, and offer to write the criteria they want checked as custom
-  review instructions for them to paste.
+  Run Codex's built-in review on the requested diff as step 8 describes. When
+  already running inside a built-in review session, review directly; never launch
+  another review from that session.
 - **Several jobs in one message:** list them, then do all of them.
 - **A repo, path or issue that does not exist:** say what you found and stop.
 
@@ -92,6 +92,22 @@ plus the standards when the unit writes code; skip the rest of this list.
 8. **Review the diff adversarially, before the verification run.** With children,
    this is the combined diff after you integrate their work. The standards document
    says what to hunt for.
+   - **Run Codex's built-in review for every change.** From the task's worktree,
+     for implementation work run
+     `codex review --base origin/<default-branch> < /dev/null` to cover the
+     whole branch. Use `codex review --uncommitted < /dev/null` during edits or
+     for pending files outside the branch diff. Confirm the review covers every
+     changed file; the final branch review runs after all task changes are committed.
+     For review-only requests, preserve the requested target: `--base <branch>`,
+     `--commit <SHA>` or `--uncommitted`. An active built-in review reviews directly
+     and never launches another review.
+     Use the ChatGPT sign-in, following
+     [references/testing-without-api-spend.md](references/testing-without-api-spend.md).
+     Save the command, reviewed commit/diff, exit status and final findings. Read
+     the findings, fix valid issues and explain any declined finding. After edits,
+     rerun review on the changed targets before verification and publication.
+     A missing CLI, failed run, timeout or missing final result blocks completion;
+     report the evidence and what would unblock review. Never count it as a pass.
    - **Small diff:** review it yourself. Small means 150 changed lines or fewer
      (added plus removed, ignoring lockfiles, generated files and snapshots) across
      5 files or fewer, with none of the sensitive areas below.
@@ -144,8 +160,8 @@ plus the standards when the unit writes code; skip the rest of this list.
      choose the CLI from the host in `git remote get-url origin`: `gh pr create
      --base <default-branch> --head <branch> --title "<title>" --body-file <file>` for
      GitHub, `glab mr create --source-branch <branch> --target-branch <default-branch>
-     --title "<title>" --description-file <file> --yes` for GitLab. The body says what
-     changed, the checks you ran and their result, and which test covers the change.
+     --title "<title>" --description-file <file> --yes` for GitLab. Write the title
+     and body using **Writing the review** below.
      Never force-push and never merge it; report the link.
    - **No remote, an unknown host, or a CLI that is missing or not signed in:** the
      commit stays on the branch. Say so in the report with the branch name, and stop.
@@ -168,7 +184,8 @@ plus the standards when the unit writes code; skip the rest of this list.
      [references/testing-without-api-spend.md](references/testing-without-api-spend.md)
      has the commands and the checks to run before a batch.
    - For anything rendered, render it, screenshot it at the viewports that matter,
-     and look at the images before you report.
+     and look at the images before you report. For UI changes, capture and inspect
+     the PR evidence described in **Writing the review** below.
    - Paste failures and say which are yours and which were already there. When a
      test looks wrong, say so instead of coding around it.
 
@@ -227,20 +244,53 @@ are in. Ending your turn is final, so never end it while a child you depend on i
 still running. When the sandbox refuses `git worktree add` or a child's commit, run
 the write units one at a time in this tree and say so in the report.
 
+## Writing the review
+
+Write for a reviewer new to the change. User instructions win; keep the repo's
+required template sections and title conventions, adapting the outline below.
+
+- Use a short, concrete title and an opening paragraph explaining the problem and
+  resulting behavior. Use plain English and active verbs; explain necessary terms.
+  Cut stock phrases, process narration, repetition, abandoned approaches and
+  contrastive phrasing.
+- Follow this order, including only sections that help review the change:
+  **What this PR implements** (a few bullets about behavior), **Architecture**
+  (a diagram only when it clarifies a boundary or flow), **Decisions and why**
+  (material choices and their consequences), **Review guide and limits**
+  (where to start and meaningful gaps), **UI evidence** (for UI changes), then
+  **Validation and rollout** (checks run, results, covering test, deployment steps).
+  Link relevant issues or decisions.
+- Scale detail to the change. A small fix usually needs a paragraph and a few
+  validation lines. Aim for 150-300 words for an ordinary PR; add detail, tables,
+  diagrams or stack links only when they help review.
+- For a UI change to one screen or state, embed a screenshot of the final UI in
+  **UI evidence**. For a multi-step UI change, include a Playwright video of the
+  complete affected flow. Let screens settle and pause roughly 1-2 seconds at
+  meaningful states so labels and results can be read. Put pauses in the recording
+  script, separate from automated checks. Use safe demo data, inspect the image or
+  watch the whole video, and include the viewport and a short caption.
+- Attach or embed the media so it can be viewed from the PR; a local file path
+  alone is insufficient. Follow repo sharing conventions and approval rules.
+  If capture or attachment fails, state why, where any artifact is available and
+  that evidence is missing. Verify the PR media link before claiming inclusion.
+- State failed, skipped or unconfirmed checks plainly. Keep test counts and CI
+  claims tied to this branch and tested commit. Check the body against the final
+  diff and remove stale claims before opening the review.
+
 ## Gotchas
 
 - A custom agent file that sets `model` or `model_reasoning_effort` overrides the
   spawn's values. No agent file in this pack sets either, so every spawn passes both.
 - A spawn that names only a model gets that model's default effort. Name both.
-- `/review` is a command the user types. This skill cannot run it and must not claim
-  to have.
+- `/review` is interactive; use the non-interactive `codex review` CLI above.
 - A skill cannot change the session's own model or effort; only the user's choice or
   `config.toml` does. Work that needs another setting goes to a subagent.
 
 ## Report
 
-Done means the change is committed on a branch with its review open, the checks ran,
-and the real path was exercised. Your final message is for the user:
+Done means the change is committed on a branch with its review open, Codex's
+built-in review completed on the final diff and findings were addressed, the checks
+ran, and the real path was exercised. Your final message is for the user:
 
 - Lead with what changed and what it does for them now, then the branch and the review
   link (or, when no review could be opened, why not and where the branch is).
@@ -250,9 +300,8 @@ and the real path was exercised. Your final message is for the user:
   reason. A missing docs line reads as docs nobody considered.
 - What your adversarial review found: what you fixed, and what you left and why.
   Say whether the `reviewer` agent ran, what it found and what you did with each
-  finding. The user can also run Codex's built-in `/review` ("Review against a base
-  branch" or "Review uncommitted changes") for another independent pass; say so in
-  one line, and never write that you ran it, because a skill cannot start it.
+  finding. Include the built-in `codex review` command, reviewed commit/diff and
+  result; say what blocked completion if it could not finish.
 - The better version, if you saw one: built, or offered for the user to pick.
 - Improvements you noticed outside the brief, one line each with a path.
 - The split: each child, including the reviewer, with its tier and effort, and the
