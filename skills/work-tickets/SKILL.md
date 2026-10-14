@@ -39,7 +39,7 @@ project number or a repo list.
   keep worker output out of the main thread: the state file holds the detail and each
   worker returns a one-paragraph summary.
 - Every spawn names its model and reasoning effort, resolved from the ticket's label.
-  Waves are capped at `--max-parallel` (3 by default) and at the Codex config's
+  Waves are capped at `--max-parallel` (5 by default) and at the Codex config's
   `agents.max_concurrent_threads_per_session` (older name `agents.max_threads`) when
   that is lower.
 - Every worker lands its change by pull or merge request, whatever the repo's own rules

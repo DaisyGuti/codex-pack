@@ -25,7 +25,7 @@ $work-tickets                          # every Ready ticket across the default b
 $work-tickets --dry-run                # the queue and nothing else
 $work-tickets --priority P1            # only P1 tickets
 $work-tickets --project 2 --owner me   # a different board (a pasted board URL works too)
-$work-tickets --max-parallel 5         # wider waves
+$work-tickets --max-parallel 5         # explicit default wave size
 ```
 
 No arguments are needed, and you never ask the user for a project number or a repo
@@ -34,7 +34,7 @@ list. Defaults, applied when the flag is absent:
 - **tracker, host, board:** the registry's Tracker and Board sections
 - **repos:** every repo in the registry's table; keep no list here
 - **priority:** no filter; any priority, and none, is eligible
-- **max-parallel:** 3. **limit:** 30
+- **max-parallel:** 5. **limit:** 30
 
 Overrides:
 
