@@ -144,8 +144,8 @@ plus the standards when the unit writes code; skip the rest of this list.
      choose the CLI from the host in `git remote get-url origin`: `gh pr create
      --base <default-branch> --head <branch> --title "<title>" --body-file <file>` for
      GitHub, `glab mr create --source-branch <branch> --target-branch <default-branch>
-     --title "<title>" --description-file <file> --yes` for GitLab. The body says what
-     changed, the checks you ran and their result, and which test covers the change.
+     --title "<title>" --description-file <file> --yes` for GitLab. Write the title
+     and body using **Writing the review** below.
      Never force-push and never merge it; report the link.
    - **No remote, an unknown host, or a CLI that is missing or not signed in:** the
      commit stays on the branch. Say so in the report with the branch name, and stop.
@@ -168,7 +168,8 @@ plus the standards when the unit writes code; skip the rest of this list.
      [references/testing-without-api-spend.md](references/testing-without-api-spend.md)
      has the commands and the checks to run before a batch.
    - For anything rendered, render it, screenshot it at the viewports that matter,
-     and look at the images before you report.
+     and look at the images before you report. For UI changes, capture and inspect
+     the PR evidence described in **Writing the review** below.
    - Paste failures and say which are yours and which were already there. When a
      test looks wrong, say so instead of coding around it.
 
@@ -226,6 +227,39 @@ combined change. Remove each worktree and its throwaway branch once its commits
 are in. Ending your turn is final, so never end it while a child you depend on is
 still running. When the sandbox refuses `git worktree add` or a child's commit, run
 the write units one at a time in this tree and say so in the report.
+
+## Writing the review
+
+Write for a reviewer new to the change. User instructions win; keep the repo's
+required template sections and title conventions, adapting the outline below.
+
+- Use a short, concrete title and an opening paragraph explaining the problem and
+  resulting behavior. Use plain English and active verbs; explain necessary terms.
+  Cut stock phrases, process narration, repetition, abandoned approaches and
+  contrastive phrasing.
+- Follow this order, including only sections that help review the change:
+  **What this PR implements** (a few bullets about behavior), **Architecture**
+  (a diagram only when it clarifies a boundary or flow), **Decisions and why**
+  (material choices and their consequences), **Review guide and limits**
+  (where to start and meaningful gaps), **UI evidence** (for UI changes), then
+  **Validation and rollout** (checks run, results, covering test, deployment steps).
+  Link relevant issues or decisions.
+- Scale detail to the change. A small fix usually needs a paragraph and a few
+  validation lines. Aim for 150-300 words for an ordinary PR; add detail, tables,
+  diagrams or stack links only when they help review.
+- For a UI change to one screen or state, embed a screenshot of the final UI in
+  **UI evidence**. For a multi-step UI change, include a Playwright video of the
+  complete affected flow. Let screens settle and pause roughly 1-2 seconds at
+  meaningful states so labels and results can be read. Put pauses in the recording
+  script, separate from automated checks. Use safe demo data, inspect the image or
+  watch the whole video, and include the viewport and a short caption.
+- Attach or embed the media so it can be viewed from the PR; a local file path
+  alone is insufficient. Follow repo sharing conventions and approval rules.
+  If capture or attachment fails, state why, where any artifact is available and
+  that evidence is missing. Verify the PR media link before claiming inclusion.
+- State failed, skipped or unconfirmed checks plainly. Keep test counts and CI
+  claims tied to this branch and tested commit. Check the body against the final
+  diff and remove stale claims before opening the review.
 
 ## Gotchas
 
