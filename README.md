@@ -30,6 +30,7 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/accessibility-audit/`](skills/accessibility-audit/SKILL.md) | `$accessibility-audit`: whole-site WCAG audit following the W3C's evaluation method |
 | [`skills/accessibility-fix/`](skills/accessibility-fix/SKILL.md) | `$accessibility-fix`: fixes the violations a scan finds and re-scans to confirm |
 | [`skills/accessibility-diff/`](skills/accessibility-diff/SKILL.md) | `$accessibility-diff`: which accessibility problems a change added or fixed |
+| [`skills/section-508-report/`](skills/section-508-report/SKILL.md) | `$section-508-report`: builds an Accessibility Conformance Report on the ITI VPAT 2.5Rev template from audit findings and test notes; refuses a Supports row without a passing check run by a person and lists what still needs a tester |
 | [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` |
 | [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run |
 | [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, `ui_ux` (renders a page in Chrome, reviews the screenshots and fixes what is wrong), and the read-only `reviewer` and `forward_tester` |

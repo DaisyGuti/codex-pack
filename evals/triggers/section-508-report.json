@@ -1,0 +1,82 @@
+[
+  {
+    "query": "Make me a draft ACR for 'Example Permit Portal 2.3' from Example Co. We only have an automated scan so far. Write the evidence file and render a markdown draft.",
+    "should_trigger": true
+  },
+  {
+    "query": "Run an accessibility audit of our whole site and tell me what fails.",
+    "should_trigger": false
+  },
+  {
+    "query": "A federal buyer sent us a VPAT questionnaire. What do we send them for our web app?",
+    "should_trigger": true
+  },
+  {
+    "query": "Scan http://localhost:3000 for WCAG violations.",
+    "should_trigger": false
+  },
+  {
+    "query": "Fill in the VPAT for our product from this accessibility audit report.",
+    "should_trigger": true
+  },
+  {
+    "query": "Fix the contrast errors the scan found in our stylesheet.",
+    "should_trigger": false
+  },
+  {
+    "query": "Turn these accessibility test notes into a customer-facing Section 508 conformance statement.",
+    "should_trigger": true
+  },
+  {
+    "query": "Which accessibility problems did my last commit add or fix?",
+    "should_trigger": false
+  },
+  {
+    "query": "Our scan found no violations, so mark everything Supports in the ACR. Can you do that?",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a FedRAMP System Security Plan section for access control.",
+    "should_trigger": false
+  },
+  {
+    "query": "Which rows in our VPAT still need a human tester, keyboard or screen reader?",
+    "should_trigger": true
+  },
+  {
+    "query": "Review this signup screenshot for usability and visual craft.",
+    "should_trigger": false
+  },
+  {
+    "query": "Write the GSA ACR issue detail supplement for the known issues we listed.",
+    "should_trigger": true
+  },
+  {
+    "query": "Do a keyboard and screen-reader pass on our checkout page.",
+    "should_trigger": false
+  },
+  {
+    "query": "We need a WCAG 2.1 AA conformance report on the ITI template for an agency procurement.",
+    "should_trigger": true
+  },
+  {
+    "query": "Draft a CMMC evidence list for our DevOps pipeline.",
+    "should_trigger": false
+  },
+  {
+    "query": "Is the ACR we drafted ready to publish as final? Check what is still open.",
+    "should_trigger": true
+  },
+  {
+    "query": "Write alt text for the images on our homepage.",
+    "should_trigger": false
+  },
+  {
+    "query": "Convert the findings from our accessibility audit into VPAT remarks for each failing criterion.",
+    "should_trigger": true
+  },
+  {
+    "query": "Add ARIA labels to the buttons in src/components/Toolbar.tsx.",
+    "should_trigger": false
+  }
+]

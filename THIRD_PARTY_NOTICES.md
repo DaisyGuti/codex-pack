@@ -46,6 +46,11 @@ Every copied or adapted file was modified for Codex; each notice file says how.
   accommodations, testing methodology) are adapted from sumi's `a11y` and `roast`
   commands and two of its skills. The files were modified. The rest of `ux-review`,
   including `references/craft.md`, was written for this pack.
+- **ITI VPAT 2.5Rev wording.** `section-508-report` bundles the template's own wording and
+  criterion rows in
+  [`skills/section-508-report/data/vpat-text.json`](skills/section-508-report/data/vpat-text.json)
+  so a report follows the template. ITI's reuse terms were not checked when this pack was
+  assembled. Confirm them before sharing the pack outside the team.
 - **WCAG 2.2 and the W3C ARIA documents.** `ux-review/references/accessibility.md`
   cites success criteria and short rule statements from
   [WCAG 2.2](https://www.w3.org/TR/WCAG22/) and
