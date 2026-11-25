@@ -35,8 +35,9 @@ Opting out of a rule (people only)
     Nothing the model can set from inside a session turns a rule off: the allowlist is read by
     this process, never from the command or its environment, and writes to it (patches, shell
     redirects, sed -i, cp, mv, rm and friends) are blocked by the `guardrails-tamper` rule,
-    which cannot itself be listed. The same rule guards this script, the hooks.json files that
-    run it, the block log, and Codex settings that switch hooks off.
+    which cannot itself be listed. The same rule guards this script and the git helper it
+    imports, the hooks.json files that run it, the block log, and Codex settings that switch
+    hooks off.
 
 Logging
     Every block (and every time an allowlisted rule would have fired) appends one JSON
@@ -47,9 +48,10 @@ not see inside a script file that a command runs, a shell variable's value, an a
 or a program that shells out by itself. It is a seatbelt for reflexes and mistakes; a
 determined person can get around it.
 
-Standard library only. Written so the file also loads on Python 3.9, the interpreter that
-ships with macOS command line tools, because the hook runs under whatever `python3` is first
-on the PATH.
+Standard library only, plus the pack's `scripts/safe_git.py` (standard library too), through
+which every git call on the session repo runs. Written so the file also loads on Python 3.9,
+the interpreter that ships with macOS command line tools, because the hook runs under whatever
+`python3` is first on the PATH.
 
 CLI (for the guardrails-help skill and for people):
     guardrails.py --list-rules
@@ -71,6 +73,12 @@ import sys
 import time
 from collections.abc import Collection, Mapping
 from dataclasses import dataclass, field
+from pathlib import Path
+
+# The session repo is one the model may have cloned, so git runs through the pack's hardened
+# helper: its `.git/config` cannot make the hook start a program.
+sys.path.insert(0, os.path.dirname(os.path.realpath(__file__)))
+from safe_git import git_argv, git_env  # noqa: E402
 
 # --------------------------------------------------------------------------------------
 # The rules. One registry feeds the block message, --list-rules and the help skill.
@@ -775,6 +783,7 @@ class Ctx:
         script = _real(__file__)
         self.pack_root = os.path.dirname(os.path.dirname(script))  # scripts/ sits in the pack
         self.guarded_files: set[str] = {script, os.path.join(self.pack_root, "hooks", HOOKS_FILE)}
+        self.guarded_files.add(os.path.join(os.path.dirname(script), "safe_git.py"))  # it imports
         self.guarded_files |= _both(os.path.join(self.codex_home, SKILL_SCRIPT))
         self.guarded_files |= _both(os.path.join(self.codex_home, HOOKS_FILE))
         self.guarded_dirs: set[str] = _both(self.data_dir)  # the block log
@@ -787,11 +796,12 @@ class Ctx:
         if key not in self._git:
             try:
                 proc = subprocess.run(
-                    ["git", "-C", directory, *args],
+                    git_argv(Path(directory), *args),
                     capture_output=True,
                     text=True,
                     timeout=GIT_TIMEOUT_S,
-                    env={**os.environ, "GIT_OPTIONAL_LOCKS": "0", "GIT_TERMINAL_PROMPT": "0"},
+                    env=git_env(),
+                    stdin=subprocess.DEVNULL,
                 )
                 self._git[key] = (proc.returncode, proc.stdout.strip())
             except (OSError, subprocess.SubprocessError):

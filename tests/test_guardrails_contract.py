@@ -441,15 +441,20 @@ def test_script_is_executable_and_has_a_shebang() -> None:
     assert SCRIPT.read_text(encoding="utf-8").startswith("#!/usr/bin/env python3\n")
 
 
-def test_script_is_standard_library_only() -> None:
-    tree = ast.parse(SCRIPT.read_text(encoding="utf-8"))
+def _imported_modules(path: Path) -> set[str]:
     modules: set[str] = set()
-    for node in ast.walk(tree):
+    for node in ast.walk(ast.parse(path.read_text(encoding="utf-8"))):
         if isinstance(node, ast.Import):
             modules |= {a.name.split(".")[0] for a in node.names}
         elif isinstance(node, ast.ImportFrom) and node.module:
             modules.add(node.module.split(".")[0])
-    assert modules <= set(sys.stdlib_module_names)
+    return modules
+
+
+def test_script_is_standard_library_only() -> None:
+    # The one pack module it imports, safe_git, is standard library only as well.
+    modules = _imported_modules(SCRIPT) | _imported_modules(SCRIPT.parent / "safe_git.py")
+    assert modules - {"safe_git"} <= set(sys.stdlib_module_names)
 
 
 @pytest.mark.skipif(not os.path.exists("/usr/bin/python3"), reason="no system python3")

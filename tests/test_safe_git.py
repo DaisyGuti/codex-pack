@@ -38,6 +38,7 @@ def load(name: str) -> ModuleType:
 scan_repo = load("scan_repo")
 check_context_budget = load("check_context_budget")
 inventory_model_calls = load("inventory_model_calls")
+guardrails = load("guardrails")
 
 
 @pytest.fixture(autouse=True)
@@ -118,6 +119,19 @@ def test_no_program_named_in_the_repos_config_runs_for_any_script(
     assert facts["commits"]["conventional_commits"] == 2
     assert [p.name for p in guides] == ["AGENTS.md"]
     assert env_files == [".env"]
+    assert [m.name for m in markers if m.exists()] == [], "git ran a program the repo named"
+
+
+def test_the_guardrails_hook_runs_no_program_the_session_repo_names(
+    hostile_repo: tuple[Path, list[Path]],
+) -> None:
+    repo, markers = hostile_repo
+    ctx = guardrails.Ctx({"cwd": str(repo)}, os.environ)
+    assert ctx.project_dir == str(repo.resolve())  # the hook still finds the repo and branch
+    assert ctx.current_branch(str(repo)) == "main"
+    # an index read (fsmonitor, post-index-change) and a signed commit's log (gpg) as well
+    assert ctx.git(str(repo), "status", "--porcelain") is not None
+    assert ctx.git(str(repo), "log", "-1") is not None
     assert [m.name for m in markers if m.exists()] == [], "git ran a program the repo named"
 
 
