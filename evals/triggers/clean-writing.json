@@ -78,5 +78,13 @@
   {
     "query": "How many tokens did my Codex runs use this week?",
     "should_trigger": false
+  },
+  {
+    "query": "Draft a Slack message for #platform asking someone to review PR 214 before Friday. It adds retries to the upload client.",
+    "should_trigger": false
+  },
+  {
+    "query": "We decided to move background jobs from Celery to Cloud Tasks. Write the ADR for it.",
+    "should_trigger": false
   }
 ]
