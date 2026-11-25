@@ -263,6 +263,39 @@ class TestExecution:
         assert env["CLOUDSDK_CORE_DISABLE_PROMPTS"] == "1"
         assert env["CLOUDSDK_CORE_SHOULD_PROMPT_TO_ENABLE_API"] == "false"
 
+    def test_identity_and_config_overrides_in_the_environment_are_dropped_and_reported(
+        self, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        overrides = {
+            "CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT": "owner@p.iam.gserviceaccount.com",
+            "CLOUDSDK_CORE_ACCOUNT": "someone@example.com",
+            "CLOUDSDK_ACTIVE_CONFIG_NAME": "prod-admin",
+            "CLOUDSDK_AUTH_ACCESS_TOKEN_FILE": "/tmp/token",
+            "CLOUDSDK_CONFIG": "/tmp/other-config",
+            "CLOUDSDK_API_ENDPOINT_OVERRIDES_CLOUDRESOURCEMANAGER": "https://evil.example/",
+        }
+        for name, value in overrides.items():
+            monkeypatch.setenv(name, value)
+        monkeypatch.setenv("CLOUDSDK_CORE_PROJECT", "kept")  # not an identity or config switch
+        runner, seen = self.make_runner()
+        wrapper.run(["projects", "list"], runner=runner)
+        env = seen["env"]
+        assert set(overrides).isdisjoint(env)
+        assert env["CLOUDSDK_CORE_PROJECT"] == "kept"
+        assert env["CLOUDSDK_CORE_DISABLE_PROMPTS"] == "1"
+        err = capsys.readouterr().err
+        assert "ignored identity/config overrides" in err
+        assert all(name in err for name in overrides)
+
+    def test_no_override_means_no_note(
+        self, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    ) -> None:
+        for name in wrapper.ignored_overrides():
+            monkeypatch.delenv(name)
+        runner, _ = self.make_runner()
+        wrapper.run(["projects", "list"], runner=runner)
+        assert capsys.readouterr().err == ""
+
     def test_run_does_not_call_the_runner_for_rejected_commands(self) -> None:
         runner, seen = self.make_runner()
         with pytest.raises(wrapper.ReadOnlyViolation):

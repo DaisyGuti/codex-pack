@@ -10,7 +10,10 @@ The wrapper fails closed. It accepts an argument list only when:
   1. the command path (for example "projects get-iam-policy") is on the allowlist below,
   2. every flag is on the flag allowlist and every value uses a safe character set,
   3. no argument contains a shell metacharacter, and
-  4. no argument selects a different identity (--impersonate-service-account and similar).
+  4. no argument selects a different identity (--impersonate-service-account and similar),
+     and the environment variables that do the same (CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT,
+     CLOUDSDK_CORE_ACCOUNT, CLOUDSDK_ACTIVE_CONFIG_NAME, CLOUDSDK_CONFIG and others) are
+     dropped from gcloud's environment, with one line on stderr naming them.
 
 It then runs gcloud with --format=json (where the command supports it), no prompts and no
 stdin, and prints gcloud's output. Exit codes:
@@ -418,9 +421,38 @@ def is_text_output(argv: list[str]) -> bool:
     return "--format=json" not in validate(argv)
 
 
+# Environment variables that do what the blocked flags do: pick another identity or gcloud
+# configuration, or point gcloud's credentials at another endpoint. A flag is refused up front;
+# a variable in the caller's environment is dropped and reported, so a review always runs as the
+# identity in the user's own default gcloud configuration.
+IDENTITY_ENV_NAMES: frozenset[str] = frozenset(
+    {
+        "CLOUDSDK_CONFIG",
+        "CLOUDSDK_ACTIVE_CONFIG_NAME",
+        "CLOUDSDK_CORE_ACCOUNT",
+        "CLOUDSDK_BILLING_QUOTA_PROJECT",
+    }
+)
+IDENTITY_ENV_PREFIXES: tuple[str, ...] = (
+    "CLOUDSDK_AUTH_",  # impersonation, token and credential files, token hosts
+    "CLOUDSDK_API_ENDPOINT_OVERRIDES_",  # where requests, and so credentials, are sent
+)
+
+
+def ignored_overrides(base: dict[str, str] | None = None) -> list[str]:
+    """The names in the environment that child_environment drops, sorted."""
+    env = os.environ if base is None else base
+    return sorted(
+        name for name in env if name in IDENTITY_ENV_NAMES or name.startswith(IDENTITY_ENV_PREFIXES)
+    )
+
+
 def child_environment(base: dict[str, str] | None = None) -> dict[str, str]:
-    """Environment for the gcloud child process: no prompts, no API-enable offers."""
+    """Environment for the gcloud child process: no identity or configuration overrides, no
+    prompts, no API-enable offers."""
     env = dict(os.environ if base is None else base)
+    for name in ignored_overrides(env):
+        del env[name]
     env["CLOUDSDK_CORE_DISABLE_PROMPTS"] = "1"
     env["CLOUDSDK_CORE_SHOULD_PROMPT_TO_ENABLE_API"] = "false"
     env["CLOUDSDK_CORE_DISABLE_USAGE_REPORTING"] = "true"
@@ -473,6 +505,13 @@ def run(argv: list[str], *, timeout: float = 120.0, runner: Runner | None = None
             "review) and retry."
         )
     chosen = runner or _default_runner
+    ignored = ignored_overrides()
+    if ignored:
+        print(
+            "gcloud_readonly: ignored identity/config overrides in the environment: "
+            f"{', '.join(ignored)}. The review runs as your default gcloud configuration.",
+            file=sys.stderr,
+        )
     try:
         return chosen([binary, *final], child_environment(), timeout)
     except subprocess.TimeoutExpired:

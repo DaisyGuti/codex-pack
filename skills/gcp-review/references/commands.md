@@ -43,7 +43,10 @@ before anything ran, 3 gcloud not installed.
 - **Refused flags**: `--impersonate-service-account`, `--account`, `--access-token-file`,
   `--credential-file-override`, `--configuration`, `--format`, `--flatten`, `--quiet`,
   `--verbosity`, `--log-http`, `--billing-project`. Each has a message that says what to do
-  instead.
+  instead. The same switches set through the environment (`CLOUDSDK_AUTH_*`,
+  `CLOUDSDK_CORE_ACCOUNT`, `CLOUDSDK_ACTIVE_CONFIG_NAME`, `CLOUDSDK_CONFIG`,
+  `CLOUDSDK_API_ENDPOINT_OVERRIDES_*`) are dropped from gcloud's environment, and the wrapper
+  prints one line on stderr naming what it dropped.
 - **Characters**: shell syntax and quote characters in any argument are refused. Values use a
   small safe character set; only `--filter` and `--query` values may hold spaces and `*`.
 - **Mutating words** such as `set-iam-policy`, `add-iam-policy-binding`, `delete`, `create`,
