@@ -1,0 +1,18 @@
+{
+  "description": "codex-pack guardrails: blocks risky shell commands and file edits before they run (protected-branch pushes, skipped git hooks, downloaded code run unread, TLS verification off, public GCP access, privileged containers, destructive deletes, credentials in files or read into the conversation).",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$|^apply_patch$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CODEX_HOME:-$HOME/.codex}/skills/guardrails-help/scripts/guardrails.py\"",
+            "timeout": 15,
+            "statusMessage": "Checking guardrails"
+          }
+        ]
+      }
+    ]
+  }
+}

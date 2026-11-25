@@ -34,6 +34,7 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/status-update/`](skills/status-update/SKILL.md) | `$status-update`: standup or weekly update from your commits, pull or merge requests and tickets on GitHub or GitLab |
 | [`skills/design-doc/`](skills/design-doc/SKILL.md) | `$design-doc`: design doc or RFC with a required security and compliance section, saved in the repo's docs folder |
 | [`skills/adr/`](skills/adr/SKILL.md) | `$adr`: numbered MADR architecture decision record, with superseded records linked |
+| [`skills/guardrails-help/`](skills/guardrails-help/SKILL.md) + [`hooks/hooks.json`](hooks/hooks.json) | The guardrails `PreToolUse` hook ([`scripts/guardrails.py`](scripts/guardrails.py)) blocks risky shell commands and edits; `$guardrails-help` explains a block and lists the rules and recent blocks |
 | [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, and the read-only `reviewer` and `forward_tester` |
 | [`references/model-selection.md`](references/model-selection.md) | Which model tier and effort for which kind of work |
 | [`references/ticket-labels.md`](references/ticket-labels.md) | When each ticket label goes on, and how held work is marked |
@@ -68,6 +69,11 @@ that belong to another pack checkout are refused unless you pass
 `--replace-other-pack`. On first run it creates `registry.md` from
 `registry.example.md`; fill it in before using the ticket skills, starting with its
 `tracker:` line. Restart Codex afterwards.
+
+The installer also links `~/.codex/hooks.json` to the pack's `hooks/hooks.json`, which
+runs the [guardrails](#guardrails) hook; an existing `hooks.json` of your own is left
+alone and the entry to add is printed. Codex runs a hook only after you trust it once:
+open `/hooks` in the CLI (Settings > Hooks in the app).
 
 **Your own preferences** (how you like replies written, tools or credits you have,
 rules for a repo only you work in) go in your own `~/.codex/config.toml` as
@@ -171,6 +177,7 @@ $slack-send
 $status-update weekly
 $design-doc how we should cache tenant settings
 $adr use Postgres advisory locks for the job queue
+$guardrails-help why was my push blocked?
 ```
 
 The Slack skills need Slack connected to Codex as an MCP server named `slack`:
@@ -179,6 +186,23 @@ approve that message in chat. `$status-update` needs `gh` or `glab` signed in.
 
 Each skill shows a display name, icon and starter prompt in the desktop app's
 Skills list (`skills/<name>/agents/openai.yaml`).
+
+## Guardrails
+
+A Codex `PreToolUse` hook ([`scripts/guardrails.py`](scripts/guardrails.py)) checks every
+shell command and `apply_patch` edit before it runs. It blocks protected-branch pushes and
+force-pushes, skipped git hooks, downloaded code run unread, TLS verification turned off,
+public GCP access, service account key creation, privileged containers, destructive
+deletes, and credentials written into files or read from secret files. It also blocks
+changes to itself, its hook file and the settings that turn hooks off. A repo turns a rule
+off by committing `.codex/guardrails-allow.txt` (one rule id per line) through review;
+Codex cannot write that file. A person runs a blocked command in their own terminal.
+
+Limits: it reads only the command line and the patch, not MCP tools, script files, aliases
+or computed values. It fails closed on its own errors, but Codex has no fail-closed setting
+for hooks, so a missing `python3` or a timeout lets the call through. Read-only agents are
+held to reading by their `sandbox_mode`, because a hook cannot tell which agent called it.
+`$guardrails-help` lists the rules and the recent blocks.
 
 ## Browser tools for the accessibility skills
 
