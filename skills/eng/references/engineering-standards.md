@@ -272,8 +272,10 @@ diff as an engineer who wants it rejected.
   round's fixes, look for the CLI with `command -v claude`. When it is there, run it once
   from the repo root in the background and wait for it, with the diff on stdin and read
   tools only: `git diff <remote>/<base>...HEAD | claude -p "<review prompt>" --tools
-  "Read,Grep,Glob" --permission-mode dontAsk --strict-mcp-config --no-session-persistence`
-  for a committed branch, `git diff HEAD | claude -p ...` for a staged or uncommitted change.
+  "Read,Grep,Glob" --permission-mode dontAsk --strict-mcp-config --no-session-persistence
+  --setting-sources user` for a committed branch, `git diff HEAD | claude -p ...` for a staged
+  or uncommitted change. `--setting-sources user` is required: `-p` skips the trust prompt, so
+  without it the repo's own `.claude/settings.json` hooks would run during the read-only review.
   The review prompt is always this one: "Review the diff on stdin as a read-only reviewer.
   Report only defects this change introduces that its author would fix: for each, a
   severity P0 to P3, the file:line, and the input or sequence that makes it fail. Do not

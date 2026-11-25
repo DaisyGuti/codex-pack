@@ -521,8 +521,10 @@ ran, put "no independent review ran" on the follow-up list.
 installed (`command -v claude`). Run it after the Codex review's fixes and before the push,
 from `WT`, on the whole branch: `git -C $WT diff origin/<default_branch>...HEAD | claude -p
 "<review prompt>" --tools "Read,Grep,Glob" --permission-mode dontAsk --strict-mcp-config
---no-session-persistence`, with the standards file's review prompt, so it reads section 6's
-sub-worker merges and any conflict fix too. Handle its findings the same way; fixes go in one
+--no-session-persistence --setting-sources user`, with the standards file's review prompt, so
+it reads section 6's sub-worker merges and any conflict fix too. `--setting-sources user` stays:
+`-p` skips the trust prompt, so the repo's own `.claude/settings.json` hooks would otherwise run
+during the read-only review. Handle its findings the same way; fixes go in one
 more commit after the gates that cover them pass. Never run it twice. Without the CLI, or
 when it fails or is not signed in, skip it and say so in the review summary.
 

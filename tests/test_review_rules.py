@@ -41,12 +41,23 @@ def test_eng_and_the_ticket_worker_both_run_the_claude_read() -> None:
     assert protocol.index("**Claude read.**") < protocol.index("**Review.** Per repo")
 
 
+def test_the_claude_read_ignores_the_repos_own_settings() -> None:
+    # `claude -p` skips the trust prompt, so a repo's .claude/settings.json hooks would run
+    # during the "read-only" review; only the user's settings may load.
+    for text in (_flat(STANDARDS), _flat(PROTOCOL)):
+        command = text[text.index("claude -p") :]
+        command = command[: command.index("--no-session-persistence") + 60]
+        assert "--no-session-persistence --setting-sources user" in command
+
+
 def test_no_other_claude_text_in_the_review_paths() -> None:
     # The review rule names the Claude CLI on purpose ("Claude CLI", "Claude read",
-    # `claude -p`, `command -v claude`); the guides may name a repo's `CLAUDE.md`, Claude Code
-    # and the dated model:claude-* labels. Any other Claude text is a port leftover.
+    # `claude -p`, `command -v claude`); the guides may name a repo's `CLAUDE.md`,
+    # `.claude/settings.json`, Claude Code and the dated model:claude-* labels. Any other Claude
+    # text is a port leftover.
     banned = re.compile(
-        r"(?<!-v )\bclaude\b(?!\s+(?:-p|CLI|read|Code|allowance)\b|\.md|-(?:haiku|sonnet|opus|\*))",
+        r"(?<!-v )\bclaude\b"
+        r"(?!\s+(?:-p|CLI|read|Code|allowance)\b|\.md|/settings\.json|-(?:haiku|sonnet|opus|\*))",
         re.I,
     )
     shipped = [
