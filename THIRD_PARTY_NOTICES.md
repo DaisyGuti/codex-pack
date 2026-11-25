@@ -15,8 +15,17 @@ Every copied or adapted file was modified for Codex; each notice file says how.
 | [`ux-review`](skills/ux-review/SKILL.md) (partly) | [phazurlabs/sumi](https://github.com/phazurlabs/sumi) | Apache-2.0 | [`skills/ux-review/LICENSE-sumi.txt`](skills/ux-review/LICENSE-sumi.txt) |
 | [`eng`](skills/eng/SKILL.md) (the ExecPlan reference and the `reviewer` agent) | [openai/openai-cookbook](https://github.com/openai/openai-cookbook) | MIT | [OpenAI Cookbook notice](#openai-cookbook-mit) below |
 | [`prompt-optimizer`](skills/prompt-optimizer/SKILL.md) (partly) | [openai/openai-cookbook](https://github.com/openai/openai-cookbook) | MIT | [OpenAI Cookbook notice](#openai-cookbook-mit) below |
+| [`gcp-review`](skills/gcp-review/SKILL.md) (the CIS recommendation IDs and titles in one data file) | [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler) | Apache-2.0 | none; the IDs and titles were read from Prowler's listing, attribution in the notes below |
 
 ## Notes
+
+- **CIS Google Cloud Platform Foundation Benchmark IDs, via Prowler.** The recommendation IDs
+  and titles in
+  [`skills/gcp-review/references/cis-gcp-map.json`](skills/gcp-review/references/cis-gcp-map.json)
+  were taken from the compliance listing `prowler/compliance/gcp/cis_5.0_gcp.json` in
+  [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler) (Apache-2.0), read on
+  2026-10-16. The CIS document itself was not read. Every report from the skill tells the
+  reader to confirm each ID against the benchmark edition their team holds.
 
 - **AccessLint/skills.** The five accessibility skills and their shared methodology
   ([`references/accessibility-methodology.md`](references/accessibility-methodology.md),

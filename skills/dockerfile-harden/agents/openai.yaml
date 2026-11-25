@@ -1,0 +1,7 @@
+interface:
+  display_name: "Dockerfile Harden"
+  short_description: "Review and harden Dockerfiles and Compose files"
+  icon_small: "./assets/dockerfile-harden-small.svg"
+  icon_large: "./assets/dockerfile-harden.png"
+  brand_color: "#0E7490"
+  default_prompt: "Use $dockerfile-harden to review this Dockerfile and harden it."

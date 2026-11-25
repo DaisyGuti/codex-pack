@@ -26,7 +26,10 @@ for the P variants; `/write-ticket` is `$write-ticket`, `/plan-next` is
   flaws is `$security-scan`'s, a threat model or security design review is
   `$threat-model`'s, and evidence for FedRAMP, CMMC, 800-53 or 800-171 is
   `$compliance-map`'s; for a whole-repo security audit before a release, spawn the
-  read-only `security_auditor` agent.
+  read-only `security_auditor` agent. A Dockerfile or Compose file to harden is
+  `$dockerfile-harden`'s, a built image to scan, sign or verify is `$image-supply-chain`'s,
+  a GitHub Actions or GitLab CI pipeline to audit is `$ci-harden`'s, a Google Cloud project to
+  review is `$gcp-review`'s, and a GitHub-to-GitLab move is `$gitlab-migration`'s.
 - Every code change lands by pull request (merge request on GitLab) into the default
   branch: commit on a branch, push the branch, open the review. Never commit or push
   to the default branch yourself. This outranks a project file or `CLAUDE.md` that

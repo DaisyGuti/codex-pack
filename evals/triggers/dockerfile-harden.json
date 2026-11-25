@@ -1,0 +1,82 @@
+[
+  {
+    "query": "review my Dockerfile for security problems",
+    "should_trigger": true
+  },
+  {
+    "query": "scan the built image for CVEs and generate an SBOM",
+    "should_trigger": false
+  },
+  {
+    "query": "harden this container, it needs to run in a government environment, FIPS if possible",
+    "should_trigger": true
+  },
+  {
+    "query": "sign our images with cosign and verify them in CI",
+    "should_trigger": false
+  },
+  {
+    "query": "why does our image run as root and how do I fix it?",
+    "should_trigger": true
+  },
+  {
+    "query": "review the GitHub Actions workflow that builds the image",
+    "should_trigger": false
+  },
+  {
+    "query": "rewrite this Dockerfile as a production multi-stage build with a distroless base pinned by digest",
+    "should_trigger": true
+  },
+  {
+    "query": "write a Kubernetes deployment for this service",
+    "should_trigger": false
+  },
+  {
+    "query": "my docker build copies a .npmrc with a token into the image. fix it properly",
+    "should_trigger": true
+  },
+  {
+    "query": "the container exits immediately with code 137, debug it",
+    "should_trigger": false
+  },
+  {
+    "query": "review our docker-compose.yml for container hardening problems before we ship it",
+    "should_trigger": true
+  },
+  {
+    "query": "fix the failing unit tests in the api package",
+    "should_trigger": false
+  },
+  {
+    "query": "make this image smaller and safer, it's a python 3.12 api",
+    "should_trigger": true
+  },
+  {
+    "query": "audit the GKE cluster settings in our GCP project",
+    "should_trigger": false
+  },
+  {
+    "query": "check the Dockerfile and compose files in the repo against container hardening best practices and run hadolint if you have it",
+    "should_trigger": true
+  },
+  {
+    "query": "what is the difference between CMD and ENTRYPOINT?",
+    "should_trigger": false
+  },
+  {
+    "query": "do we need a .dockerignore? set one up and add a healthcheck and read-only root filesystem settings",
+    "should_trigger": true
+  },
+  {
+    "query": "scan this repo for secrets",
+    "should_trigger": false
+  },
+  {
+    "query": "what base image should we use if the customer wants Iron Bank?",
+    "should_trigger": true
+  },
+  {
+    "query": "pin our actions to SHAs and set least-privilege permissions",
+    "should_trigger": false
+  }
+]

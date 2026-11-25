@@ -1,0 +1,7 @@
+interface:
+  display_name: "CI Harden"
+  short_description: "Audit and harden GitHub Actions and GitLab CI pipelines"
+  icon_small: "./assets/ci-harden-small.svg"
+  icon_large: "./assets/ci-harden.png"
+  brand_color: "#0F766E"
+  default_prompt: "Use $ci-harden to review this repo's CI pipeline and harden it."

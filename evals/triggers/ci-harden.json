@@ -1,0 +1,82 @@
+[
+  {
+    "query": "review our GitHub Actions workflow in .github/workflows/release.yml, I think it's loose on permissions",
+    "should_trigger": true
+  },
+  {
+    "query": "review my Dockerfile, it runs as root and pulls latest",
+    "should_trigger": false
+  },
+  {
+    "query": "harden our pipeline: pin the actions to commit SHAs and lock down the token",
+    "should_trigger": true
+  },
+  {
+    "query": "scan the nginx image we pushed for CVEs and make an SBOM",
+    "should_trigger": false
+  },
+  {
+    "query": "we have a service account JSON key stored as a secret for deploying to GCP from CI. set up keyless auth instead",
+    "should_trigger": true
+  },
+  {
+    "query": "the unit test job in CI is flaky, find out why and fix it",
+    "should_trigger": false
+  },
+  {
+    "query": "review our .gitlab-ci.yml for security problems, protected variables, unpinned images, runner setup",
+    "should_trigger": true
+  },
+  {
+    "query": "audit our GCP project IAM bindings and org policies",
+    "should_trigger": false
+  },
+  {
+    "query": "write me a secure build pipeline that builds the image, scans it, signs it and pushes to Artifact Registry with Workload Identity Federation",
+    "should_trigger": true
+  },
+  {
+    "query": "move this repo and its workflows from GitHub to GitLab",
+    "should_trigger": false
+  },
+  {
+    "query": "is pull_request_target safe in this workflow? someone mentioned script injection",
+    "should_trigger": true
+  },
+  {
+    "query": "add a job to our GitHub workflow that runs the linter on pull requests",
+    "should_trigger": false
+  },
+  {
+    "query": "which GitLab security scanners need Ultimate and what do we use on the Free tier?",
+    "should_trigger": true
+  },
+  {
+    "query": "scan this repo for leaked secrets and vulnerable dependencies",
+    "should_trigger": false
+  },
+  {
+    "query": "secure our CI: dependabot, CODEOWNERS, branch protection, environments. what is missing?",
+    "should_trigger": true
+  },
+  {
+    "query": "explain what a GitHub Actions matrix build is",
+    "should_trigger": false
+  },
+  {
+    "query": "run zizmor on the repo and fix what it finds in the workflows",
+    "should_trigger": true
+  },
+  {
+    "query": "write the threat model for our deployment pipeline design",
+    "should_trigger": false
+  },
+  {
+    "query": "our deploy job uses id_tokens for GCP but I'm not sure the trust condition is right on the pipeline side. check the workflow",
+    "should_trigger": true
+  },
+  {
+    "query": "why is our pipeline slow? the build step takes 20 minutes",
+    "should_trigger": false
+  }
+]

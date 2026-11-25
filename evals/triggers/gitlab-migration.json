@@ -1,0 +1,82 @@
+[
+  {
+    "query": "we're moving this repo from GitHub to GitLab. make a migration plan",
+    "should_trigger": true
+  },
+  {
+    "query": "fix the failing job in our .gitlab-ci.yml, the cache key is wrong",
+    "should_trigger": false
+  },
+  {
+    "query": "what does GitLab's GitHub importer carry over and what does it drop? check against our repo",
+    "should_trigger": true
+  },
+  {
+    "query": "how do I fix a GitHub Action that fails with 'permission denied' on checkout?",
+    "should_trigger": false
+  },
+  {
+    "query": "translate our GitHub Actions workflows to .gitlab-ci.yml and tell me what doesn't map",
+    "should_trigger": true
+  },
+  {
+    "query": "harden our GitHub Actions workflow",
+    "should_trigger": false
+  },
+  {
+    "query": "we need to re-point our GCP Workload Identity trust at GitLab and remove the GitHub provider. plan it",
+    "should_trigger": true
+  },
+  {
+    "query": "add a new stage to our GitLab pipeline that runs eslint",
+    "should_trigger": false
+  },
+  {
+    "query": "replace Dependabot when we move to GitLab, and map our branch protection and CODEOWNERS",
+    "should_trigger": true
+  },
+  {
+    "query": "what is the difference between GitLab and GitHub pricing tiers?",
+    "should_trigger": false
+  },
+  {
+    "query": "write the cutover and rollback checklist for switching from GitHub to GitLab, with a mirror period",
+    "should_trigger": true
+  },
+  {
+    "query": "rebase my branch on main and resolve the conflicts",
+    "should_trigger": false
+  },
+  {
+    "query": "inventory this checkout before we migrate: workflows, secrets names, submodules, LFS, hardcoded github URLs",
+    "should_trigger": true
+  },
+  {
+    "query": "audit our GCP project IAM",
+    "should_trigger": false
+  },
+  {
+    "query": "run the import to GitLab for acme/app now, I'm ready",
+    "should_trigger": true
+  },
+  {
+    "query": "set up Renovate in this GitHub repo",
+    "should_trigger": false
+  },
+  {
+    "query": "how should we move our repository secrets into masked and protected GitLab CI/CD variables?",
+    "should_trigger": true
+  },
+  {
+    "query": "write a README for the project",
+    "should_trigger": false
+  },
+  {
+    "query": "can you migrate us to self-managed GitLab? start by listing what needs a person to decide",
+    "should_trigger": true
+  },
+  {
+    "query": "review our .gitlab-ci.yml for security issues",
+    "should_trigger": false
+  }
+]

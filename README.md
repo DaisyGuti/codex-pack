@@ -29,6 +29,11 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/security-scan/`](skills/security-scan/SKILL.md) | `$security-scan`: runs the free scanners installed here (gitleaks, osv-scanner, grype, semgrep, trivy, checkov) and merges them into one de-duplicated findings report, saying which scanners did not run |
 | [`skills/threat-model/`](skills/threat-model/SKILL.md) | `$threat-model`: a STRIDE threat model of a design, feature or repo, with a Mermaid data flow diagram, trust boundaries, a ranked threat register and mitigations mapped to NIST 800-53 |
 | [`skills/compliance-map/`](skills/compliance-map/SKILL.md) | `$compliance-map`: maps a repo's evidence to FedRAMP, NIST 800-53 and 800-171, CMMC, SSDF, DoD SRG and FIPS 140-3; lists evidence and gaps and never says a system is compliant |
+| [`skills/dockerfile-harden/`](skills/dockerfile-harden/SKILL.md) | `$dockerfile-harden`: reviews and rewrites Dockerfiles and Compose files for hardening (multi-stage, minimal or FIPS base images pinned by digest, non-root, no secrets in layers), with reference Dockerfiles |
+| [`skills/image-supply-chain/`](skills/image-supply-chain/SKILL.md) | `$image-supply-chain`: scans a built image, writes CycloneDX and SPDX SBOMs, and plans or verifies cosign signing, provenance, Artifact Registry and Binary Authorization |
+| [`skills/ci-harden/`](skills/ci-harden/SKILL.md) | `$ci-harden`: audits and hardens GitHub Actions and GitLab CI pipelines, and ships reference pipelines that build, scan, sign and push an image with keyless GCP auth |
+| [`skills/gcp-review/`](skills/gcp-review/SKILL.md) | `$gcp-review`: read-only security review of a Google Cloud project through an allowlisted gcloud wrapper; reports evidence, gaps and drafted fixes and changes nothing |
+| [`skills/gitlab-migration/`](skills/gitlab-migration/SKILL.md) | `$gitlab-migration`: plans a GitHub-to-GitLab move (inventory, importer limits, Actions translation, secrets, Workload Identity trust, cutover and rollback) and runs it only on an explicit go per step |
 | [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` |
 | [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run |
 | [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, and the read-only `reviewer`, `forward_tester` and `security_auditor` |
@@ -162,6 +167,11 @@ $accessibility-scan http://localhost:3000
 $security-scan --changed-since origin/main
 $threat-model the new file upload feature
 $compliance-map FedRAMP Moderate
+$dockerfile-harden review the Dockerfile in this repo
+$image-supply-chain scan and write an SBOM for IMAGE@sha256:...
+$ci-harden review our workflows
+$gcp-review project acme-prod
+$gitlab-migration plan the move of this repo to GitLab
 $codex-project-setup
 $codex-usage
 ```
@@ -186,6 +196,11 @@ codex mcp add accesslint -- npx -y @accesslint/mcp@latest
 Restart Codex after adding them.
 
 ## Tools for the security skills
+
+`$dockerfile-harden`, `$image-supply-chain`, `$ci-harden`, `$gcp-review` and `$gitlab-migration`
+use whichever of hadolint, dockle, trivy, grype, syft, cosign, zizmor, actionlint, `gh`, `glab`
+and `gcloud` are installed, say which are missing, and never install them. Anything that would
+change a registry, a project, a pipeline setting or a cloud resource is drafted for you to run.
 
 `$security-scan` runs whichever of gitleaks, osv-scanner, grype, semgrep, trivy and checkov are
 installed, lists the rest with an install command, and never installs anything itself.
