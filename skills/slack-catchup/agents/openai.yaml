@@ -1,0 +1,7 @@
+interface:
+  display_name: "Slack Catch-up"
+  short_description: "Summarize Slack since a time, with links"
+  icon_small: "./assets/slack-catchup-small.svg"
+  icon_large: "./assets/slack-catchup.png"
+  brand_color: "#4A154B"
+  default_prompt: "Use $slack-catchup to catch me up on #platform-eng since yesterday."

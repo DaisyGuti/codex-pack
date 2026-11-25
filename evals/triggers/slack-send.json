@@ -1,0 +1,82 @@
+[
+  {
+    "query": "that draft is good, post it to #platform-eng",
+    "should_trigger": true
+  },
+  {
+    "query": "send it",
+    "should_trigger": true
+  },
+  {
+    "query": "post the approved update in the incident channel",
+    "should_trigger": true
+  },
+  {
+    "query": "save this as a Slack draft in #releases, I will send it myself",
+    "should_trigger": true
+  },
+  {
+    "query": "schedule this message for tomorrow 9am in #team-updates",
+    "should_trigger": true
+  },
+  {
+    "query": "yes, send that standup to #team-updates",
+    "should_trigger": true
+  },
+  {
+    "query": "post this exact text in the thread with Priya: 'retry change is merged, shipping Thursday'",
+    "should_trigger": true
+  },
+  {
+    "query": "go ahead and send the reply you drafted",
+    "should_trigger": true
+  },
+  {
+    "query": "DM Marcus the text above, it is approved",
+    "should_trigger": true
+  },
+  {
+    "query": "I like version two. put it in #general",
+    "should_trigger": true
+  },
+  {
+    "query": "draft a message for #platform-eng about the retry change",
+    "should_trigger": false
+  },
+  {
+    "query": "write a Slack update but do not send it, I want to look first",
+    "should_trigger": false
+  },
+  {
+    "query": "catch me up on Slack since Monday",
+    "should_trigger": false
+  },
+  {
+    "query": "how do I give Codex access to Slack",
+    "should_trigger": false
+  },
+  {
+    "query": "post my standup",
+    "should_trigger": false
+  },
+  {
+    "query": "send an email to the team about the release",
+    "should_trigger": false
+  },
+  {
+    "query": "send the report to my manager as a PDF",
+    "should_trigger": false
+  },
+  {
+    "query": "what would be a good way to word this reminder?",
+    "should_trigger": false
+  },
+  {
+    "query": "schedule a meeting with Priya for Thursday",
+    "should_trigger": false
+  },
+  {
+    "query": "write the announcement and tell me what you changed",
+    "should_trigger": false
+  }
+]

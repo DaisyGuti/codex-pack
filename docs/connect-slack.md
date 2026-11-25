@@ -1,0 +1,1 @@
+../skills/slack-send/references/connect-slack.md

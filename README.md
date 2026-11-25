@@ -28,10 +28,17 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/accessibility-diff/`](skills/accessibility-diff/SKILL.md) | `$accessibility-diff`: which accessibility problems a change added or fixed |
 | [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` |
 | [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run |
+| [`skills/slack-catchup/`](skills/slack-catchup/SKILL.md) | `$slack-catchup`: summarizes Slack channels, threads and DMs since a time into decisions, asks, blockers and FYIs, with links; read-only |
+| [`skills/slack-draft/`](skills/slack-draft/SKILL.md) | `$slack-draft`: drafts a Slack message or thread reply for a stated goal; drafts only |
+| [`skills/slack-send/`](skills/slack-send/SKILL.md) | `$slack-send`: posts, schedules or saves as a Slack draft text you approved, after one confirmation |
+| [`skills/status-update/`](skills/status-update/SKILL.md) | `$status-update`: standup or weekly update from your commits, pull or merge requests and tickets on GitHub or GitLab |
+| [`skills/design-doc/`](skills/design-doc/SKILL.md) | `$design-doc`: design doc or RFC with a required security and compliance section, saved in the repo's docs folder |
+| [`skills/adr/`](skills/adr/SKILL.md) | `$adr`: numbered MADR architecture decision record, with superseded records linked |
 | [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, and the read-only `reviewer` and `forward_tester` |
 | [`references/model-selection.md`](references/model-selection.md) | Which model tier and effort for which kind of work |
 | [`references/ticket-labels.md`](references/ticket-labels.md) | When each ticket label goes on, and how held work is marked |
 | [`references/testing-without-api-spend.md`](references/testing-without-api-spend.md) | When to test with `codex exec` or the Codex SDK on the ChatGPT sign-in, and when an API key is really needed |
+| [`docs/connect-slack.md`](docs/connect-slack.md) | How to connect Slack to Codex as an MCP server, for the Slack skills |
 | [`references/trackers/`](references/trackers/) | How each tracker operation is done on GitHub (`gh`) and on GitLab (`glab`) |
 | [`scripts/resolve_model.py`](scripts/resolve_model.py) | Turns a tier into a model your account has, with a supported effort |
 | [`scripts/codex_usage.py`](scripts/codex_usage.py) | Per-run usage from Codex's own records |
@@ -158,7 +165,17 @@ $ux-review this checkout screenshot
 $accessibility-scan http://localhost:3000
 $codex-project-setup
 $codex-usage
+$slack-catchup what did I miss in #platform-eng since yesterday
+$slack-draft reply to this thread: the retry change is merged
+$slack-send
+$status-update weekly
+$design-doc how we should cache tenant settings
+$adr use Postgres advisory locks for the job queue
 ```
+
+The Slack skills need Slack connected to Codex as an MCP server named `slack`:
+[docs/connect-slack.md](docs/connect-slack.md). `$slack-send` posts only after you
+approve that message in chat. `$status-update` needs `gh` or `glab` signed in.
 
 Each skill shows a display name, icon and starter prompt in the desktop app's
 Skills list (`skills/<name>/agents/openai.yaml`).

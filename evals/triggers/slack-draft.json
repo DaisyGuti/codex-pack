@@ -1,0 +1,82 @@
+[
+  {
+    "query": "draft a Slack message asking the team to review my merge request",
+    "should_trigger": true
+  },
+  {
+    "query": "reply to this thread: tell Priya the retry change is merged and will ship Thursday",
+    "should_trigger": true
+  },
+  {
+    "query": "help me word a question for #platform-eng about why the queue backs up",
+    "should_trigger": true
+  },
+  {
+    "query": "write an incident update for #incidents, the API has been returning 500s since 14:05 UTC and the cause is not known yet",
+    "should_trigger": true
+  },
+  {
+    "query": "announce the 2.4 release in #general",
+    "should_trigger": true
+  },
+  {
+    "query": "how should I ask for help with this flaky test? I want to give enough context",
+    "should_trigger": true
+  },
+  {
+    "query": "write a status update for #payments-eng about the migration",
+    "should_trigger": true
+  },
+  {
+    "query": "someone asked how our retries work, help me answer in the thread",
+    "should_trigger": true
+  },
+  {
+    "query": "word a nice reminder asking for reviews on PR 482",
+    "should_trigger": true
+  },
+  {
+    "query": "draft what I should say in #ops about tonight's maintenance window",
+    "should_trigger": true
+  },
+  {
+    "query": "post this message to #general now",
+    "should_trigger": false
+  },
+  {
+    "query": "send the approved text to #platform-eng",
+    "should_trigger": false
+  },
+  {
+    "query": "catch me up on #incidents since yesterday",
+    "should_trigger": false
+  },
+  {
+    "query": "write a commit message for this fix",
+    "should_trigger": false
+  },
+  {
+    "query": "draft an email to the vendor about the outage",
+    "should_trigger": false
+  },
+  {
+    "query": "write the release notes for 2.4",
+    "should_trigger": false
+  },
+  {
+    "query": "write my standup from yesterday's commits",
+    "should_trigger": false
+  },
+  {
+    "query": "write a design doc for the retry system",
+    "should_trigger": false
+  },
+  {
+    "query": "summarize the Slack thread I pasted",
+    "should_trigger": false
+  },
+  {
+    "query": "write a pull request description for this branch",
+    "should_trigger": false
+  }
+]

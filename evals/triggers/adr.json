@@ -1,0 +1,82 @@
+[
+  {
+    "query": "write an ADR for our decision to use Postgres instead of DynamoDB for the audit log",
+    "should_trigger": true
+  },
+  {
+    "query": "we decided to move the job queue to SQS, can you record that decision in the repo",
+    "should_trigger": true
+  },
+  {
+    "query": "document why we chose gRPC over REST for the internal services",
+    "should_trigger": true
+  },
+  {
+    "query": "ADR 7 is out of date now that we switched to Kafka, supersede it with a new record",
+    "should_trigger": true
+  },
+  {
+    "query": "mark ADR 3 as deprecated",
+    "should_trigger": true
+  },
+  {
+    "query": "record the decision to pin the base image by digest",
+    "should_trigger": true
+  },
+  {
+    "query": "we agreed in standup to drop the monorepo plan. write that up as a decision record",
+    "should_trigger": true
+  },
+  {
+    "query": "add an architecture decision record for adopting feature flags",
+    "should_trigger": true
+  },
+  {
+    "query": "log this choice so the next person knows why we picked Redis: low latency, we already run it, team knows it",
+    "should_trigger": true
+  },
+  {
+    "query": "new ADR please: use OpenTelemetry for tracing, rejected Datadog agents because of cost",
+    "should_trigger": true
+  },
+  {
+    "query": "write a design doc comparing three ways to shard the orders table",
+    "should_trigger": false
+  },
+  {
+    "query": "which is better for our queue, SQS or Kafka? help me think it through",
+    "should_trigger": false
+  },
+  {
+    "query": "write the commit message for this change",
+    "should_trigger": false
+  },
+  {
+    "query": "summarize ADR 12 for me",
+    "should_trigger": false
+  },
+  {
+    "query": "draft a Slack message telling the team we chose Postgres",
+    "should_trigger": false
+  },
+  {
+    "query": "explain what MADR is and how it differs from the Nygard format",
+    "should_trigger": false
+  },
+  {
+    "query": "write the README for the audit service",
+    "should_trigger": false
+  },
+  {
+    "query": "propose an architecture for a multi-tenant billing system",
+    "should_trigger": false
+  },
+  {
+    "query": "open a ticket to migrate off the old queue",
+    "should_trigger": false
+  },
+  {
+    "query": "review this pull request that changes the database schema",
+    "should_trigger": false
+  }
+]

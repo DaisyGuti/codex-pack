@@ -23,6 +23,11 @@ for the P variants; `/write-ticket` is `$write-ticket`, `/plan-next` is
   `$work-tickets`, `$accessibility-fix`, `$prompt-optimizer`,
   `$codex-project-setup`). A question about how a screen looks or reads is
   `$ux-review`'s.
+- For a Slack catch-up, a Slack draft or send, a standup or weekly update, a design doc
+  or RFC, or an architecture decision record, read and follow the matching skill:
+  `${CODEX_HOME:-~/.codex}/skills/slack-catchup/SKILL.md`, `slack-draft`, `slack-send`,
+  `status-update`, `design-doc` or `adr` in the same folder. Only `$slack-send` posts to
+  Slack, and only after the user's explicit go-ahead in chat for that message.
 - Every code change lands by pull request (merge request on GitLab) into the default
   branch: commit on a branch, push the branch, open the review. Never commit or push
   to the default branch yourself. This outranks a project file or `CLAUDE.md` that
