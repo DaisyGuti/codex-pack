@@ -1,0 +1,82 @@
+[
+  {
+    "query": "Which model should I use for the subagents in this repo: one scans files for a pattern, one writes the fix, one reviews it?",
+    "should_trigger": true
+  },
+  {
+    "query": "Rewrite this system prompt so the model stops ignoring the tone rule.",
+    "should_trigger": false
+  },
+  {
+    "query": "Is gpt-6 sol overkill for classifying support tickets into five buckets? What effort should I run?",
+    "should_trigger": true
+  },
+  {
+    "query": "How much did my last Codex run cost in credits?",
+    "should_trigger": false
+  },
+  {
+    "query": "I'm designing a pipeline with an extraction stage, a drafting stage and a final judgment stage. Which model tier and effort for each?",
+    "should_trigger": true
+  },
+  {
+    "query": "Audit our repo for deprecated model ids and how we call the OpenAI API.",
+    "should_trigger": false
+  },
+  {
+    "query": "How do I cut the cost of our nightly Codex runs without losing quality?",
+    "should_trigger": true
+  },
+  {
+    "query": "Fix the failing date parser in src/dates.ts.",
+    "should_trigger": false
+  },
+  {
+    "query": "Should this task run on the frontier tier or is workhorse enough? It's a refactor across a dozen files with tests.",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a README for our model evaluation harness.",
+    "should_trigger": false
+  },
+  {
+    "query": "What reasoning effort do I start with for a spec-driven implementation task, and when do I move up?",
+    "should_trigger": true
+  },
+  {
+    "query": "Compare Gemini and Mistral for our chatbot and pick a vendor.",
+    "should_trigger": false
+  },
+  {
+    "query": "We call the OpenAI API for inline autocomplete suggestions. Latency matters more than depth. What model and effort?",
+    "should_trigger": true
+  },
+  {
+    "query": "Add retries to the OpenAI client wrapper in llm/client.py.",
+    "should_trigger": false
+  },
+  {
+    "query": "Pick models and effort for the three kinds of work in this plan: file inventory, security review, and release notes.",
+    "should_trigger": true
+  },
+  {
+    "query": "Summarize this research paper on reasoning models.",
+    "should_trigger": false
+  },
+  {
+    "query": "My session runs on the top model and every helper inherits it. How do I set models per spawn?",
+    "should_trigger": true
+  },
+  {
+    "query": "Explain how temperature and top_p differ.",
+    "should_trigger": false
+  },
+  {
+    "query": "What should the team default model and effort be in config.toml?",
+    "should_trigger": true
+  },
+  {
+    "query": "Generate an image of a robot for our landing page.",
+    "should_trigger": false
+  }
+]

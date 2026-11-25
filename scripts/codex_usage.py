@@ -4,7 +4,8 @@
     codex_usage.py                       the last 10 runs, one compact table
     codex_usage.py --since 2026-10-07    every run from that local date on
     codex_usage.py --run 01a1168f        one row per thread of the matching run(s)
-    codex_usage.py --summary             aggregate by skill and by model
+    codex_usage.py --summary             aggregate by skill, model, subagent role and project, and
+                                         list frontier-tier subagent runs that look mechanical
     codex_usage.py --csv usage.csv       one row per thread, for a spreadsheet
     codex_usage.py --json                everything, machine-readable
 
@@ -38,6 +39,11 @@ that one call.
 A thread whose rollout is missing or unreadable falls back to the index's own token total
 and is marked partial ("~"); its credits are n/a because input and output cannot be split.
 
+A frontier-tier subagent run "looks mechanical" when it wrote no patch, spawned no subagent
+and wrote at most --mech-output-max output tokens (default 8000): it read and reported. That is
+a lead, not a verdict. A patch is seen only as an apply_patch call, so a run that wrote through
+the shell can still be listed; the lead names the run's first message so a person can confirm.
+
 Runs started with `codex exec --ephemeral` leave no record and cannot appear here.
 
 Stdlib only. Nothing is ever written under the Codex home: the live database is WAL-mode
@@ -59,7 +65,7 @@ import statistics
 import sys
 import tempfile
 from collections import Counter, defaultdict
-from collections.abc import Iterable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -89,6 +95,18 @@ FIVE_HOUR_MINUTES = 300
 WEEK_MINUTES = 10080
 
 DEFAULT_LAST = 10
+# A subagent that wrote at most this many output tokens (reasoning included) returned a short
+# answer; with no patch and no spawn, that is the shape of work a smaller model can do.
+MECH_OUTPUT_MAX = 8000
+FRONTIER_TIER = "frontier"
+_MECHANICAL_WORDS = re.compile(
+    r"search|find|list|inventor|scan|grep|collect|extract|count|summar|lookup|locate|gather|rename",
+    re.IGNORECASE,
+)
+_JUDGMENT_WORDS = re.compile(
+    r"review|audit|design|architect|security|judg|verif|decid|plan|debug|root.?cause|threat",
+    re.IGNORECASE,
+)
 PREVIEW_CHARS = 40
 EXIT_NO_DATA = 1  # Codex data missing or unreadable; argparse owns exit 2
 _SNAPSHOT_ATTEMPTS = 3  # the live db may be mid-write when copied
@@ -119,6 +137,9 @@ _LINE_MARKERS = (
     "task_complete",
     "SKILL.md",
     '"user"',
+    "apply_patch",
+    "Begin Patch",
+    "spawn_agent",
 )
 _SKILL_PATH = re.compile(r"skills/(?:\.system/)?([\w.-]+)/SKILL\.md")
 _SKILL_MENTION = re.compile(r"(?<![\w$])\$([A-Za-z][\w-]*)")
@@ -170,6 +191,8 @@ class RolloutFacts:
     intervals: list[tuple[float, float]] = field(default_factory=list)
     readings: list[Reading] = field(default_factory=list)
     skills: set[str] = field(default_factory=set)
+    edited: bool = False  # an apply_patch call
+    spawned: bool = False  # a spawn_agent call
     malformed: int = 0
 
 
@@ -193,6 +216,8 @@ class Thread:
     readings: list[Reading]
     notes: list[str]
     malformed: int
+    edited: bool = False
+    spawned: bool = False
 
 
 @dataclass(frozen=True)
@@ -294,6 +319,16 @@ def listed_catalog_slugs() -> list[str]:
     except (OSError, UsageError):  # resolve_model.py is not beside this file
         return []
     return [slug for slug, info in catalog.models.items() if info.visibility == "list"]
+
+
+def model_tier(slug: str) -> str | None:
+    """fast / workhorse / frontier for a model slug, from the live catalog, or None when the
+    catalog cannot be read or does not place the model."""
+    try:
+        resolver = _load_resolver()
+        return resolver.tier_of(slug, resolver.load_catalog())  # type: ignore[no-any-return]
+    except (OSError, UsageError):
+        return None
 
 
 def unpriced_warnings(slugs: Iterable[str]) -> list[str]:
@@ -450,6 +485,7 @@ def read_rollout(path: Path, known_skills: set[str]) -> RolloutFacts:
                     facts.intervals.append((begin, ts))
             elif kind == "response_item":
                 _read_skill_evidence(facts, payload, known_skills)
+                _read_work_evidence(facts, payload)
 
     # A turn with no task_complete is still running, or died: it lasted until the last event.
     facts.intervals.extend((begin, last_ts) for begin in started.values() if last_ts >= begin)
@@ -461,6 +497,19 @@ def _keep_larger(facts: RolloutFacts, candidate: Usage | None) -> None:
     # Both event kinds carry the cumulative total; the largest is the latest.
     if candidate is not None and (facts.usage is None or candidate.total >= facts.usage.total):
         facts.usage = candidate
+
+
+def _read_work_evidence(facts: RolloutFacts, payload: dict[str, Any]) -> None:
+    """Did this thread write a patch or spawn a subagent? Seen from its tool calls."""
+    if payload.get("type") not in ("function_call", "custom_tool_call"):
+        return
+    if payload.get("name") == "spawn_agent":
+        facts.spawned = True
+    text = payload.get("arguments") or payload.get("input")
+    if payload.get("name") == "apply_patch" or (
+        isinstance(text, str) and ("*** Begin Patch" in text or "apply_patch" in text)
+    ):
+        facts.edited = True
 
 
 def _read_skill_evidence(facts: RolloutFacts, payload: dict[str, Any], known: set[str]) -> None:
@@ -645,6 +694,8 @@ def build_thread(
         readings=list(facts.readings) if facts else [],
         notes=notes,
         malformed=facts.malformed if facts else 0,
+        edited=facts.edited if facts else False,
+        spawned=facts.spawned if facts else False,
     )
 
 
@@ -886,7 +937,76 @@ def _median(values: list[float]) -> float:
     return statistics.median(values) if values else 0.0
 
 
-def summary(runs: list[Run], unattributed: list[Thread]) -> str:
+@dataclass(frozen=True)
+class Lead:
+    """A frontier-tier subagent run whose shape looks mechanical."""
+
+    run_id: str
+    thread: Thread
+    judgment_hint: bool
+    mechanical_hint: bool
+
+
+def mechanical_leads(
+    runs: list[Run], tier_for: Callable[[str], str | None], output_max: int = MECH_OUTPUT_MAX
+) -> list[Lead]:
+    """Subagents on the frontier tier that wrote no patch, spawned nothing and returned a short
+    answer, most expensive first. A lead to confirm, never a verdict."""
+    tiers: dict[str, str | None] = {}
+    leads: list[Lead] = []
+    for run in runs:
+        for t in run.threads:
+            if t.kind != "child" or t.edited or t.spawned or t.usage.output > output_max:
+                continue
+            if "partial: rollout unreadable" in t.notes or "partial: no rollout path" in t.notes:
+                continue  # without the rollout, edits and spawns cannot be ruled out
+            if t.model not in tiers:
+                tiers[t.model] = tier_for(t.model)
+            if tiers[t.model] != FRONTIER_TIER:
+                continue
+            label = f"{t.role} {t.preview}"
+            leads.append(
+                Lead(
+                    run.id,
+                    t,
+                    bool(_JUDGMENT_WORDS.search(label)),
+                    bool(_MECHANICAL_WORDS.search(label)),
+                )
+            )
+    return sorted(leads, key=lambda lead: -(lead.thread.credits or 0.0))
+
+
+def _lead_lines(leads: list[Lead], ids: dict[str, str]) -> list[str]:
+    lines = [
+        "frontier-tier subagent runs that look mechanical "
+        "(no patch, no spawn, short answer; leads to confirm, not verdicts)"
+    ]
+    if not leads:
+        return [*lines, "  none"]
+    for lead in leads:
+        t = lead.thread
+        hint = ""
+        if lead.judgment_hint:
+            hint += "  [reads as judgment work; probably keep]"
+        elif lead.mechanical_hint:
+            hint += "  [reads as search, list or summarize work]"
+        lines.append(
+            f"  {ids.get(lead.run_id, lead.run_id[:8])} {t.role}: {t.preview!r} on {t.model} "
+            f"{t.effort}, {_tokens(t.usage.output)} out, {_credits(t.credits)} credits{hint}"
+        )
+    lines.append(
+        "  A shell command can write files without apply_patch: read the thread's first "
+        "message and its commands before moving it to a smaller tier."
+    )
+    return lines
+
+
+def summary(
+    runs: list[Run],
+    unattributed: list[Thread],
+    tier_for: Callable[[str], str | None] = lambda _slug: None,
+    mech_output_max: int = MECH_OUTPUT_MAX,
+) -> str:
     by_skill: dict[str, list[Run]] = defaultdict(list)
     for run in runs:
         for name in run.skills or ["(no skill)"]:
@@ -929,6 +1049,34 @@ def summary(runs: list[Run], unattributed: list[Thread]) -> str:
                 _credits(_median(credits) if credits else None),
             ]
         )
+    role_threads: dict[str, list[Thread]] = defaultdict(list)
+    for run in runs:
+        for t in run.threads:
+            role_threads[t.role if t.kind == "child" else "(root)"].append(t)
+    role_rows = [
+        [
+            role,
+            str(len(group)),
+            _tokens(sum(t.usage.total for t in group)),
+            _credits(_sum_credits(group)[0], _sum_credits(group)[1]),
+        ]
+        for role, group in sorted(role_threads.items())
+    ]
+    by_project: dict[str, list[Run]] = defaultdict(list)
+    for run in runs:
+        by_project[run.root.cwd or "(unknown)"].append(run)
+    project_rows = [
+        [
+            project,
+            str(len(group)),
+            _tokens(sum(r.tokens for r in group)),
+            _credits(
+                sum(c for r in group if (c := r.credits) is not None) or None,
+                any(r.credits_partial for r in group),
+            ),
+        ]
+        for project, group in sorted(by_project.items())
+    ]
     header = ["", "runs", "tokens", "credits", "median tokens/run", "median credits/run"]
     out = [
         f"{len(runs)} run(s); a run that used several skills counts under each.",
@@ -936,6 +1084,14 @@ def summary(runs: list[Run], unattributed: list[Thread]) -> str:
         _table(["by skill", *header[1:]], skill_rows, right={1, 2, 3, 4, 5}),
         "",
         _table(["by model", *header[1:]], model_rows, right={1, 2, 3, 4, 5}),
+        "",
+        _table(["by subagent role", "threads", "tokens", "credits"], role_rows, right={1, 2, 3}),
+        "",
+        _table(
+            ["by project (root cwd)", "runs", "tokens", "credits"], project_rows, right={1, 2, 3}
+        ),
+        "",
+        *_lead_lines(mechanical_leads(runs, tier_for, mech_output_max), short_ids(runs)),
     ]
     if unattributed:
         out += ["", unattributed_line(unattributed)]
@@ -1108,7 +1264,24 @@ def build_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--skill", metavar="NAME", help="only runs that used this skill")
     shape = parser.add_mutually_exclusive_group()
-    shape.add_argument("--summary", action="store_true", help="aggregate by skill and by model")
+    shape.add_argument(
+        "--summary",
+        action="store_true",
+        help=(
+            "aggregate by skill, model, subagent role and project, and list frontier-tier "
+            "subagent runs that look mechanical"
+        ),
+    )
+    parser.add_argument(
+        "--mech-output-max",
+        type=int,
+        default=MECH_OUTPUT_MAX,
+        metavar="N",
+        help=(
+            f"a subagent that wrote at most N output tokens counts as a short answer "
+            f"(default {MECH_OUTPUT_MAX}; used by --summary)"
+        ),
+    )
     shape.add_argument(
         "--csv",
         type=Path,
@@ -1158,7 +1331,7 @@ def main(argv: list[str] | None = None) -> int:
     elif not runs and not unattributed:
         print("no runs match")
     elif args.summary:
-        print(summary(runs, unattributed))
+        print(summary(runs, unattributed, model_tier, args.mech_output_max))
         if warnings:
             print("\n" + "\n".join(warnings))
     else:

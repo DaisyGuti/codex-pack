@@ -21,9 +21,10 @@ for the P variants; `/write-ticket` is `$write-ticket`, `/plan-next` is
   request, read and follow `${CODEX_HOME:-~/.codex}/skills/eng/SKILL.md` before you
   start, unless another pack skill already governs the task (`$ticket-worker`,
   `$work-tickets`, `$accessibility-fix`, `$prompt-optimizer`,
-  `$codex-project-setup`). A question about how a screen looks or reads is
-  `$ux-review`'s; a running page to look at and fix goes to the `ui_ux` agent. A UI
-  built on the U.S. Web Design System also loads `$uswds`.
+  `$model-recommender`, `$model-usage-audit`, `$codex-project-setup`). A question
+  about how a screen looks or reads is `$ux-review`'s; a running page to look at and
+  fix goes to the `ui_ux` agent. A UI built on the U.S. Web Design System also loads
+  `$uswds`.
 - Every code change lands by pull request (merge request on GitLab) into the default
   branch: commit on a branch, push the branch, open the review. Never commit or push
   to the default branch yourself. This outranks a project file or `CLAUDE.md` that
@@ -87,7 +88,9 @@ for the P variants; `/write-ticket` is `$write-ticket`, `/plan-next` is
 ## Models and delegation
 
 Before you spawn a subagent or recommend a model, read the model guide at
-`${CODEX_HOME:-~/.codex}/skills/eng/references/model-selection.md`. Give every
+`${CODEX_HOME:-~/.codex}/skills/eng/references/model-selection.md`. A request to pick a
+model and effort for a job is `$model-recommender`'s; an audit of the model calls in a
+product's code is `$model-usage-audit`'s. Give every
 subagent an explicit model and effort, sized to the cheapest setting that clears
 the bar; start cheap and move one unit up a step only when it comes back weak.
 Delegate independent read-heavy work (exploration, scans, review lenses, test

@@ -31,8 +31,10 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/accessibility-fix/`](skills/accessibility-fix/SKILL.md) | `$accessibility-fix`: fixes the violations a scan finds and re-scans to confirm |
 | [`skills/accessibility-diff/`](skills/accessibility-diff/SKILL.md) | `$accessibility-diff`: which accessibility problems a change added or fixed |
 | [`skills/section-508-report/`](skills/section-508-report/SKILL.md) | `$section-508-report`: builds an Accessibility Conformance Report on the ITI VPAT 2.5Rev template from audit findings and test notes; refuses a Supports row without a passing check run by a person and lists what still needs a tester |
+| [`skills/model-recommender/`](skills/model-recommender/SKILL.md) | `$model-recommender`: picks the OpenAI model tier and reasoning effort for a task, subagent or pipeline stage from the live catalog, and says how to verify and apply it |
+| [`skills/model-usage-audit/`](skills/model-usage-audit/SKILL.md) | `$model-usage-audit`: audits how a product's code calls AI models (any provider): call sites, model ids and lifecycle, limits, cost, data flow, secrets and evals, as a findings report |
 | [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` |
-| [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run |
+| [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run, split by model, subagent role and project, with frontier-tier subagent runs that look mechanical |
 | [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, `ui_ux` (renders a page in Chrome, reviews the screenshots and fixes what is wrong), and the read-only `reviewer` and `forward_tester` |
 | [`references/model-selection.md`](references/model-selection.md) | Which model tier and effort for which kind of work |
 | [`references/ticket-labels.md`](references/ticket-labels.md) | When each ticket label goes on, and how held work is marked |
@@ -40,6 +42,9 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`references/trackers/`](references/trackers/) | How each tracker operation is done on GitHub (`gh`) and on GitLab (`glab`) |
 | [`scripts/resolve_model.py`](scripts/resolve_model.py) | Turns a tier into a model your account has, with a supported effort |
 | [`scripts/codex_usage.py`](scripts/codex_usage.py) | Per-run usage from Codex's own records |
+| [`scripts/inventory_model_calls.py`](scripts/inventory_model_calls.py) | Finds every place a repository calls an AI model, with file:line evidence, for `$model-usage-audit` |
+| [`scripts/uswds_check.py`](scripts/uswds_check.py) | Installed against latest USWDS version, `usa-` classes the stylesheet does not define, and page facts, for `$uswds` |
+| [`scripts/acr.py`](scripts/acr.py) | Builds and validates the Accessibility Conformance Report evidence file, for `$section-508-report` |
 | [`registry.example.md`](registry.example.md) | Template for the tracker, board, lanes, labels and repo list the ticket skills read |
 | [`evals/triggers/`](evals/triggers/) | For each skill, about 20 requests that should and should not trigger it, for testing its description |
 | [`docs/sources.md`](docs/sources.md) | The documentation and measurements behind the design |
@@ -164,6 +169,8 @@ $uswds review these templates against the design system
 $accessibility-scan http://localhost:3000
 $codex-project-setup
 $codex-usage
+$model-recommender which model and effort for these three subagents
+$model-usage-audit path/to/repo
 ```
 
 Each skill shows a display name, icon and starter prompt in the desktop app's

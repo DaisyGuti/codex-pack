@@ -40,6 +40,9 @@ Classify the input before anything else:
   Separate `--file` arguments are already explicit; optimize each one.
 - **A prompt mixed with notes or critique**: extract the prompt, state that
   assumption in the iteration log, and proceed.
+- **A prompt that names large documents** (long PDFs, spreadsheets, standards, repos,
+  pages): they are inputs for the model that will run it, so do not open them. Keep every
+  one and write a chain, per [references/large-documents.md](references/large-documents.md).
 
 Missing context fields are fine; ask only when one blocks a P0 or P1 decision.
 When the prompt and `--context` disagree, the prompt wins.
@@ -78,7 +81,8 @@ only to fix a P0 or P1.
 ## The loop
 
 Tag every issue **P0** (breaks the prompt or causes wrong behavior), **P1**
-(materially weakens the output) or **P2** (polish). When unsure, call it P1.
+(materially weakens the output) or **P2** (polish); examples are in
+[references/severity-examples.md](references/severity-examples.md). When unsure, call it P1.
 Reclassify every open issue each round.
 
 With `--evidence`, work in two steps, following
@@ -155,6 +159,11 @@ are covered.
 - **Output style** (prose for people). Sets length and formatting, since current
   GPT models default to heavy formatting, and bans the stock phrasing the guidance
   lists.
+- **Large inputs.** Long documents go through an extraction step first: one prompt per
+  document writes sourced excerpts to a notes file, and the main prompt works from the notes
+  and starts the extractions itself, so the chain runs from one paste. Each extraction first
+  records what its input is, has a fallback when a tool is missing, and stops to ask instead
+  of guessing ([references/large-documents.md](references/large-documents.md)).
 - **Completeness.** Edge cases and stop conditions are defined; every loop has exit
   rules (pass, attempt cap, no change since the last pass, needs a human).
 - **Tool fit.** Uses only tools the runtime has. A comparison against another
@@ -164,8 +173,8 @@ are covered.
   weaker models are gone; absolute language stays only where correctness or safety
   needs it.
 - **Intent preservation.** Scope and tone match the original. Read the files the
-  prompt links to, optimize only the files passed, and leave linked content in its
-  own file.
+  prompt links to when they are short instruction files (a large document stays unread: see
+  Large inputs), optimize only the files passed, and leave linked content in its own file.
 - **Extensibility** (repeated or commercial workflows only). Composes with other
   tools and survives model upgrades: model names are resolved at runtime or kept
   in config.
