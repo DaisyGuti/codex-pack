@@ -901,7 +901,7 @@ def test_install_tolerates_an_empty_pack(pack: Pack) -> None:
     (pack.root / "registry.example.md").unlink()
     done = pack.install()
     assert done.returncode == 0
-    assert done.stdout.count("skipped:") == 4  # skills, agents, AGENTS.md, registry
+    assert done.stdout.count("skipped:") == 5  # skills, agents, AGENTS.md, hooks.json, registry
 
 
 def test_an_unknown_option_exits_2(pack: Pack) -> None:

@@ -1,0 +1,1 @@
+../../../scripts/check_agents_md.py

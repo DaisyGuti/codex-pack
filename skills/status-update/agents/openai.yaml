@@ -1,0 +1,7 @@
+interface:
+  display_name: "Status Update"
+  short_description: "Standup or weekly update from git and tickets"
+  icon_small: "./assets/status-update-small.svg"
+  icon_large: "./assets/status-update.png"
+  brand_color: "#0369A1"
+  default_prompt: "Use $status-update to write my standup from yesterday's commits and pull requests."

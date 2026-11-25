@@ -1,68 +1,108 @@
 # Plan one ticket
 
-The one procedure for writing a ticket's plan, shared by `$plan-ticket` (one ticket) and
-`$daily-grooming` (every unplanned Ready ticket, possibly through subagents). Keep it
-here and nowhere else.
+The one procedure for writing a ticket's plan, shared by `$plan-ticket` (one ticket),
+`$write-ticket --ready` (the ticket it just filed) and `$daily-grooming` (every unplanned
+ticket headed for Ready, possibly through subagents). It lives here and nowhere else. It runs
+on the `frontier` tier whatever the session's model ([model-selection.md](model-selection.md),
+"Ticket work").
 
-A worker reads the plan before it builds, checks it for drift, and re-plans only when
-it has drifted. So the plan is a short brief for the worker: a
-short plan that is 80% right and gets re-checked at build time beats a long one that
-is stale by next week.
+**Ready means planned.** A ticket goes to the ready lane only with a `### Final Plan` and no
+open blocker, and a planned ticket with no open blocker moves to the ready lane in the same
+step that posts its plan. A planned ticket is never left in the backlog.
+
+A worker reads the plan before it builds, checks it for drift, and re-plans only when it has
+drifted. So the plan is a short brief for the worker: a short plan that is 80% right and gets
+re-checked at build time beats a long one that is stale by next week.
 
 **Inputs.** The ticket (its repo's Remote and number), and whether this is a dry run.
-Optional: `--context FILE`. The registry and the tracker adapter file for the
-registry's tracker are already read; if you were handed this file in a subagent
-brief, read both before the first step. Tracker actions are the named operations in
-bold; run them as the adapter file writes them.
+Optional: `--context FILE`, and, when batching is on, the ticket's parent and whether to join
+one (see "Batches"). The registry (`registry.py show`) and the tracker adapter file for the
+registry's tracker are already read; if you were handed this file in a subagent brief, read
+both before the first step. Tracker actions are the named operations in bold; run them as the
+adapter file writes them. Read the pack's engineering standards once,
+`${CODEX_HOME:-~/.codex}/skills/eng/references/engineering-standards.md`: its design and test
+rules shape **Pattern to reuse** and **Watch out for** (a pattern that removes branches, an
+old path to delete, a test to cut).
+
+## Contents
+
+- 1. Load the context, lean
+- 2. Hold it instead, when there is nothing sound to plan
+- 3. Write the plan, one pass
+- 4. Post it and set the labels
+- 5. Return one line
+- Labels only, when the plan already exists
+- Batches, when batching is on
 
 ## 1. Load the context, lean
 
 1. **read-issue** for the ticket: title, body, labels, comments, state.
-2. Stop, and return `could not plan: <reason>`, when the issue is closed or carries
-   the registry's blocked label. Nothing is written.
-3. The owning repo and its brief come from the registry's "Resolving a ticket to its
-   repo" and "Resolving a ticket's product brief". An explicit `--context FILE`
-   replaces the brief. A brief missing on disk: plan without it and say so in your
-   result. A repo with no local clone on this machine: stop with
-   `could not plan: no local clone of <repo>`.
+2. Stop, and return `could not plan: <reason>`, when the issue is closed or carries the
+   registry's blocked label. Nothing is written.
+3. The owning repo and its brief come from [registry-rules.md](registry-rules.md) ("Resolving
+   a ticket to its repo" and "Resolving a ticket's product brief"). An explicit `--context
+   FILE` replaces the brief. A brief missing on disk: plan without it and say so in your
+   result. A repo with no local clone on this machine: stop with `could not plan: no local
+   clone of <repo>`.
 4. Read, in the repo's local clone and with read-only commands only:
    - the brief, end to end (it is the source of truth);
    - the top of the repo's dependency manifest (`package.json`, `pyproject.toml`,
      `requirements.txt`, `go.mod`, `Cargo.toml`: whichever exists);
    - **one** targeted search for the primary symbol or file the ticket names.
 
-   That is all. Do not survey the repo, and do not research other tickets.
-5. For each issue the body names on a `Depends on:`, `Blocked by:` or `Blocked on:`
-   line, run **issue-state**.
+   That is all. Do not survey the repo. Other tickets are read only in item 6.
+5. For each issue the body names on a `Depends on:`, `Blocked by:` or `Blocked on:` line,
+   run **issue-state**.
+6. **Parent, neighbours and duplicates.** Run **search-issues** in the ticket's repo on two
+   or three keywords from its title and primary symbol (a grooming pass already holds the
+   board's items: use those). From that, and **read-parent** when batching is on, find:
+   - **Its parent**, when it has none: an open epic or parent the ticket body names (a link,
+     a `Parent:` line). Step 4 attaches it only in `epics` or `sub-issues` mode and only when
+     the plan's **Batch** line says `single`, because **attach-child** replaces a parent and a
+     non-batch parent keeps the ticket out of batches. In any other case, or when you cannot
+     name the parent for certain, it goes in the returned line.
+   - **Batch partners**, when batching is on: open tickets in the same area or files, judged
+     by [batches.md](batches.md), "Forming batches".
+   - **Duplicates and close candidates**: a ticket that repeats this one, or one that this
+     ticket or merged work already settles. Name each in the returned line. Never close or
+     merge one.
 
 ## 2. Hold it instead, when there is nothing sound to plan
 
-Do not write a plan, and hold the ticket, in two cases:
+Do not write a plan, and hold the ticket, in three cases:
 
 - **A dependency is still open** (step 1.5): kind `dependency`, naming each open issue.
-- **The ticket is too vague to plan.** A section would need more than a paragraph, or
-  you cannot state what done looks like. Expanding the plan is the wrong response:
-  kind `decision`, listing the missing facts as questions, each with your recommended
-  answer.
+- **The ticket is too vague to plan.** A section would need more than a paragraph, or you
+  cannot state what done looks like. Expanding the plan is the wrong response: use kind
+  `decision`, and list the missing facts as questions, each with your recommended answer.
+- **The ticket is too big for one worker.** It would change the database schema, the API and
+  the UI together. One worker run cannot hold that much, and tickets of that size have ended
+  with nothing committed. Use kind `decision`: recommend cutting it by layer, one ticket each
+  chained with `Depends on:` lines, and name what each piece covers.
 
 Holding follows [ticket-labels.md](ticket-labels.md), "Blocked": **ensure-label** and
-**add-label** for the registry's blocked label, then **comment** in the `Blocked:`
-shape. The ticket keeps its lane, because no one has started it. Return
-`held: <kind>`. In a dry run, print what you would post and write nothing.
+**add-label** for the registry's blocked label, then **comment** in the `Blocked:` shape.
+A held ticket is not ready: when it sits in the ready lane, **set-lane** moves it to the
+backlog lane, and in any other lane it stays where it is. Return `held: <kind>`. In a dry
+run, print what you would post and write nothing.
 
 ## 3. Write the plan, one pass
 
 About 200 words and about five minutes of work. One paragraph per section at most:
 
-- **Files to touch**: concrete paths, in each affected repo.
+- **Files to touch**: concrete paths, in each affected repo; write another repo's path in
+  backticks as `other-repo: src/a.py`.
 - **Pattern to reuse**: the existing file or function the work should mirror.
 - **Acceptance**: the one or two checks that mean done.
 - **Blockers / dependencies**: only if real and current.
 - **Watch out for**: only the non-obvious traps.
+- **Batch**, when batching is on: one line. Name the batch the ticket joins and its
+  members, or propose a new batch (`propose batch <area>: #12, #15`) when two or more open
+  tickets fit it and no parent does, or write `single`.
 
-The comment starts with the heading `### Final Plan` on a line of its own, exactly,
-because workers look for that heading. When the ticket already has a `### Final Plan`
-comment (you were asked to re-plan it), put one line under the heading first:
+The comment starts with the heading `### Final Plan` on a line of its own, exactly, because
+workers look for that heading. When the ticket already has a `### Final Plan` comment (you
+were asked to re-plan it), put one line under the heading first:
 `_Re-planned YYYY-MM-DD: <reason>_`, using today's date.
 
 **Forbidden:**
@@ -70,47 +110,107 @@ comment (you were asked to re-plan it), put one line under the heading first:
 - iteration loops or an iterations footer ("Iterations: 2, round 1 added X");
 - tradeoff tables;
 - risk registers;
-- "cross-ticket coordination" sections that re-list other tickets;
+- "cross-ticket coordination" sections that re-list other tickets (the **Batch** line is the
+  one place another ticket appears);
 - restating the brief: link to it.
 
-A fourth section, a table or a third paragraph in one section means stop and cut. If
-the plan will not fit in 200 words, the ticket is too vague: go to step 2.
+A section beyond the six above, a table or a third paragraph in one section means stop and
+cut. If the plan will not fit in 200 words, the ticket is too vague: go to step 2.
 
 ## 4. Post it and set the labels
 
-In a dry run, print the plan and the labels below, run no write operation, and
+In a dry run, print the plan, the labels and the lane move below, run no write operation, and
 return.
 
 1. **comment** with the plan. Keep the comment's URL if the operation printed one.
 2. **Model label.** Judge the tier from the plan you just wrote: its files, its traps.
-   [ticket-labels.md](ticket-labels.md), "Model label", holds the rubric, and the
-   registry's Model labels table gives the label for the tier. A model label already
-   on the ticket stays as it is, in any form the registry resolves, and so does a
-   ticket that has several (report that; do not pick). Otherwise **ensure-label**,
-   then **add-label**.
+   [ticket-labels.md](ticket-labels.md), "Model label", holds the rubric, and the registry's
+   Model labels table gives the label for the tier. Size it to the plan's scope: `fast` for a
+   test-only or document-only change or one small file, `workhorse` for a normal multi-file
+   change, `frontier` for security, authentication or gate logic, cross-cutting design or
+   tricky invariants. A model label already on the ticket stays as it is, in any form the
+   registry resolves, and so does a ticket that has several (report that; do not pick).
+   Otherwise **ensure-label**, then **add-label**.
+   **Weight:** when the registry's Model labels row for the ticket's tier (the label it now
+   carries) has a weight, **set-weight** to it, replacing any weight already there. No weight
+   in the registry, or several model labels on the ticket: set none.
 3. **Run label.** Judge it from the acceptance criteria you just wrote, per
    [ticket-labels.md](ticket-labels.md), "Run label". None on the ticket: **ensure-label**
-   and **add-label** the right one. The wrong one: **remove-label** it and add the
-   right one. Both on the ticket: a contradiction only a person can settle, so report
-   it and change nothing.
+   and **add-label** the right one. The wrong one: **remove-label** it and add the right one.
+   Both on the ticket: a contradiction only a person can settle, so report it and change
+   nothing.
+4. **Lane.** A ticket with no open blocker (step 1.5 found none) is now planned, so
+   **set-lane** with role `ready` when it sits in the backlog lane. A ticket already in the
+   ready lane stays. A ticket in any other lane stays where it is, because a worker or a person
+   put it there.
+5. **Groom what the plan touches.**
+   - **Parent:** **attach-child** to the parent item 6 of step 1 named, under the conditions
+     it gives.
+   - **Priority:** in a `$plan-ticket` or `$write-ticket` run only (grooming syncs priority
+     itself and tells its planners to change none): none set, judge one and **set-priority**,
+     as [ticket-labels.md](ticket-labels.md) "Priority" says.
+   - **Team label:** when the repo uses team labels (`team:<name>` or the like, from
+     **list-labels**) and the ticket has none, **add-label** the existing one that owns the
+     plan's files. Never invent a label.
+   - **Milestone:** **read-milestone** on the ticket, and on its parent when it has one. The
+     ticket has none and the parent has one: **set-milestone** to the parent's. Both have one
+     and they differ: change nothing and name the mismatch in the returned line, since a
+     person set the ticket's.
+   - **Assignee:** never change one. Name an unassigned ticket in the returned line.
 
-**ensure-label** can lose a race when several planners run at once. A failure to
-create a label that now exists is success: run it again to confirm, and carry on.
+**ensure-label** can lose a race when several planners run at once. A failure to create a
+label that now exists is success: run it again to confirm, and carry on.
 
 ## 5. Return one line
 
 ```text
-planned <repo>#<n>: <model label>, <run label>, <comment URL, when printed>, <word count> words
+planned <repo>#<n>: <model label>, <run label>, <comment URL, when printed>, <word count> words[; <notes>]
 replanned <repo>#<n>: <same fields>
 held <repo>#<n>: <kind>: <what it waits on>
 could not plan <repo>#<n>: <reason>
 ```
 
-The caller reads this line and nothing else; it does not need the plan text back.
+`<notes>` lists, comma-separated, what step 1's item 6 and step 4's item 5 found for a
+person: the parent attached or suggested, the batch joined or proposed, duplicates and close
+candidates, the milestone set or a mismatch, no assignee. The caller reads this line and
+nothing else; it does not need the plan text back.
 
 ## Labels only, when the plan already exists
 
-`$daily-grooming` also uses this procedure on a Ready ticket that already has a
-`### Final Plan` comment but lacks a model or run label, since `$work-tickets` will not
-dispatch it that way. Do step 4's labels (2 and 3) judging from the existing plan,
-post nothing, and return `labelled <repo>#<n>: <labels added>`.
+`$daily-grooming` also uses this procedure on a ticket that already has a `### Final Plan`
+comment but lacks a model or run label, since `$work-tickets` will not dispatch it that way.
+Do step 4's labels and weight (2 and 3) judging from the existing plan, and its lane (4), post
+nothing, and return `labelled <repo>#<n>: <labels added>`.
+
+## Batches, when batching is on
+
+Only when `registry.py show` prints a `batching` `mode` other than `off`; the rules are
+[batches.md](batches.md) ("Planning a batch" and "Lanes"). A ticket with a parent is never
+planned alone: planning any child plans its whole batch.
+
+1. **read-parent-item** for the parent's plan and addenda, and **read-issue** for each open
+   child (the parent's children come from **list-parents**). Load the context once for the
+   batch: step 1's reads cover every child.
+2. Step 2 holds a child, never the parent: a held child gets the blocked label and comment,
+   the rest are still planned, and the batch stays in the backlog until the hold clears.
+3. **No plan on the parent:** one `### Final Plan` covering every open child that is not
+   held, posted with **comment-parent**: a `### #<n> <title>` section per child in the order
+   the worker should take them, each the shape of step 3 and about 200 words, then one short
+   paragraph on what they share (files, the test command, why that order). **A plan exists:**
+   post a `### Final Plan addendum: #<n>` for each open child it does not cover, in the same
+   shape. A re-plan opens with step 3's `_Re-planned_` line.
+4. Step 4's model and run labels (and weight) go on each child, judged from its own section.
+   The lane moves the whole batch: when every open child is covered and none is held,
+   **set-lane** each open child in the backlog lane to `ready`; otherwise move none.
+5. Return `planned batch <parent ref>: #<n> <model label> <run label>, ... (<comment URL>,
+   <words> words)`, or `held` and `could not plan` lines per child as in step 5.
+
+**Joining a parent** (only when the caller asks: `$plan-ticket` does, grooming does not). A
+ticket with no parent (**read-parent** prints null; one under a non-batch parent never joins,
+since attaching would re-parent it), planned by step 3 and not held, may join an open parent
+that fits it ([batches.md](batches.md), "Joining a batch"; attach only, never create a
+parent). Before posting, run **list-parents** for its repo and judge the fit with the plan's
+files. One fits: **attach-child**, then post the plan on the parent as this child's addendum
+(or, when the parent has no plan yet, plan the batch as above) instead of on the ticket. None
+fits: post it on the ticket as a single. Say in the returned line which parent it joined, or
+`single`.

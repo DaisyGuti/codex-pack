@@ -32,6 +32,14 @@ for the P variants; `/write-ticket` is `$write-ticket`, `/plan-next` is
   `$dockerfile-harden`'s, a built image to scan, sign or verify is `$image-supply-chain`'s,
   a GitHub Actions or GitLab CI pipeline to audit is `$ci-harden`'s, a Google Cloud project to
   review is `$gcp-review`'s, and a GitHub-to-GitLab move is `$gitlab-migration`'s.
+- For a Slack catch-up, a Slack draft or send, a standup or weekly update, a design doc
+  or RFC, or an architecture decision record, read and follow the matching skill:
+  `${CODEX_HOME:-~/.codex}/skills/slack-catchup/SKILL.md`, `slack-draft`, `slack-send`,
+  `status-update`, `design-doc` or `adr` in the same folder. Only `$slack-send` posts to
+  Slack, and only after the user's explicit go-ahead in chat for that message.
+- When the guardrails hook blocks a call, do not retry it another way: say what was
+  blocked and let the user run it or allowlist the rule
+  (`${CODEX_HOME:-~/.codex}/skills/guardrails-help/SKILL.md`).
 - Every code change lands by pull request (merge request on GitLab) into the default
   branch: commit on a branch, push the branch, open the review. Never commit or push
   to the default branch yourself. This outranks a project file or `CLAUDE.md` that

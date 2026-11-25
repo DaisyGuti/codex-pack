@@ -78,5 +78,17 @@
   {
     "query": "create the ticket registry file so the board commands know which repos to read",
     "should_trigger": false
+  },
+  {
+    "query": "our AGENTS.md files keep growing. check whether Codex is still reading all of them or cutting the tail off",
+    "should_trigger": true
+  },
+  {
+    "query": "add a CI check so nobody can bloat the AGENTS.md guides in this repo",
+    "should_trigger": true
+  },
+  {
+    "query": "how many tokens did my Codex sessions burn this week",
+    "should_trigger": false
   }
 ]

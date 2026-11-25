@@ -1,0 +1,7 @@
+interface:
+  display_name: "ADR"
+  short_description: "Write a numbered architecture decision record"
+  icon_small: "./assets/adr-small.svg"
+  icon_large: "./assets/adr.png"
+  brand_color: "#0F766E"
+  default_prompt: "Use $adr to record that we chose Postgres for the audit log and supersede ADR 4."

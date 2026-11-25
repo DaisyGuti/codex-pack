@@ -1,0 +1,7 @@
+interface:
+  display_name: "Slack Draft"
+  short_description: "Draft a Slack message or thread reply"
+  icon_small: "./assets/slack-draft-small.svg"
+  icon_large: "./assets/slack-draft.png"
+  brand_color: "#6D28D9"
+  default_prompt: "Use $slack-draft to draft a message asking for a review of my merge request."

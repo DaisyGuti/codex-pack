@@ -1,6 +1,6 @@
 interface:
   display_name: "Work Ready Tickets"
-  short_description: "Run Ready board tickets in parallel waves"
+  short_description: "Run Ready board tickets with a parallel worker pool"
   icon_small: "./assets/work-tickets-small.svg"
   icon_large: "./assets/work-tickets.png"
   brand_color: "#EA580C"

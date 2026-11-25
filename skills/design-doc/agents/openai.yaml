@@ -1,0 +1,7 @@
+interface:
+  display_name: "Design Doc"
+  short_description: "Write a design doc or RFC with a security section"
+  icon_small: "./assets/design-doc-small.svg"
+  icon_large: "./assets/design-doc.png"
+  brand_color: "#7C2D12"
+  default_prompt: "Use $design-doc to write a design doc comparing two ways to add rate limiting."

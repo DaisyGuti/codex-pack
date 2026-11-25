@@ -1,0 +1,82 @@
+[
+  {
+    "query": "write my standup",
+    "should_trigger": true
+  },
+  {
+    "query": "what did I do yesterday? build it from my commits and PRs",
+    "should_trigger": true
+  },
+  {
+    "query": "weekly update for the team, covering what I shipped",
+    "should_trigger": true
+  },
+  {
+    "query": "summarize my week from git and my merge requests",
+    "should_trigger": true
+  },
+  {
+    "query": "give me a status update for Friday",
+    "should_trigger": true
+  },
+  {
+    "query": "what did I ship this sprint, with links to the pull requests",
+    "should_trigger": true
+  },
+  {
+    "query": "standup for today: yesterday, today, blockers, from my repo activity",
+    "should_trigger": true
+  },
+  {
+    "query": "I need a quick status for my manager covering my merged MRs and open issues",
+    "should_trigger": true
+  },
+  {
+    "query": "pull together my weekly update across these two repos",
+    "should_trigger": true
+  },
+  {
+    "query": "update for the team: what is in progress and what is next, based on my tickets",
+    "should_trigger": true
+  },
+  {
+    "query": "write a commit message for my staged changes",
+    "should_trigger": false
+  },
+  {
+    "query": "summarize what happened in #platform-eng this week",
+    "should_trigger": false
+  },
+  {
+    "query": "write the release notes for 2.4",
+    "should_trigger": false
+  },
+  {
+    "query": "write a changelog entry for this pull request",
+    "should_trigger": false
+  },
+  {
+    "query": "what is the status of PR 482? is CI green",
+    "should_trigger": false
+  },
+  {
+    "query": "post my standup to Slack",
+    "should_trigger": false
+  },
+  {
+    "query": "write a pull request description for this branch",
+    "should_trigger": false
+  },
+  {
+    "query": "list the open issues assigned to me",
+    "should_trigger": false
+  },
+  {
+    "query": "generate a burndown chart for the sprint",
+    "should_trigger": false
+  },
+  {
+    "query": "write a performance review self-assessment for the year",
+    "should_trigger": false
+  }
+]

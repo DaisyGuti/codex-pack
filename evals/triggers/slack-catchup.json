@@ -1,0 +1,82 @@
+[
+  {
+    "query": "catch me up on #platform-eng since yesterday",
+    "should_trigger": true
+  },
+  {
+    "query": "what did I miss in Slack over the weekend",
+    "should_trigger": true
+  },
+  {
+    "query": "summarize #incidents for the last two days and tell me what needs my reply",
+    "should_trigger": true
+  },
+  {
+    "query": "go through my mentions and DMs since Monday",
+    "should_trigger": true
+  },
+  {
+    "query": "any updates in the release thread? here is the link",
+    "should_trigger": true
+  },
+  {
+    "query": "I was out Thursday and Friday. what happened in #payments-eng",
+    "should_trigger": true
+  },
+  {
+    "query": "here is a 200 message thread. give me the short version: decisions, asks, blockers",
+    "should_trigger": true
+  },
+  {
+    "query": "what needs my attention in Slack right now",
+    "should_trigger": true
+  },
+  {
+    "query": "read the thread I pasted and tell me what is time-sensitive",
+    "should_trigger": true
+  },
+  {
+    "query": "give me the highlights from #design-review this week, with links",
+    "should_trigger": true
+  },
+  {
+    "query": "draft a reply to this thread telling Priya the fix is merged",
+    "should_trigger": false
+  },
+  {
+    "query": "post my standup in #team-updates",
+    "should_trigger": false
+  },
+  {
+    "query": "summarize this pull request discussion",
+    "should_trigger": false
+  },
+  {
+    "query": "what did I do last week? build my weekly update from git",
+    "should_trigger": false
+  },
+  {
+    "query": "write an announcement for the release",
+    "should_trigger": false
+  },
+  {
+    "query": "summarize this meeting transcript",
+    "should_trigger": false
+  },
+  {
+    "query": "summarize the long email chain below",
+    "should_trigger": false
+  },
+  {
+    "query": "set up a Slack reminder for tomorrow at nine",
+    "should_trigger": false
+  },
+  {
+    "query": "how do I connect Slack to Codex",
+    "should_trigger": false
+  },
+  {
+    "query": "who is in the #platform-eng channel",
+    "should_trigger": false
+  }
+]

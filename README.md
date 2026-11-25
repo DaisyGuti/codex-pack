@@ -17,7 +17,7 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/write-ticket/`](skills/write-ticket/SKILL.md) | `$write-ticket`: checks the premise against the real repo, then files an issue in the shape and with the labels the ticket workers need |
 | [`skills/plan-ticket/`](skills/plan-ticket/SKILL.md) | `$plan-ticket`: writes a ticket's short build plan (files, pattern to copy, how to tell it's done) and sets its model and run labels, so the plan can be read before a worker builds it |
 | [`skills/daily-grooming/`](skills/daily-grooming/SKILL.md) | `$daily-grooming`: tidies the whole board: settles closed items, syncs priorities, flags duplicates and gaps, promotes to Ready and plans what is unplanned |
-| [`skills/work-tickets/`](skills/work-tickets/SKILL.md) | `$work-tickets`: works your Ready tickets in parallel waves, each on the model its label names |
+| [`skills/work-tickets/`](skills/work-tickets/SKILL.md) | `$work-tickets`: works your Ready tickets with a rolling pool of parallel workers, each on the model its label names |
 | [`skills/ticket-worker/`](skills/ticket-worker/SKILL.md) | `$ticket-worker`: works one issue from plan to an open pull or merge request; merging closes the issue |
 | [`skills/ux-review/`](skills/ux-review/SKILL.md) | `$ux-review`: reviews a screen, flow, mockup or screenshot for usability, accessibility and visual craft |
 | [`skills/web-design-guidelines/`](skills/web-design-guidelines/SKILL.md) | `$web-design-guidelines`: audits UI code against Vercel's Web Interface Guidelines, fetched fresh each run |
@@ -41,12 +41,20 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/section-508-report/`](skills/section-508-report/SKILL.md) | `$section-508-report`: builds an Accessibility Conformance Report on the ITI VPAT 2.5Rev template from audit findings and test notes; refuses a Supports row without a passing check run by a person and lists what still needs a tester |
 | [`skills/model-recommender/`](skills/model-recommender/SKILL.md) | `$model-recommender`: picks the OpenAI model tier and reasoning effort for a task, subagent or pipeline stage from the live catalog, and says how to verify and apply it |
 | [`skills/model-usage-audit/`](skills/model-usage-audit/SKILL.md) | `$model-usage-audit`: audits how a product's code calls AI models (any provider): call sites, model ids and lifecycle, limits, cost, data flow, secrets and evals, as a findings report |
-| [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` |
+| [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` from a scan of its files, checks it, measures the `AGENTS.md` chain against Codex's read cap, and offers a CI size guard |
 | [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run, split by model, subagent role and project, with frontier-tier subagent runs that look mechanical |
+| [`skills/slack-catchup/`](skills/slack-catchup/SKILL.md) | `$slack-catchup`: summarizes Slack channels, threads and DMs since a time into decisions, asks, blockers and FYIs, with links; read-only |
+| [`skills/slack-draft/`](skills/slack-draft/SKILL.md) | `$slack-draft`: drafts a Slack message or thread reply for a stated goal; drafts only |
+| [`skills/slack-send/`](skills/slack-send/SKILL.md) | `$slack-send`: posts, schedules or saves as a Slack draft text you approved, after one confirmation |
+| [`skills/status-update/`](skills/status-update/SKILL.md) | `$status-update`: standup or weekly update from your commits, pull or merge requests and tickets on GitHub or GitLab |
+| [`skills/design-doc/`](skills/design-doc/SKILL.md) | `$design-doc`: design doc or RFC with a required security and compliance section, saved in the repo's docs folder |
+| [`skills/adr/`](skills/adr/SKILL.md) | `$adr`: numbered MADR architecture decision record, with superseded records linked |
+| [`skills/guardrails-help/`](skills/guardrails-help/SKILL.md) + [`hooks/hooks.json`](hooks/hooks.json) | The guardrails `PreToolUse` hook ([`scripts/guardrails.py`](scripts/guardrails.py)) blocks risky shell commands and edits; `$guardrails-help` explains a block and lists the rules and recent blocks |
 | [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, `ui_ux` (renders a page in Chrome, reviews the screenshots and fixes what is wrong), and the read-only `reviewer`, `forward_tester` and `security_auditor` |
 | [`references/model-selection.md`](references/model-selection.md) | Which model tier and effort for which kind of work |
 | [`references/ticket-labels.md`](references/ticket-labels.md) | When each ticket label goes on, and how held work is marked |
 | [`references/testing-without-api-spend.md`](references/testing-without-api-spend.md) | When to test with `codex exec` or the Codex SDK on the ChatGPT sign-in, and when an API key is really needed |
+| [`docs/connect-slack.md`](docs/connect-slack.md) | How to connect Slack to Codex as an MCP server, for the Slack skills |
 | [`references/trackers/`](references/trackers/) | How each tracker operation is done on GitHub (`gh`) and on GitLab (`glab`) |
 | [`scripts/resolve_model.py`](scripts/resolve_model.py) | Turns a tier into a model your account has, with a supported effort |
 | [`scripts/codex_usage.py`](scripts/codex_usage.py) | Per-run usage from Codex's own records |
@@ -79,6 +87,11 @@ that belong to another pack checkout are refused unless you pass
 `--replace-other-pack`. On first run it creates `registry.md` from
 `registry.example.md`; fill it in before using the ticket skills, starting with its
 `tracker:` line. Restart Codex afterwards.
+
+The installer also links `~/.codex/hooks.json` to the pack's `hooks/hooks.json`, which
+runs the [guardrails](#guardrails) hook; an existing `hooks.json` of your own is left
+alone and the entry to add is printed. Codex runs a hook only after you trust it once:
+open `/hooks` in the CLI (Settings > Hooks in the app).
 
 **Your own preferences** (how you like replies written, tools or credits you have,
 rules for a repo only you work in) go in your own `~/.codex/config.toml` as
@@ -132,6 +145,16 @@ is a one-page picture of the flow below, from filing to merge.
   person can read the plan first; `$daily-grooming` does that for the whole board.
   `$work-tickets` builds your Ready tickets in parallel, and `$ticket-worker` builds
   one. A worker writes the plan itself when a ticket has none.
+- **Ready means planned.** A ticket reaches the ready lane only with a `### Final Plan`
+  and no open blocker; `$plan-ticket` and `$write-ticket --ready` post the plan and move
+  it there in one step. Planning runs on the frontier tier whatever the session's model,
+  and sets the issue's weight from its model tier when the registry gives one.
+- **Workers check their own work.** Ticket workers review their own diff (the `reviewer`
+  agent on large or risky diffs, then `codex review`, then one read-only Claude read when
+  the Claude CLI is installed), file unfixed findings and known gaps as follow-up tickets
+  (at most five per run), and can split a change across parallel `worker` sub-workers.
+  The Codex facts these rely on are in
+  [`references/codex-ticket-notes.md`](references/codex-ticket-notes.md).
 - **How work lands.** Every change the pack makes goes on a branch and into the
   default branch by pull request (merge request on GitLab); Codex never commits or
   pushes to the default branch itself, even where a repo's own instructions allow
@@ -187,10 +210,38 @@ $codex-project-setup
 $codex-usage
 $model-recommender which model and effort for these three subagents
 $model-usage-audit path/to/repo
+$slack-catchup what did I miss in #platform-eng since yesterday
+$slack-draft reply to this thread: the retry change is merged
+$slack-send
+$status-update weekly
+$design-doc how we should cache tenant settings
+$adr use Postgres advisory locks for the job queue
+$guardrails-help why was my push blocked?
 ```
+
+The Slack skills need Slack connected to Codex as an MCP server named `slack`:
+[docs/connect-slack.md](docs/connect-slack.md). `$slack-send` posts only after you
+approve that message in chat. `$status-update` needs `gh` or `glab` signed in.
 
 Each skill shows a display name, icon and starter prompt in the desktop app's
 Skills list (`skills/<name>/agents/openai.yaml`).
+
+## Guardrails
+
+A Codex `PreToolUse` hook ([`scripts/guardrails.py`](scripts/guardrails.py)) checks every
+shell command and `apply_patch` edit before it runs. It blocks protected-branch pushes and
+force-pushes, skipped git hooks, downloaded code run unread, TLS verification turned off,
+public GCP access, service account key creation, privileged containers, destructive
+deletes, and credentials written into files or read from secret files. It also blocks
+changes to itself, its hook file and the settings that turn hooks off. A repo turns a rule
+off by committing `.codex/guardrails-allow.txt` (one rule id per line) through review;
+Codex cannot write that file. A person runs a blocked command in their own terminal.
+
+Limits: it reads only the command line and the patch, not MCP tools, script files, aliases
+or computed values. It fails closed on its own errors, but Codex has no fail-closed setting
+for hooks, so a missing `python3` or a timeout lets the call through. Read-only agents are
+held to reading by their `sandbox_mode`, because a hook cannot tell which agent called it.
+`$guardrails-help` lists the rules and the recent blocks.
 
 ## Browser tools for the accessibility skills
 

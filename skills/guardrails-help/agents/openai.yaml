@@ -1,0 +1,7 @@
+interface:
+  display_name: "Guardrails Help"
+  short_description: "Why the guardrails hook blocked a call, and what to do"
+  icon_small: "./assets/guardrails-help-small.svg"
+  icon_large: "./assets/guardrails-help.png"
+  brand_color: "#B45309"
+  default_prompt: "Use $guardrails-help to explain the last guardrails block and the safe way forward."
