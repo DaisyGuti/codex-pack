@@ -210,7 +210,7 @@ def _parse_flow_value(text: str, lineno: int) -> Any:
         for item in _split_top_level(text[1:-1], lineno):
             match = _KEY_RE.match(item)
             if not match:
-                raise YamlSubsetError(lineno, f"cannot read flow map entry {item!r}")
+                raise YamlSubsetError(lineno, "cannot read a flow map entry")
             key = match.group("key")
             if key[0] in "\"'":
                 key = _unquote(key, lineno)
@@ -296,7 +296,7 @@ class _Reader:
                 return result
             match = _KEY_RE.match(content)
             if not match:
-                raise YamlSubsetError(lineno, f"expected 'key: value', found {content[:40]!r}")
+                raise YamlSubsetError(lineno, "expected 'key: value'")
             key = match.group("key")
             if key[0] in "\"'":
                 key = _unquote(key, lineno)
@@ -773,6 +773,29 @@ def analyze_workflow(rel_path: str, text: str) -> dict[str, Any]:
 # ------------------------------------------------------------------ other repository files
 
 
+def _inside(root: Path, path: Path, skipped: list[str] | None) -> bool:
+    """True when path is no symlink and resolves under root; otherwise record it as skipped.
+
+    A checkout can hold a link to a file or directory outside it (a workflow that points at the
+    reader's own files). Nothing reads through one.
+    """
+    if not path.is_symlink():
+        try:
+            path.resolve().relative_to(root.resolve())
+            return True
+        except ValueError:
+            pass
+    if skipped is not None:
+        rel = path.relative_to(root).as_posix()
+        if rel not in skipped:
+            skipped.append(rel)
+    return False
+
+
+def _is_file(root: Path, path: Path, skipped: list[str] | None) -> bool:
+    return (path.exists() or path.is_symlink()) and _inside(root, path, skipped) and path.is_file()
+
+
 def _read_text(path: Path) -> str | None:
     try:
         return path.read_text(encoding="utf-8", errors="replace")
@@ -784,10 +807,10 @@ def _strip_credentials(url: str) -> str:
     return re.sub(r"(://)[^/@\s]+@", r"\1", url)
 
 
-def read_origin(root: Path) -> dict[str, Any]:
+def read_origin(root: Path, skipped: list[str] | None = None) -> dict[str, Any]:
     """Read the origin URL from .git/config by text search. Credentials are removed."""
     config = root / ".git" / "config"
-    text = _read_text(config) if config.is_file() else None
+    text = _read_text(config) if _is_file(root, config, skipped) else None
     if not text:
         return {"url": None, "owner_repo": None}
     match = re.search(r'\[remote "origin"\][^\[]*?url\s*=\s*(\S+)', text)
@@ -798,10 +821,10 @@ def read_origin(root: Path) -> dict[str, Any]:
     return {"url": url, "owner_repo": f"{repo.group(1)}/{repo.group(2)}" if repo else None}
 
 
-def analyze_dependabot(root: Path) -> dict[str, Any] | None:
+def analyze_dependabot(root: Path, skipped: list[str] | None = None) -> dict[str, Any] | None:
     for name in ("dependabot.yml", "dependabot.yaml"):
         path = root / ".github" / name
-        if not path.is_file():
+        if not _is_file(root, path, skipped):
             continue
         rel = f".github/{name}"
         text = _read_text(path) or ""
@@ -845,10 +868,10 @@ def analyze_dependabot(root: Path) -> dict[str, Any] | None:
     return None
 
 
-def analyze_codeowners(root: Path) -> dict[str, Any]:
+def analyze_codeowners(root: Path, skipped: list[str] | None = None) -> dict[str, Any]:
     found: list[str] = []
     for rel in (".github/CODEOWNERS", "CODEOWNERS", "docs/CODEOWNERS", ".gitlab/CODEOWNERS"):
-        if (root / rel).is_file():
+        if _is_file(root, root / rel, skipped):
             found.append(rel)
     record: dict[str, Any] = {
         "found": found,
@@ -935,19 +958,21 @@ _EXTRAS: list[tuple[str, str, str]] = [
 ]
 
 
-def collect_extras(root: Path) -> list[dict[str, str]]:
+def collect_extras(root: Path, skipped: list[str] | None = None) -> list[dict[str, str]]:
     out = []
     for rel, kind, target in _EXTRAS:
         path = root / rel
+        if not (path.exists() or path.is_symlink()) or not _inside(root, path, skipped):
+            continue
         present = path.is_dir() if kind == "dir" else path.is_file()
         if present:
             out.append({"path": rel, "gitlab_destination": target})
     return out
 
 
-def analyze_submodules(root: Path) -> list[dict[str, Any]]:
+def analyze_submodules(root: Path, skipped: list[str] | None = None) -> list[dict[str, Any]]:
     path = root / ".gitmodules"
-    text = _read_text(path) if path.is_file() else None
+    text = _read_text(path) if _is_file(root, path, skipped) else None
     if not text:
         return []
     modules: list[dict[str, Any]] = []
@@ -972,22 +997,23 @@ def analyze_submodules(root: Path) -> list[dict[str, Any]]:
     return modules
 
 
-def analyze_lfs(root: Path) -> dict[str, Any]:
+def analyze_lfs(root: Path, skipped: list[str] | None = None) -> dict[str, Any]:
     patterns: list[str] = []
     attributes = root / ".gitattributes"
-    text = _read_text(attributes) if attributes.is_file() else None
+    text = _read_text(attributes) if _is_file(root, attributes, skipped) else None
     for line in (text or "").splitlines():
         if "filter=lfs" in line:
             patterns.append(line.split()[0])
     lfsconfig = root / ".lfsconfig"
     url = None
-    if lfsconfig.is_file():
+    lfsconfig_present = _is_file(root, lfsconfig, skipped)
+    if lfsconfig_present:
         match = re.search(r"url\s*=\s*(\S+)", _read_text(lfsconfig) or "")
         url = _strip_credentials(match.group(1)) if match else None
     return {
         "used": bool(patterns),
         "patterns": patterns,
-        "lfsconfig_present": lfsconfig.is_file(),
+        "lfsconfig_present": lfsconfig_present,
         "lfsconfig_url": url,
     }
 
@@ -1037,26 +1063,28 @@ def _category(rel: str) -> str:
     return "other"
 
 
-def _iter_text_files(root: Path) -> list[Path]:
+def _iter_text_files(root: Path, skipped: list[str] | None = None) -> list[Path]:
     """List regular files under root in a stable order, pruning SKIP_DIRS without descending."""
     files: list[Path] = []
     for current, dirs, names in os.walk(root, followlinks=False):
         dirs[:] = sorted(d for d in dirs if d not in SKIP_DIRS)
         for name in sorted(names):
             path = Path(current) / name
-            if not path.is_symlink() and path.is_file():
+            if _is_file(root, path, skipped):
                 files.append(path)
     return files
 
 
-def scan_references(root: Path, own_repo: str | None) -> dict[str, Any]:
+def scan_references(
+    root: Path, own_repo: str | None, skipped: list[str] | None = None
+) -> dict[str, Any]:
     counts: dict[str, int] = {}
     items: list[dict[str, Any]] = []
     other_links = 0
     omitted = 0
     go_module: str | None = None
     skipped_large = 0
-    for path in _iter_text_files(root):
+    for path in _iter_text_files(root, skipped):
         rel = path.relative_to(root).as_posix()
         try:
             if path.stat().st_size > MAX_SCAN_BYTES:
@@ -1118,12 +1146,13 @@ def scan_references(root: Path, own_repo: str | None) -> dict[str, Any]:
 
 
 def build_inventory(root: Path) -> dict[str, Any]:
-    origin = read_origin(root)
+    skipped: list[str] = []
+    origin = read_origin(root, skipped)
     workflows: list[dict[str, Any]] = []
     wf_dir = root / ".github" / "workflows"
-    if wf_dir.is_dir():
+    if _inside(root, wf_dir, skipped) and wf_dir.is_dir():
         for path in sorted(wf_dir.iterdir()):
-            if path.is_file() and path.suffix in WORKFLOW_SUFFIXES:
+            if path.suffix in WORKFLOW_SUFFIXES and _is_file(root, path, skipped):
                 text = _read_text(path)
                 rel = path.relative_to(root).as_posix()
                 if text is None:
@@ -1143,12 +1172,12 @@ def build_inventory(root: Path) -> dict[str, Any]:
                     continue
                 workflows.append(analyze_workflow(rel, text))
 
-    dependabot = analyze_dependabot(root)
-    codeowners = analyze_codeowners(root)
-    extras = collect_extras(root)
-    submodules = analyze_submodules(root)
-    lfs = analyze_lfs(root)
-    references = scan_references(root, origin["owner_repo"])
+    dependabot = analyze_dependabot(root, skipped)
+    codeowners = analyze_codeowners(root, skipped)
+    extras = collect_extras(root, skipped)
+    submodules = analyze_submodules(root, skipped)
+    lfs = analyze_lfs(root, skipped)
+    references = scan_references(root, origin["owner_repo"], skipped)
 
     secret_names = sorted({s for w in workflows for s in w.get("secrets", [])})
     var_names = sorted({v for w in workflows for v in w.get("vars", [])})
@@ -1257,6 +1286,7 @@ def build_inventory(root: Path) -> dict[str, Any]:
         "submodules": submodules,
         "lfs": lfs,
         "references": references,
+        "skipped_links": sorted(skipped),
         "flags": flags,
         "has_github_dir": (root / ".github").is_dir(),
     }
@@ -1427,6 +1457,11 @@ def render_markdown(inv: dict[str, Any]) -> str:
             f"- {refs['files_skipped_for_size']} file(s) over the size limit were not scanned."
         )
     out.append(f"- Directories skipped: {', '.join(refs['skipped_dirs'])}")
+    if inv["skipped_links"]:
+        out.append(
+            "- Symlinks, or paths resolving outside the checkout, were not read: "
+            + ", ".join(f"`{p}`" for p in inv["skipped_links"])
+        )
     out.append("")
     return "\n".join(out)
 

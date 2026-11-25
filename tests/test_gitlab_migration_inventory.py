@@ -560,3 +560,52 @@ def test_origin_on_another_host_has_no_owner_repo(tmp_path: Path) -> None:
     origin = inv.build_inventory(root)["origin"]
     assert origin["url"] == "https://git.example.org/a/b.git"
     assert origin["owner_repo"] is None
+
+
+# ------------------------------------------------ readers stay inside the repository
+
+
+def test_readers_skip_symlinks_that_leave_the_repository_and_report_them(tmp_path: Path) -> None:
+    root = tmp_path / "r"
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "ci.yml").write_text("on: push\njobs: {}\n# ${{ secrets.LEAKED }}\n")
+    (outside / "CODEOWNERS").write_text("* @leaked-owner\n")
+    (outside / "dependabot.yml").write_text("version: 2\nupdates: []\n")
+    (outside / "modules").write_text(
+        '[submodule "x"]\n\tpath = x\n\turl = https://github.com/o/p\n'
+    )
+    (root / ".github" / "workflows").mkdir(parents=True)
+    (root / ".github" / "workflows" / "ci.yml").symlink_to(outside / "ci.yml")
+    (root / ".github" / "CODEOWNERS").symlink_to(outside / "CODEOWNERS")
+    (root / ".github" / "dependabot.yml").symlink_to(outside / "dependabot.yml")
+    (root / ".gitmodules").symlink_to(outside / "modules")
+    result = inv.build_inventory(root)
+    assert result["workflows"] == []
+    assert result["codeowners"]["owners"] == [] and result["dependabot"] is None
+    assert result["submodules"] == []
+    assert set(result["skipped_links"]) == {
+        ".github/workflows/ci.yml",
+        ".github/CODEOWNERS",
+        ".github/dependabot.yml",
+        ".gitmodules",
+    }
+    assert "ci.yml" in inv.render_markdown(result)
+
+
+def test_a_symlinked_workflows_directory_is_not_listed(tmp_path: Path) -> None:
+    root = tmp_path / "r"
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "ci.yml").write_text("on: push\njobs: {}\n")
+    (root / ".github").mkdir(parents=True)
+    (root / ".github" / "workflows").symlink_to(outside)
+    result = inv.build_inventory(root)
+    assert result["workflows"] == [] and ".github/workflows" in result["skipped_links"]
+
+
+def test_a_yaml_error_names_the_line_and_never_the_line_content() -> None:
+    for text in ("just a secret-value-123 line\nmore\n", "a: {secret-value-123}\n"):
+        with pytest.raises(inv.YamlSubsetError) as err:
+            inv.parse_yaml_subset(text)
+        assert "secret-value-123" not in str(err.value) and str(err.value).startswith("line ")

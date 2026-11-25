@@ -1110,3 +1110,43 @@ def test_checkov_is_skipped_and_reported_when_the_repository_has_its_config(
     (checkov,) = [t for t in data["tools"] if t["name"] == "checkov"]
     assert checkov["status"] == "skipped" and f"infra/{name}" in checkov["detail"]
     assert "| checkov | IaC | skipped |" in (out / "SECURITY-SCAN.md").read_text()
+
+
+# --- review findings: case-insensitive names, osv-scanner offline, no stdout in failures ----
+
+
+def test_a_differently_cased_checkov_config_still_skips_checkov(tmp_path: Path) -> None:
+    (tmp_path / ".Checkov.YAML").write_text("external-checks-dir: [evil]\n")
+    assert ".Checkov.YAML" in ss.blocked_by_repo_config("checkov", tmp_path)
+    assert ".Checkov.YAML" in ss.find_suppression_files(tmp_path)
+    (tmp_path / ".GitLeaks.TOML").write_text("")
+    assert ".GitLeaks.TOML" in ss.find_suppression_files(tmp_path)
+
+
+def test_osv_scanner_resolves_nothing_over_the_network_unless_remote_resolution_is_allowed(
+    tmp_path: Path,
+) -> None:
+    ((_, argv, _),) = ss.TOOLS["osv-scanner"].commands(tmp_path, tmp_path / "raw", "")
+    assert "--no-resolve" in argv and "--offline-vulnerabilities" in argv
+    ((_, remote, _),) = ss.TOOLS["osv-scanner"].commands(
+        tmp_path, tmp_path / "raw", "", allow_remote=True
+    )
+    assert "--no-resolve" not in remote and "--offline-vulnerabilities" not in remote
+
+
+def test_an_unexpected_exit_reports_stderr_and_the_code_never_stdout(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    _stub(
+        bin_dir,
+        "grype",
+        '[ "$1" = "version" ] && { echo stub; exit 0; }\necho SECRET-IN-STDOUT\nexit 3\n',
+    )
+    monkeypatch.setenv("PATH", str(bin_dir))
+    raw = tmp_path / "raw"
+    raw.mkdir()
+    status = ss.run_tool(ss.TOOLS["grype"], tmp_path, raw, "", 30)
+    assert status.status == "failed"
+    assert "exit code 3" in status.detail and "SECRET-IN-STDOUT" not in status.detail

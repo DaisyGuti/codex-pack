@@ -528,7 +528,7 @@ def find_suppression_files(repo: Path) -> list[str]:
     for folder, dirs, names in os.walk(repo):
         dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
         for name in names:
-            if name in SUPPRESSION_FILES:
+            if name.lower() in SUPPRESSION_FILES:  # a case-insensitive filesystem reads either case
                 found.append((Path(folder) / name).relative_to(repo).as_posix())
     return sorted(found)
 
@@ -812,6 +812,34 @@ def _checkov_commands(
     return [("checkov.json", argv, True)]
 
 
+def _osv_commands(
+    repo: Path, raw: Path, _c: str, *, allow_remote: bool = False, **_options: Any
+) -> list[tuple[str, list[str], bool]]:
+    # osv-scanner v2 resolves transitive dependencies over the network from what the repository
+    # declares. Default: `--no-resolve` ("Disables transitive dependency resolution") and
+    # `--offline-vulnerabilities` (vulnerability lookups use a local database; osv-scanner docs,
+    # usage/offline-mode). `--download-offline-databases` only works with that flag and fetches
+    # the fixed OSV database, nothing the repository names. Remote resolution is opt-in.
+    offline = (
+        []
+        if allow_remote
+        else ["--no-resolve", "--offline-vulnerabilities", "--download-offline-databases"]
+    )
+    argv = [
+        "osv-scanner",
+        "scan",
+        "source",
+        "-r",
+        *offline,
+        "--format",
+        "json",
+        "--output-file",
+        str(raw / "osv-scanner.json"),
+        str(repo),
+    ]
+    return [("osv-scanner.json", argv, False)]
+
+
 def _gitleaks_commands(
     repo: Path, raw: Path, _cfg: str, *, mirror: Mirror | None = None, **_options: Any
 ) -> list[tuple[str, list[str], bool]]:
@@ -859,23 +887,7 @@ TOOLS: dict[str, Tool] = {
         binary="osv-scanner",
         version_args=["--version"],
         install="brew install osv-scanner   (v2 or later; https://google.github.io/osv-scanner/installation/)",
-        commands=lambda repo, raw, _c, **_o: [
-            (
-                "osv-scanner.json",
-                [
-                    "osv-scanner",
-                    "scan",
-                    "source",
-                    "-r",
-                    "--format",
-                    "json",
-                    "--output-file",
-                    str(raw / "osv-scanner.json"),
-                    str(repo),
-                ],
-                False,
-            )
-        ],
+        commands=_osv_commands,
         ok_codes=(0, 1),
         no_input_codes=(128,),
         parser=parse_osv,
@@ -988,7 +1000,7 @@ REPO_CONFIG_BLOCKS = {"checkov": {".checkov.yaml", ".checkov.yml"}}
 def blocked_by_repo_config(name: str, repo: Path) -> str:
     """Why `name` must not run on this repository, or an empty string."""
     names = REPO_CONFIG_BLOCKS.get(name, set())
-    found = [f for f in find_suppression_files(repo) if Path(f).name in names]
+    found = [f for f in find_suppression_files(repo) if Path(f).name.lower() in names]
     if not found:
         return ""
     return (
@@ -1046,8 +1058,9 @@ def run_tool(
                     return status
                 continue
             if proc.returncode not in tool.ok_codes:
-                tail = (proc.stderr or proc.stdout).strip()[-STDERR_TAIL:]
-                problem = f"exit code {proc.returncode}: {tail}"
+                # stderr only: a tool's stdout can carry repository content, secrets included.
+                tail = proc.stderr.strip()[-STDERR_TAIL:]
+                problem = f"exit code {proc.returncode}" + (f": {tail}" if tail else "")
             elif to_stdout:
                 (raw / raw_name).write_text(proc.stdout)
         if problem:
@@ -1405,8 +1418,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_run.add_argument(
         "--allow-remote-resolution",
         action="store_true",
-        help="let trivy run its IaC scan, which downloads remote Terraform modules, and drop "
-        "its --offline-scan; off by default",
+        help="let trivy run its IaC scan, which downloads remote Terraform modules, and let "
+        "osv-scanner resolve transitive dependencies over the network; off by default",
     )
     p_run.set_defaults(func=cmd_run)
 
