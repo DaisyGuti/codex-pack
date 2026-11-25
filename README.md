@@ -21,6 +21,10 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/ticket-worker/`](skills/ticket-worker/SKILL.md) | `$ticket-worker`: works one issue from plan to an open pull or merge request; merging closes the issue |
 | [`skills/ux-review/`](skills/ux-review/SKILL.md) | `$ux-review`: reviews a screen, flow, mockup or screenshot for usability, accessibility and visual craft |
 | [`skills/web-design-guidelines/`](skills/web-design-guidelines/SKILL.md) | `$web-design-guidelines`: audits UI code against Vercel's Web Interface Guidelines, fetched fresh each run |
+| [`skills/composition-patterns/`](skills/composition-patterns/SKILL.md) | `$composition-patterns`: Vercel's React composition rules (compound components, state in providers, explicit variants) for component APIs |
+| [`skills/react-best-practices/`](skills/react-best-practices/SKILL.md) | `$react-best-practices`: Vercel's React and Next.js performance rules, ranked by impact |
+| [`skills/react-native-skills/`](skills/react-native-skills/SKILL.md) | `$react-native-skills`: Vercel's React Native and Expo rules: lists, animation, navigation, UI, state, monorepos |
+| [`skills/uswds/`](skills/uswds/SKILL.md) | `$uswds`: builds or reviews a UI with the U.S. Web Design System, fetching the current version, components and federal website standards, and checking templates for class names the stylesheet does not define |
 | [`skills/accessibility-scan/`](skills/accessibility-scan/SKILL.md) | `$accessibility-scan`: automated WCAG scan of one live page |
 | [`skills/accessibility-inspect/`](skills/accessibility-inspect/SKILL.md) | `$accessibility-inspect`: hands-on keyboard and screen-reader pass of one live page in Chrome |
 | [`skills/accessibility-audit/`](skills/accessibility-audit/SKILL.md) | `$accessibility-audit`: whole-site WCAG audit following the W3C's evaluation method |
@@ -28,7 +32,7 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/accessibility-diff/`](skills/accessibility-diff/SKILL.md) | `$accessibility-diff`: which accessibility problems a change added or fixed |
 | [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` |
 | [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run |
-| [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, and the read-only `reviewer` and `forward_tester` |
+| [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, `ui_ux` (renders a page in Chrome, reviews the screenshots and fixes what is wrong), and the read-only `reviewer` and `forward_tester` |
 | [`references/model-selection.md`](references/model-selection.md) | Which model tier and effort for which kind of work |
 | [`references/ticket-labels.md`](references/ticket-labels.md) | When each ticket label goes on, and how held work is marked |
 | [`references/testing-without-api-spend.md`](references/testing-without-api-spend.md) | When to test with `codex exec` or the Codex SDK on the ChatGPT sign-in, and when an API key is really needed |
@@ -155,6 +159,7 @@ $work-tickets --dry-run
 $work-tickets --priority P1
 $ticket-worker work issue 42 in my-repo
 $ux-review this checkout screenshot
+$uswds review these templates against the design system
 $accessibility-scan http://localhost:3000
 $codex-project-setup
 $codex-usage
@@ -165,7 +170,7 @@ Skills list (`skills/<name>/agents/openai.yaml`).
 
 ## Browser tools for the accessibility skills
 
-The accessibility skills drive a real page. `$accessibility-scan` and
+The accessibility skills and the `ui_ux` agent drive a real page. `$accessibility-scan` and
 `$accessibility-diff` need Node and Chrome installed (they run AccessLint's CLI
 through `npx`, which starts Chrome itself).
 `$accessibility-inspect` needs Chrome DevTools connected to Codex, and

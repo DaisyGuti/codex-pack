@@ -22,7 +22,8 @@ for the P variants; `/write-ticket` is `$write-ticket`, `/plan-next` is
   start, unless another pack skill already governs the task (`$ticket-worker`,
   `$work-tickets`, `$accessibility-fix`, `$prompt-optimizer`,
   `$codex-project-setup`). A question about how a screen looks or reads is
-  `$ux-review`'s.
+  `$ux-review`'s; a running page to look at and fix goes to the `ui_ux` agent. A UI
+  built on the U.S. Web Design System also loads `$uswds`.
 - Every code change lands by pull request (merge request on GitLab) into the default
   branch: commit on a branch, push the branch, open the review. Never commit or push
   to the default branch yourself. This outranks a project file or `CLAUDE.md` that

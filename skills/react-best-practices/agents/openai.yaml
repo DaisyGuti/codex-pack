@@ -1,0 +1,7 @@
+interface:
+  display_name: "React Best Practices"
+  short_description: "Speed rules for React and Next.js code"
+  icon_small: "./assets/react-best-practices-small.svg"
+  icon_large: "./assets/react-best-practices.png"
+  brand_color: "#2563EB"
+  default_prompt: "Use $react-best-practices to review this code for performance problems."

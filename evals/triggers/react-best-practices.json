@@ -1,0 +1,82 @@
+[
+  {
+    "query": "This Next.js page feels slow: it awaits three fetches one after another in a server component. How do I fix the waterfall?",
+    "should_trigger": true
+  },
+  {
+    "query": "Our Button component has too many boolean props. Redesign its API.",
+    "should_trigger": false
+  },
+  {
+    "query": "Our bundle is 2 MB. We import from lucide-react and lodash barrel files everywhere. What should change?",
+    "should_trigger": true
+  },
+  {
+    "query": "Review this landing page screenshot for usability and visual craft.",
+    "should_trigger": false
+  },
+  {
+    "query": "Why does this React component re-render on every keystroke in a sibling input? Here is the component.",
+    "should_trigger": true
+  },
+  {
+    "query": "My React Native FlatList stutters on Android.",
+    "should_trigger": false
+  },
+  {
+    "query": "Review app/dashboard/page.tsx for performance: data fetching, suspense boundaries, and server component usage.",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a Python script that parses CSV files quickly.",
+    "should_trigger": false
+  },
+  {
+    "query": "I get a hydration flicker when reading theme from localStorage on load. What's the right fix?",
+    "should_trigger": true
+  },
+  {
+    "query": "Fix the TypeScript error in utils/format.ts.",
+    "should_trigger": false
+  },
+  {
+    "query": "Should I wrap this in useMemo? The value is a cheap boolean expression derived from props.",
+    "should_trigger": true
+  },
+  {
+    "query": "Check src/components/Form.tsx against the Web Interface Guidelines.",
+    "should_trigger": false
+  },
+  {
+    "query": "How do I stop passing huge props from a server component to a client component and bloating the RSC payload?",
+    "should_trigger": true
+  },
+  {
+    "query": "Which database index speeds up this slow SQL query?",
+    "should_trigger": false
+  },
+  {
+    "query": "Refactor these useEffect hooks that derive state from props; they cause extra renders.",
+    "should_trigger": true
+  },
+  {
+    "query": "Set up ESLint and Prettier for a new Vite React project.",
+    "should_trigger": false
+  },
+  {
+    "query": "Our list of 5,000 rows is slow to render in the browser. Which React rules apply?",
+    "should_trigger": true
+  },
+  {
+    "query": "Explain the difference between props and state to a new hire.",
+    "should_trigger": false
+  },
+  {
+    "query": "Defer a third-party analytics script so it doesn't block first paint in our Next.js app.",
+    "should_trigger": true
+  },
+  {
+    "query": "Add Playwright tests for the signup flow.",
+    "should_trigger": false
+  }
+]

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Composition Patterns"
+  short_description: "Fix boolean-prop sprawl and component APIs"
+  icon_small: "./assets/composition-patterns-small.svg"
+  icon_large: "./assets/composition-patterns.png"
+  brand_color: "#0E7490"
+  default_prompt: "Use $composition-patterns to review this component's API and suggest composition fixes."
