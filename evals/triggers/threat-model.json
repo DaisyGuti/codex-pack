@@ -1,0 +1,82 @@
+[
+  {
+    "query": "threat model the new file upload feature before we build it",
+    "should_trigger": true
+  },
+  {
+    "query": "scan the repo for secrets and CVEs",
+    "should_trigger": false
+  },
+  {
+    "query": "do a security design review of our webhook ingestion service. I want a data flow diagram and the trust boundaries",
+    "should_trigger": true
+  },
+  {
+    "query": "map our repo evidence to the FedRAMP moderate baseline",
+    "should_trigger": false
+  },
+  {
+    "query": "what are the attack paths into this system? write it up as a STRIDE document the team can review",
+    "should_trigger": true
+  },
+  {
+    "query": "review this diff for bugs before I merge",
+    "should_trigger": false
+  },
+  {
+    "query": "we're adding an LLM agent that can call internal tools. map the trust boundaries and abuse cases",
+    "should_trigger": true
+  },
+  {
+    "query": "harden the Dockerfile and compose file",
+    "should_trigger": false
+  },
+  {
+    "query": "write abuse cases and a ranked threat register for the SSO integration, mapped to 800-53 controls",
+    "should_trigger": true
+  },
+  {
+    "query": "fix the 500 on login when the email has a plus sign",
+    "should_trigger": false
+  },
+  {
+    "query": "before we start on the export API, assess its security at the design stage and list mitigations to build",
+    "should_trigger": true
+  },
+  {
+    "query": "design the database schema for the new billing feature",
+    "should_trigger": false
+  },
+  {
+    "query": "draw the data flow diagram for this repo with trust boundaries and walk each flow with STRIDE",
+    "should_trigger": true
+  },
+  {
+    "query": "explain what STRIDE stands for",
+    "should_trigger": false
+  },
+  {
+    "query": "prepare design-stage security evidence for the new tenant isolation design in docs/design/tenancy.md",
+    "should_trigger": true
+  },
+  {
+    "query": "is this checkout screen usable? screenshot attached",
+    "should_trigger": false
+  },
+  {
+    "query": "here is a description of our architecture in chat: browser, API gateway, two services, a Postgres. threat model it",
+    "should_trigger": true
+  },
+  {
+    "query": "audit our GCP project for public buckets and broad IAM",
+    "should_trigger": false
+  },
+  {
+    "query": "what could an attacker do with the new admin impersonation feature? give me ranked threats and fixes",
+    "should_trigger": true
+  },
+  {
+    "query": "write the ADR for choosing Postgres over DynamoDB",
+    "should_trigger": false
+  }
+]

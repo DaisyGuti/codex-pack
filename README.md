@@ -26,9 +26,12 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/accessibility-audit/`](skills/accessibility-audit/SKILL.md) | `$accessibility-audit`: whole-site WCAG audit following the W3C's evaluation method |
 | [`skills/accessibility-fix/`](skills/accessibility-fix/SKILL.md) | `$accessibility-fix`: fixes the violations a scan finds and re-scans to confirm |
 | [`skills/accessibility-diff/`](skills/accessibility-diff/SKILL.md) | `$accessibility-diff`: which accessibility problems a change added or fixed |
+| [`skills/security-scan/`](skills/security-scan/SKILL.md) | `$security-scan`: runs the free scanners installed here (gitleaks, osv-scanner, grype, semgrep, trivy, checkov) and merges them into one de-duplicated findings report, saying which scanners did not run |
+| [`skills/threat-model/`](skills/threat-model/SKILL.md) | `$threat-model`: a STRIDE threat model of a design, feature or repo, with a Mermaid data flow diagram, trust boundaries, a ranked threat register and mitigations mapped to NIST 800-53 |
+| [`skills/compliance-map/`](skills/compliance-map/SKILL.md) | `$compliance-map`: maps a repo's evidence to FedRAMP, NIST 800-53 and 800-171, CMMC, SSDF, DoD SRG and FIPS 140-3; lists evidence and gaps and never says a system is compliant |
 | [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` |
 | [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run |
-| [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, and the read-only `reviewer` and `forward_tester` |
+| [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, and the read-only `reviewer`, `forward_tester` and `security_auditor` |
 | [`references/model-selection.md`](references/model-selection.md) | Which model tier and effort for which kind of work |
 | [`references/ticket-labels.md`](references/ticket-labels.md) | When each ticket label goes on, and how held work is marked |
 | [`references/testing-without-api-spend.md`](references/testing-without-api-spend.md) | When to test with `codex exec` or the Codex SDK on the ChatGPT sign-in, and when an API key is really needed |
@@ -156,6 +159,9 @@ $work-tickets --priority P1
 $ticket-worker work issue 42 in my-repo
 $ux-review this checkout screenshot
 $accessibility-scan http://localhost:3000
+$security-scan --changed-since origin/main
+$threat-model the new file upload feature
+$compliance-map FedRAMP Moderate
 $codex-project-setup
 $codex-usage
 ```
@@ -178,6 +184,14 @@ codex mcp add accesslint -- npx -y @accesslint/mcp@latest
 ```
 
 Restart Codex after adding them.
+
+## Tools for the security skills
+
+`$security-scan` runs whichever of gitleaks, osv-scanner, grype, semgrep, trivy and checkov are
+installed, lists the rest with an install command, and never installs anything itself.
+`$threat-model` and `$compliance-map` download the NIST SP 800-53 catalog and the other
+sources they cite when they run, to a cache under `${XDG_CACHE_HOME:-~/.cache}/codex-pack/`,
+so they need network access. All scripts use only the Python standard library.
 
 ## Models
 

@@ -1,0 +1,82 @@
+[
+  {
+    "query": "run the security tools on this repo and give me one findings list",
+    "should_trigger": true
+  },
+  {
+    "query": "read the auth code in services/api line by line and hunt for new vulnerabilities, no scanners",
+    "should_trigger": false
+  },
+  {
+    "query": "scan the repo for secrets and vulnerable dependencies before we cut the release",
+    "should_trigger": true
+  },
+  {
+    "query": "write a STRIDE threat model for the payments service",
+    "should_trigger": false
+  },
+  {
+    "query": "can you check this merge request for SAST problems? only show what the branch changed",
+    "should_trigger": true
+  },
+  {
+    "query": "generate an SBOM for the container image and sign it",
+    "should_trigger": false
+  },
+  {
+    "query": "run gitleaks, osv-scanner and semgrep and merge the output, I don't care which tool says what",
+    "should_trigger": true
+  },
+  {
+    "query": "review my Dockerfile for hardening problems",
+    "should_trigger": false
+  },
+  {
+    "query": "do we have any committed credentials or outdated packages with known CVEs? check the whole repo",
+    "should_trigger": true
+  },
+  {
+    "query": "the build is failing on the lint step, fix it",
+    "should_trigger": false
+  },
+  {
+    "query": "scan our terraform for misconfigurations with whatever scanners are installed",
+    "should_trigger": true
+  },
+  {
+    "query": "which NIST controls does our logging satisfy? give me an evidence map",
+    "should_trigger": false
+  },
+  {
+    "query": "I want a security pass before merge: dependencies, secrets, static analysis, one report with file and line and a fix",
+    "should_trigger": true
+  },
+  {
+    "query": "explain the difference between SAST and DAST",
+    "should_trigger": false
+  },
+  {
+    "query": "which of the free scanners are installed here, and run the ones that are against services/api",
+    "should_trigger": true
+  },
+  {
+    "query": "review our GitHub Actions workflow for script injection and unpinned actions",
+    "should_trigger": false
+  },
+  {
+    "query": "give me a CI gate: scan the repo and exit non-zero on high severity findings",
+    "should_trigger": true
+  },
+  {
+    "query": "is this IAM policy on our GCP project too broad? audit the project",
+    "should_trigger": false
+  },
+  {
+    "query": "check this pull request for vulnerable dependencies and tell me which scanners could not run",
+    "should_trigger": true
+  },
+  {
+    "query": "add rate limiting to the signup endpoint",
+    "should_trigger": false
+  }
+]

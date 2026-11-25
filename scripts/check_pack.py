@@ -10,7 +10,7 @@ Checks, each printed as `FAIL RULE where: detail`:
                 and developer_instructions, and sets neither `model` nor
                 `model_reasoning_effort` (a value there overrides what a spawn asks for;
                 measured 2026-10-07, see references/model-selection.md)
-  read-only     agents/reviewer.toml and agents/forward_tester.toml set
+  read-only     agents/reviewer.toml, forward_tester.toml and security_auditor.toml set
                 sandbox_mode = "read-only"
   path          every ${CODEX_HOME:-~/.codex}/skills/... path named in AGENTS.md, an agent
                 file, a SKILL.md or a reference resolves to a file inside the pack
@@ -41,7 +41,7 @@ from pathlib import Path
 
 REQUIRED_AGENT_KEYS = ("name", "description", "developer_instructions")
 FORBIDDEN_AGENT_KEYS = ("model", "model_reasoning_effort")
-READ_ONLY_AGENTS = ("reviewer", "forward_tester")
+READ_ONLY_AGENTS = ("reviewer", "forward_tester", "security_auditor")
 
 # The instruction files and references whose named paths must resolve. SKILL.md files are added
 # by pack_doc_files() because they live one directory down.

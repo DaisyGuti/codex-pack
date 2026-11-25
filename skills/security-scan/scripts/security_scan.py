@@ -1,0 +1,1 @@
+../../../scripts/security_scan.py

@@ -42,7 +42,7 @@ def agent_toml(
 
 
 def make_pack(root: Path) -> Path:
-    """A minimal pack that passes every check: five agents, one skill, one named path."""
+    """A minimal pack that passes every check: six agents, one skill, one named path."""
     subprocess.run(["git", "init", "-q"], cwd=root, check=True)
     (root / "agents").mkdir()
     for name in ("eng", "ticket_worker", "prompt_optimizer"):
@@ -70,7 +70,7 @@ def rules(findings: list[object]) -> list[str]:
 def test_a_well_formed_pack_has_no_findings(tmp_path: Path) -> None:
     findings, summary = cp.run(make_pack(tmp_path))
     assert findings == []
-    assert "5 agent file(s), 1 named path(s)" in summary[0]
+    assert "6 agent file(s), 1 named path(s)" in summary[0]
 
 
 def test_the_real_pack_passes() -> None:
@@ -122,7 +122,7 @@ def test_a_file_that_is_not_toml_fails_once(tmp_path: Path) -> None:
     (pack / "agents" / "eng.toml").write_text("name = \n", encoding="utf-8")
     findings, count = cp.check_agents(pack)
     assert rules(findings) == ["agent-shape agents/eng.toml"]
-    assert count == 5
+    assert count == 6
 
 
 @pytest.mark.parametrize("name", list(cp.READ_ONLY_AGENTS))

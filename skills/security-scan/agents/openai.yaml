@@ -1,0 +1,7 @@
+interface:
+  display_name: "Security Scan"
+  short_description: "Run the installed scanners and merge one findings report"
+  icon_small: "./assets/security-scan-small.svg"
+  icon_large: "./assets/security-scan.png"
+  brand_color: "#9F1239"
+  default_prompt: "Use $security-scan to scan this repo for secrets, vulnerable dependencies and code flaws."
