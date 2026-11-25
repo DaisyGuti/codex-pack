@@ -13,6 +13,7 @@ Every copied or adapted file was modified for Codex; each notice file says how.
 | [`accessibility-diff`](skills/accessibility-diff/SKILL.md) | [AccessLint/skills](https://github.com/AccessLint/skills) | MIT | [`skills/accessibility-diff/LICENSE.txt`](skills/accessibility-diff/LICENSE.txt) |
 | [`web-design-guidelines`](skills/web-design-guidelines/SKILL.md) | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | MIT | [`skills/web-design-guidelines/LICENSE.txt`](skills/web-design-guidelines/LICENSE.txt) |
 | [`ux-review`](skills/ux-review/SKILL.md) (partly) | [phazurlabs/sumi](https://github.com/phazurlabs/sumi) | Apache-2.0 | [`skills/ux-review/LICENSE-sumi.txt`](skills/ux-review/LICENSE-sumi.txt) |
+| [`clean-writing`](skills/clean-writing/SKILL.md) (the plain-English rules and word swaps) | [AminBlg/SimpleEnglish](https://github.com/AminBlg/SimpleEnglish) | MIT | [`skills/clean-writing/LICENSE.txt`](skills/clean-writing/LICENSE.txt) |
 | [`eng`](skills/eng/SKILL.md) (the ExecPlan reference and the `reviewer` agent) | [openai/openai-cookbook](https://github.com/openai/openai-cookbook) | MIT | [OpenAI Cookbook notice](#openai-cookbook-mit) below |
 | [`prompt-optimizer`](skills/prompt-optimizer/SKILL.md) (partly) | [openai/openai-cookbook](https://github.com/openai/openai-cookbook) | MIT | [OpenAI Cookbook notice](#openai-cookbook-mit) below |
 
@@ -35,6 +36,11 @@ Every copied or adapted file was modified for Codex; each notice file says how.
   accommodations, testing methodology) are adapted from sumi's `a11y` and `roast`
   commands and two of its skills. The files were modified. The rest of `ux-review`,
   including `references/craft.md`, was written for this pack.
+- **AminBlg/SimpleEnglish.** In `clean-writing`, the plain-English pass in `SKILL.md`,
+  `references/plain-english.md` and the word-swap table in `references/slop-patterns.md`
+  are adapted from the `simple-english` skill and its references, read at commit
+  `300432a`. The text was shortened and reworded. It holds no ASD-STE100 standard or
+  dictionary text.
 - **WCAG 2.2 and the W3C ARIA documents.** `ux-review/references/accessibility.md`
   cites success criteria and short rule statements from
   [WCAG 2.2](https://www.w3.org/TR/WCAG22/) and

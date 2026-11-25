@@ -19,6 +19,7 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/daily-grooming/`](skills/daily-grooming/SKILL.md) | `$daily-grooming`: tidies the whole board: settles closed items, syncs priorities, flags duplicates and gaps, promotes to Ready and plans what is unplanned |
 | [`skills/work-tickets/`](skills/work-tickets/SKILL.md) | `$work-tickets`: works your Ready tickets in parallel waves, each on the model its label names |
 | [`skills/ticket-worker/`](skills/ticket-worker/SKILL.md) | `$ticket-worker`: works one issue from plan to an open pull or merge request; merging closes the issue |
+| [`skills/clean-writing/`](skills/clean-writing/SKILL.md) | `$clean-writing`: edits a doc, README, ADR, PR or MR body, ticket, message or docs folder to be clear and concise, keeping every fact; proposes a numbered table of rewrites before it edits a file |
 | [`skills/ux-review/`](skills/ux-review/SKILL.md) | `$ux-review`: reviews a screen, flow, mockup or screenshot for usability, accessibility and visual craft |
 | [`skills/web-design-guidelines/`](skills/web-design-guidelines/SKILL.md) | `$web-design-guidelines`: audits UI code against Vercel's Web Interface Guidelines, fetched fresh each run |
 | [`skills/accessibility-scan/`](skills/accessibility-scan/SKILL.md) | `$accessibility-scan`: automated WCAG scan of one live page |
@@ -28,17 +29,18 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/accessibility-diff/`](skills/accessibility-diff/SKILL.md) | `$accessibility-diff`: which accessibility problems a change added or fixed |
 | [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` |
 | [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run |
-| [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, and the read-only `reviewer` and `forward_tester` |
+| [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, `writing_editor`, and the read-only `reviewer` and `forward_tester` |
 | [`references/model-selection.md`](references/model-selection.md) | Which model tier and effort for which kind of work |
 | [`references/ticket-labels.md`](references/ticket-labels.md) | When each ticket label goes on, and how held work is marked |
 | [`references/testing-without-api-spend.md`](references/testing-without-api-spend.md) | When to test with `codex exec` or the Codex SDK on the ChatGPT sign-in, and when an API key is really needed |
 | [`references/trackers/`](references/trackers/) | How each tracker operation is done on GitHub (`gh`) and on GitLab (`glab`) |
 | [`scripts/resolve_model.py`](scripts/resolve_model.py) | Turns a tier into a model your account has, with a supported effort |
+| [`scripts/check_facts.py`](scripts/check_facts.py) | Lists the numbers, links and code an edit dropped, for `$clean-writing` |
 | [`scripts/codex_usage.py`](scripts/codex_usage.py) | Per-run usage from Codex's own records |
 | [`registry.example.md`](registry.example.md) | Template for the tracker, board, lanes, labels and repo list the ticket skills read |
 | [`evals/triggers/`](evals/triggers/) | For each skill, about 20 requests that should and should not trigger it, for testing its description |
 | [`docs/sources.md`](docs/sources.md) | The documentation and measurements behind the design |
-| [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | Where the UX and accessibility skills come from, and their licenses |
+| [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | Where the UX, accessibility and writing skills come from, and their licenses |
 
 ## Install on a new machine
 
@@ -148,6 +150,7 @@ is a one-page picture of the flow below, from filing to merge.
 ```text
 $eng fix the failing date parser in src/dates.ts
 $prompt-optimizer --file path/to/prompt.md
+$clean-writing docs/runbook.md
 $write-ticket add rate limiting to the signup endpoint
 $plan-ticket
 $daily-grooming --dry-run
