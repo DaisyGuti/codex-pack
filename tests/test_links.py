@@ -132,6 +132,20 @@ def test_github_reads_each_page_of_a_paginated_answer() -> None:
     assert found[0].blockers == (("acme/app#3", "closed"),)
 
 
+def test_a_scope_links_only_the_tickets_in_its_milestone_with_its_labels(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    board = [
+        links.Issue(f"{REPO}#1", REPO, "T", "Depends on: #9", ("team:a",), (), "v0.3"),
+        links.Issue(f"{REPO}#2", REPO, "T", "Depends on: #9", ("team:b",), (), "v0.3"),
+        links.Issue(f"{REPO}#3", REPO, "T", "Depends on: #9", ("team:a",), (), "v0.4"),
+        links.Issue(f"{REPO}#9", REPO, "T", "", (), (), None),
+    ]
+    tracker = FakeTracker(board)
+    links.migrate(tracker, [REPO], "blocked", True, links.Scope("v0.3", ("team:a",)))
+    assert tracker.added == [("acme/app#1", "acme/app#9")]
+
+
 def test_grooming_reaches_the_script() -> None:
     link = PACK / "skills" / "daily-grooming" / "scripts" / "links.py"
     assert link.is_symlink() and link.resolve() == SCRIPTS / "links.py"
