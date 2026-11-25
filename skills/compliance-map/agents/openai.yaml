@@ -1,0 +1,7 @@
+interface:
+  display_name: "Compliance Map"
+  short_description: "Map repo evidence to FedRAMP, NIST and CMMC controls"
+  icon_small: "./assets/compliance-map-small.svg"
+  icon_large: "./assets/compliance-map.png"
+  brand_color: "#B91C1C"
+  default_prompt: "Use $compliance-map to map this repo's evidence to the NIST 800-53 Moderate baseline and list the gaps."

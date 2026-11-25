@@ -8,8 +8,12 @@
 # Each copy's first line is a marker naming its source, so the installer can tell its own
 # copy from someone's own agent.
 #
-#   ./install.sh                         link skills and AGENTS.md; copy agents; create
-#                                        registry.md from registry.example.md if it is missing
+# hooks.json (the guardrails PreToolUse hook) is linked like AGENTS.md: only when there is no
+# hooks.json yet. One of your own is left alone, and the entry to add by hand is printed. Codex
+# runs a new or changed hook only after you review and trust it once with /hooks.
+#
+#   ./install.sh                         link skills, AGENTS.md and hooks.json; copy agents;
+#                                        create registry.md from registry.example.md if missing
 #   ./install.sh --check                 change nothing; report agent drift, missing installs
 #                                        and link state; exit 1 if anything is missing or has
 #                                        drifted
@@ -239,6 +243,47 @@ install_agents_md() {
   fi
 }
 
+# The text every hooks.json that runs the guardrails hook contains.
+HOOK_MARK="skills/guardrails-help/scripts/guardrails.py"
+
+hooks_entry() { # hooks_entry SRC : the PreToolUse entry to merge into a hooks.json of your own
+  python3 -c 'import json, sys; print(json.dumps(json.load(open(sys.argv[1]))["hooks"]["PreToolUse"][0], indent=2))' "$1" 2>/dev/null || cat "$1"
+}
+
+# hooks_is_pack_slot DEST : hooks.json is missing, or a link this pack (or another pack
+# checkout) manages, so link() decides; anything else is your own and only read.
+hooks_is_pack_slot() {
+  [ ! -e "$1" ] && [ ! -L "$1" ] && return 0
+  [ -L "$1" ] || return 1
+  is_ours_or_dangling "$1" || other_pack_of "$1" >/dev/null
+}
+
+trust_note() {
+  echo "  -> review and trust the guardrails hook once: /hooks in Codex (Settings > Hooks in the app); until then it does not run"
+}
+
+install_hooks() {
+  local src="$PACK/hooks/hooks.json" dest="$CODEX_HOME/hooks.json"
+  if [ ! -f "$src" ]; then
+    echo "skipped: no $src yet"
+    return 0
+  fi
+  mkdir -p "$CODEX_HOME"
+  if [ -e "$dest" ] && [ ! -L "$dest" ] && [ ! -s "$dest" ]; then
+    rm "$dest" # an empty file holds nothing to lose
+    echo "replacing empty file: $dest"
+  fi
+  if hooks_is_pack_slot "$dest"; then
+    if link "$src" "$dest"; then trust_note; fi
+  elif grep -qF "$HOOK_MARK" "$dest"; then
+    echo "already present: $dest runs the guardrails hook"
+  else
+    echo "left alone: $dest has your own hooks. To add guardrails, put this entry in its PreToolUse list:"
+    hooks_entry "$src" | sed 's/^/    /'
+    trust_note
+  fi
+}
+
 # registry.md is per-machine config (the repos this person's tickets live in), so it is
 # gitignored and created from the shipped example the first time. An existing one is theirs.
 install_registry() {
@@ -256,7 +301,7 @@ install_registry() {
 
 uninstall() {
   local entry target removed=0
-  for entry in "$CODEX_HOME"/skills/* "$CODEX_HOME"/agents/* "$CODEX_HOME/AGENTS.md"; do
+  for entry in "$CODEX_HOME"/skills/* "$CODEX_HOME"/agents/* "$CODEX_HOME/AGENTS.md" "$CODEX_HOME/hooks.json"; do
     if [ -L "$entry" ]; then
       target="$(readlink "$entry")"
       case "$target" in
@@ -327,6 +372,19 @@ check_all() {
       check_link "$PACK/AGENTS.md" "$dest"
     fi
   fi
+  if [ -f "$PACK/hooks/hooks.json" ]; then
+    dest="$CODEX_HOME/hooks.json"
+    if ! hooks_is_pack_slot "$dest"; then
+      if grep -qF "$HOOK_MARK" "$dest" 2>/dev/null; then
+        echo "ok: $dest is your own and runs the guardrails hook"
+      else
+        problem "missing: $dest is your own and does not run the guardrails hook (install prints the entry to add)"
+      fi
+    else
+      check_link "$PACK/hooks/hooks.json" "$dest"
+    fi
+    echo "note: Codex runs the guardrails hook only once it is trusted; /hooks shows its state"
+  fi
   if [ -e "$PACK/registry.md" ]; then
     echo "ok: $PACK/registry.md exists"
   elif [ -f "$PACK/registry.example.md" ]; then
@@ -380,6 +438,7 @@ esac
 install_skills "$PACK"/skills/*/
 install_agents "$PACK"/agents/*.toml
 install_agents_md
+install_hooks
 install_registry
 run_model_check
 

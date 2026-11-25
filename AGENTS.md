@@ -21,8 +21,27 @@ for the P variants; `/write-ticket` is `$write-ticket`, `/plan-next` is
   request, read and follow `${CODEX_HOME:-~/.codex}/skills/eng/SKILL.md` before you
   start, unless another pack skill already governs the task (`$ticket-worker`,
   `$work-tickets`, `$accessibility-fix`, `$prompt-optimizer`,
-  `$codex-project-setup`). A question about how a screen looks or reads is
-  `$ux-review`'s.
+  `$model-recommender`, `$model-usage-audit`, `$codex-project-setup`). A question
+  about how a screen looks or reads is `$ux-review`'s; a running page to look at and
+  fix goes to the `ui_ux` agent. A UI built on the U.S. Web Design System also loads
+  `$uswds`. A request to scan a repo for secrets, vulnerable dependencies or code
+  flaws is `$security-scan`'s, a threat model or security design review is
+  `$threat-model`'s, and evidence for FedRAMP, CMMC, 800-53 or 800-171 is
+  `$compliance-map`'s; for a whole-repo security audit before a release, spawn the
+  read-only `security_auditor` agent. A Dockerfile or Compose file to harden is
+  `$dockerfile-harden`'s, a built image to scan, sign or verify is `$image-supply-chain`'s,
+  a GitHub Actions or GitLab CI pipeline to audit is `$ci-harden`'s, a Google Cloud project to
+  review is `$gcp-review`'s, and a GitHub-to-GitLab move is `$gitlab-migration`'s.
+  A request to clean up, tighten or de-slop existing writing (a doc, README, ADR, PR or
+  MR body, ticket, message or docs folder) is `$clean-writing`'s.
+- For a Slack catch-up, a Slack draft or send, a standup or weekly update, a design doc
+  or RFC, or an architecture decision record, read and follow the matching skill:
+  `${CODEX_HOME:-~/.codex}/skills/slack-catchup/SKILL.md`, `slack-draft`, `slack-send`,
+  `status-update`, `design-doc` or `adr` in the same folder. Only `$slack-send` posts to
+  Slack, and only after the user's explicit go-ahead in chat for that message.
+- When the guardrails hook blocks a call, do not retry it another way: say what was
+  blocked and let the user run it or allowlist the rule
+  (`${CODEX_HOME:-~/.codex}/skills/guardrails-help/SKILL.md`).
 - Every code change lands by pull request (merge request on GitLab) into the default
   branch: commit on a branch, push the branch, open the review. Never commit or push
   to the default branch yourself. This outranks a project file or `CLAUDE.md` that
@@ -86,7 +105,9 @@ for the P variants; `/write-ticket` is `$write-ticket`, `/plan-next` is
 ## Models and delegation
 
 Before you spawn a subagent or recommend a model, read the model guide at
-`${CODEX_HOME:-~/.codex}/skills/eng/references/model-selection.md`. Give every
+`${CODEX_HOME:-~/.codex}/skills/eng/references/model-selection.md`. A request to pick a
+model and effort for a job is `$model-recommender`'s; an audit of the model calls in a
+product's code is `$model-usage-audit`'s. Give every
 subagent an explicit model and effort, sized to the cheapest setting that clears
 the bar; start cheap and move one unit up a step only when it comes back weak.
 Delegate independent read-heavy work (exploration, scans, review lenses, test

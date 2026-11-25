@@ -21,7 +21,9 @@ the only rules file.}}
 
 ## Commands
 
-- Setup: `{{command}}`
+Every command below is copied from a file in the repo; the source is in parentheses.
+
+- Setup: `{{command}}` ({{source}})
 - Run locally: `{{command}}`
 - Tests, narrow: `{{command for one file or test}}`
 - Tests, full: `{{command}}`
@@ -41,7 +43,28 @@ the only rules file.}}
   the pull request template to fill, title or label conventions, what must pass
   before a merge. Delete the line if there are none.}}
 - Commit messages: {{style, for example Conventional Commits}}.
+- {{Signed commits are required here; never bypass signing or hooks. Keep this line
+  only when the repo signs commits.}}
 - {{Push helper or release script, if the repo has one.}}
+
+## Security rules
+
+- Secrets: no credential, token, key, certificate or connection string in code,
+  config, tests, fixtures, logs, commit messages, tickets or prompts. Credentials
+  come from {{the secret mechanism the repo uses}}; a new one is documented by name
+  only in {{`.env.example`}}. If you find a real secret in the tree, stop and tell a
+  person; never repeat its value.
+- Data: no customer data, personal data or controlled or non-public government data
+  in a prompt to any model, a fixture, a ticket or test output. Use synthetic data
+  with the same shape.
+- Dependencies: commit and respect the lockfile ({{lockfile}}), pin container base
+  images by digest and CI actions or includes by commit SHA. Before adding a
+  dependency, check its license and maintenance, and say why in the review.
+- Human review: anything that touches authentication, authorization, payments,
+  personal data or secrets is named in the review description and merged by a
+  person, never by an agent.
+- Enforcement: this file is guidance. A rule that must hold every time belongs in a
+  Codex hook (`[[hooks.PreToolUse]]` in `config.toml`) or a CI check.
 
 ## Conventions
 

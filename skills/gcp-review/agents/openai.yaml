@@ -1,0 +1,7 @@
+interface:
+  display_name: "GCP Review"
+  short_description: "Read-only security review of a Google Cloud project"
+  icon_small: "./assets/gcp-review-small.svg"
+  icon_large: "./assets/gcp-review.png"
+  brand_color: "#1D4ED8"
+  default_prompt: "Use $gcp-review to audit this Google Cloud project's security settings, read-only."

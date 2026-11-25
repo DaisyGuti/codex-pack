@@ -1,0 +1,7 @@
+interface:
+  display_name: "Image Supply Chain"
+  short_description: "Scan, SBOM, sign and verify a container image"
+  icon_small: "./assets/image-supply-chain-small.svg"
+  icon_large: "./assets/image-supply-chain.png"
+  brand_color: "#115E59"
+  default_prompt: "Use $image-supply-chain to scan this image, write its SBOM and check its signature."

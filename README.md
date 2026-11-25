@@ -17,28 +17,58 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/write-ticket/`](skills/write-ticket/SKILL.md) | `$write-ticket`: checks the premise against the real repo, then files an issue in the shape and with the labels the ticket workers need |
 | [`skills/plan-ticket/`](skills/plan-ticket/SKILL.md) | `$plan-ticket`: writes a ticket's short build plan (files, pattern to copy, how to tell it's done) and sets its model and run labels, so the plan can be read before a worker builds it |
 | [`skills/daily-grooming/`](skills/daily-grooming/SKILL.md) | `$daily-grooming`: tidies the whole board: settles closed items, syncs priorities, flags duplicates and gaps, promotes to Ready and plans what is unplanned |
-| [`skills/work-tickets/`](skills/work-tickets/SKILL.md) | `$work-tickets`: works your Ready tickets in parallel waves, each on the model its label names |
+| [`skills/work-tickets/`](skills/work-tickets/SKILL.md) | `$work-tickets`: works your Ready tickets with a rolling pool of parallel workers, each on the model its label names |
 | [`skills/ticket-worker/`](skills/ticket-worker/SKILL.md) | `$ticket-worker`: works one issue from plan to an open pull or merge request; merging closes the issue |
+| [`skills/clean-writing/`](skills/clean-writing/SKILL.md) | `$clean-writing`: edits a doc, README, ADR, PR or MR body, ticket, message or docs folder to be clear and concise, keeping every fact; proposes a numbered table of rewrites before it edits a file |
 | [`skills/ux-review/`](skills/ux-review/SKILL.md) | `$ux-review`: reviews a screen, flow, mockup or screenshot for usability, accessibility and visual craft |
 | [`skills/web-design-guidelines/`](skills/web-design-guidelines/SKILL.md) | `$web-design-guidelines`: audits UI code against Vercel's Web Interface Guidelines, fetched fresh each run |
+| [`skills/composition-patterns/`](skills/composition-patterns/SKILL.md) | `$composition-patterns`: Vercel's React composition rules (compound components, state in providers, explicit variants) for component APIs |
+| [`skills/react-best-practices/`](skills/react-best-practices/SKILL.md) | `$react-best-practices`: Vercel's React and Next.js performance rules, ranked by impact |
+| [`skills/react-native-skills/`](skills/react-native-skills/SKILL.md) | `$react-native-skills`: Vercel's React Native and Expo rules: lists, animation, navigation, UI, state, monorepos |
+| [`skills/uswds/`](skills/uswds/SKILL.md) | `$uswds`: builds or reviews a UI with the U.S. Web Design System, fetching the current version, components and federal website standards, and checking templates for class names the stylesheet does not define |
 | [`skills/accessibility-scan/`](skills/accessibility-scan/SKILL.md) | `$accessibility-scan`: automated WCAG scan of one live page |
 | [`skills/accessibility-inspect/`](skills/accessibility-inspect/SKILL.md) | `$accessibility-inspect`: hands-on keyboard and screen-reader pass of one live page in Chrome |
 | [`skills/accessibility-audit/`](skills/accessibility-audit/SKILL.md) | `$accessibility-audit`: whole-site WCAG audit following the W3C's evaluation method |
 | [`skills/accessibility-fix/`](skills/accessibility-fix/SKILL.md) | `$accessibility-fix`: fixes the violations a scan finds and re-scans to confirm |
 | [`skills/accessibility-diff/`](skills/accessibility-diff/SKILL.md) | `$accessibility-diff`: which accessibility problems a change added or fixed |
-| [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` |
-| [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run |
-| [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, and the read-only `reviewer` and `forward_tester` |
+| [`skills/security-scan/`](skills/security-scan/SKILL.md) | `$security-scan`: runs the free scanners installed here (gitleaks, osv-scanner, grype, semgrep, trivy, checkov) and merges them into one de-duplicated findings report, saying which scanners did not run |
+| [`skills/threat-model/`](skills/threat-model/SKILL.md) | `$threat-model`: a STRIDE threat model of a design, feature or repo, with a Mermaid data flow diagram, trust boundaries, a ranked threat register and mitigations mapped to NIST 800-53 |
+| [`skills/compliance-map/`](skills/compliance-map/SKILL.md) | `$compliance-map`: maps a repo's evidence to FedRAMP, NIST 800-53 and 800-171, CMMC, SSDF, DoD SRG and FIPS 140-3; lists evidence and gaps and never says a system is compliant |
+| [`skills/dockerfile-harden/`](skills/dockerfile-harden/SKILL.md) | `$dockerfile-harden`: reviews and rewrites Dockerfiles and Compose files for hardening (multi-stage, minimal or FIPS base images pinned by digest, non-root, no secrets in layers), with reference Dockerfiles |
+| [`skills/image-supply-chain/`](skills/image-supply-chain/SKILL.md) | `$image-supply-chain`: scans a built image, writes CycloneDX and SPDX SBOMs, and plans or verifies cosign signing, provenance, Artifact Registry and Binary Authorization |
+| [`skills/ci-harden/`](skills/ci-harden/SKILL.md) | `$ci-harden`: audits and hardens GitHub Actions and GitLab CI pipelines, and ships reference pipelines that build, scan, sign and push an image with keyless GCP auth |
+| [`skills/gcp-review/`](skills/gcp-review/SKILL.md) | `$gcp-review`: read-only security review of a Google Cloud project through an allowlisted gcloud wrapper; reports evidence, gaps and drafted fixes and changes nothing |
+| [`skills/gitlab-migration/`](skills/gitlab-migration/SKILL.md) | `$gitlab-migration`: plans a GitHub-to-GitLab move (inventory, importer limits, Actions translation, secrets, Workload Identity trust, cutover and rollback) and runs it only on an explicit go per step |
+| [`skills/section-508-report/`](skills/section-508-report/SKILL.md) | `$section-508-report`: builds an Accessibility Conformance Report on the ITI VPAT 2.5Rev template from audit findings and test notes; refuses a Supports row without a passing check run by a person and lists what still needs a tester |
+| [`skills/model-recommender/`](skills/model-recommender/SKILL.md) | `$model-recommender`: picks the OpenAI model tier and reasoning effort for a task, subagent or pipeline stage from the live catalog, and says how to verify and apply it |
+| [`skills/model-usage-audit/`](skills/model-usage-audit/SKILL.md) | `$model-usage-audit`: audits how a product's code calls AI models (any provider): call sites, model ids and lifecycle, limits, cost, data flow, secrets and evals, as a findings report |
+| [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` from a scan of its files, checks it, measures the `AGENTS.md` chain against Codex's read cap, and offers a CI size guard |
+| [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run, split by model, subagent role and project, with frontier-tier subagent runs that look mechanical |
+| [`skills/slack-catchup/`](skills/slack-catchup/SKILL.md) | `$slack-catchup`: summarizes Slack channels, threads and DMs since a time into decisions, asks, blockers and FYIs, with links; read-only |
+| [`skills/slack-draft/`](skills/slack-draft/SKILL.md) | `$slack-draft`: drafts a Slack message or thread reply for a stated goal; drafts only |
+| [`skills/slack-send/`](skills/slack-send/SKILL.md) | `$slack-send`: posts, schedules or saves as a Slack draft text you approved, after one confirmation |
+| [`skills/status-update/`](skills/status-update/SKILL.md) | `$status-update`: standup or weekly update from your commits, pull or merge requests and tickets on GitHub or GitLab |
+| [`skills/design-doc/`](skills/design-doc/SKILL.md) | `$design-doc`: design doc or RFC with a required security and compliance section, saved in the repo's docs folder |
+| [`skills/adr/`](skills/adr/SKILL.md) | `$adr`: numbered MADR architecture decision record, with superseded records linked |
+| [`skills/guardrails-help/`](skills/guardrails-help/SKILL.md) + [`hooks/hooks.json`](hooks/hooks.json) | The guardrails `PreToolUse` hook ([`scripts/guardrails.py`](scripts/guardrails.py)) blocks risky shell commands and edits; `$guardrails-help` explains a block and lists the rules and recent blocks |
+| [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, `writing_editor`, `ui_ux` (renders a page in Chrome, reviews the screenshots and fixes what is wrong), and the read-only `reviewer`, `forward_tester` and `security_auditor` |
 | [`references/model-selection.md`](references/model-selection.md) | Which model tier and effort for which kind of work |
 | [`references/ticket-labels.md`](references/ticket-labels.md) | When each ticket label goes on, and how held work is marked |
 | [`references/testing-without-api-spend.md`](references/testing-without-api-spend.md) | When to test with `codex exec` or the Codex SDK on the ChatGPT sign-in, and when an API key is really needed |
+| [`docs/connect-slack.md`](docs/connect-slack.md) | How to connect Slack to Codex as an MCP server, for the Slack skills |
 | [`references/trackers/`](references/trackers/) | How each tracker operation is done on GitHub (`gh`) and on GitLab (`glab`) |
 | [`scripts/resolve_model.py`](scripts/resolve_model.py) | Turns a tier into a model your account has, with a supported effort |
+| [`scripts/check_facts.py`](scripts/check_facts.py) | Lists the numbers, links and code an edit dropped, for `$clean-writing` |
+| [`scripts/deps.py`](scripts/deps.py) | Finds dependency cycles, blocked-by links to a tracker or batch parent, links whose work already merged, and holds that have cleared, from a board's tickets as JSON |
+| [`scripts/links.py`](scripts/links.py) | Reads a board's native blocked-by links into `deps.py`'s input, and turns old `Depends on:` lines into links (a dry run unless `--apply`) |
 | [`scripts/codex_usage.py`](scripts/codex_usage.py) | Per-run usage from Codex's own records |
+| [`scripts/inventory_model_calls.py`](scripts/inventory_model_calls.py) | Finds every place a repository calls an AI model, with file:line evidence, for `$model-usage-audit` |
+| [`scripts/uswds_check.py`](scripts/uswds_check.py) | Installed against latest USWDS version, `usa-` classes the stylesheet does not define, and page facts, for `$uswds` |
+| [`scripts/acr.py`](scripts/acr.py) | Builds and validates the Accessibility Conformance Report evidence file, for `$section-508-report` |
 | [`registry.example.md`](registry.example.md) | Template for the tracker, board, lanes, labels and repo list the ticket skills read |
 | [`evals/triggers/`](evals/triggers/) | For each skill, about 20 requests that should and should not trigger it, for testing its description |
 | [`docs/sources.md`](docs/sources.md) | The documentation and measurements behind the design |
-| [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | Where the UX and accessibility skills come from, and their licenses |
+| [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | Where the UX, accessibility and writing skills come from, and their licenses |
 
 ## Install on a new machine
 
@@ -61,6 +91,11 @@ that belong to another pack checkout are refused unless you pass
 `--replace-other-pack`. On first run it creates `registry.md` from
 `registry.example.md`; fill it in before using the ticket skills, starting with its
 `tracker:` line. Restart Codex afterwards.
+
+The installer also links `~/.codex/hooks.json` to the pack's `hooks/hooks.json`, which
+runs the [guardrails](#guardrails) hook; an existing `hooks.json` of your own is left
+alone and the entry to add is printed. Codex runs a hook only after you trust it once:
+open `/hooks` in the CLI (Settings > Hooks in the app).
 
 **Your own preferences** (how you like replies written, tools or credits you have,
 rules for a repo only you work in) go in your own `~/.codex/config.toml` as
@@ -114,6 +149,16 @@ is a one-page picture of the flow below, from filing to merge.
   person can read the plan first; `$daily-grooming` does that for the whole board.
   `$work-tickets` builds your Ready tickets in parallel, and `$ticket-worker` builds
   one. A worker writes the plan itself when a ticket has none.
+- **Ready means planned.** A ticket reaches the ready lane only with a `### Final Plan`
+  and no open blocker; `$plan-ticket` and `$write-ticket --ready` post the plan and move
+  it there in one step. Planning runs on the frontier tier whatever the session's model,
+  and sets the issue's weight from its model tier when the registry gives one.
+- **Workers check their own work.** Ticket workers review their own diff (the `reviewer`
+  agent on large or risky diffs, then `codex review`, then one read-only Claude read when
+  the Claude CLI is installed), file unfixed findings and known gaps as follow-up tickets
+  (at most five per run), and can split a change across parallel `worker` sub-workers.
+  The Codex facts these rely on are in
+  [`references/codex-ticket-notes.md`](references/codex-ticket-notes.md).
 - **How work lands.** Every change the pack makes goes on a branch and into the
   default branch by pull request (merge request on GitLab); Codex never commits or
   pushes to the default branch itself, even where a repo's own instructions allow
@@ -148,6 +193,7 @@ is a one-page picture of the flow below, from filing to merge.
 ```text
 $eng fix the failing date parser in src/dates.ts
 $prompt-optimizer --file path/to/prompt.md
+$clean-writing docs/runbook.md
 $write-ticket add rate limiting to the signup endpoint
 $plan-ticket
 $daily-grooming --dry-run
@@ -155,17 +201,61 @@ $work-tickets --dry-run
 $work-tickets --priority P1
 $ticket-worker work issue 42 in my-repo
 $ux-review this checkout screenshot
+$uswds review these templates against the design system
 $accessibility-scan http://localhost:3000
+$security-scan --changed-since origin/main
+$threat-model the new file upload feature
+$compliance-map FedRAMP Moderate
+$dockerfile-harden review the Dockerfile in this repo
+$image-supply-chain scan and write an SBOM for IMAGE@sha256:...
+$ci-harden review our workflows
+$gcp-review project acme-prod
+$gitlab-migration plan the move of this repo to GitLab
 $codex-project-setup
 $codex-usage
+$model-recommender which model and effort for these three subagents
+$model-usage-audit path/to/repo
+$slack-catchup what did I miss in #platform-eng since yesterday
+$slack-draft reply to this thread: the retry change is merged
+$slack-send
+$status-update weekly
+$design-doc how we should cache tenant settings
+$adr use Postgres advisory locks for the job queue
+$guardrails-help why was my push blocked?
 ```
+
+The Slack skills need Slack connected to Codex as an MCP server named `slack`:
+[docs/connect-slack.md](docs/connect-slack.md). `$slack-send` posts only after you
+approve that message in chat. `$status-update` needs `gh` or `glab` signed in.
 
 Each skill shows a display name, icon and starter prompt in the desktop app's
 Skills list (`skills/<name>/agents/openai.yaml`).
 
+## Guardrails
+
+A Codex `PreToolUse` hook ([`scripts/guardrails.py`](scripts/guardrails.py)) checks every
+shell command and `apply_patch` edit before it runs. It blocks protected-branch pushes and
+force-pushes, skipped git hooks, downloaded code run unread, TLS verification turned off,
+public GCP access, service account key creation, privileged containers, destructive
+deletes, and credentials written into files or read from secret files. It also blocks
+changes to itself, its hook file and the settings that turn hooks off. A person turns a rule
+off per repo in `${CODEX_HOME:-~/.codex}/guardrails-allow/<key>.txt` (one rule id per line;
+`guardrails.py --allow-path` prints the file). The key is `<basename>-<16 hex>`: the git root's
+last path component, then the first 16 hex digits of the SHA-256 of its absolute path (symlinks
+resolved; the session directory outside a repo). A repo's own `.codex/guardrails-allow.txt` is
+ignored, so a cloned repo cannot switch rules off, and Codex cannot write the waiver file: the
+same tamper rule that protects `hooks.json` covers it. A person runs a blocked command in their
+own terminal.
+
+Limits: it reads only the command line and the patch, not MCP tools, script files, aliases
+or computed values. It fails closed on its own errors, but Codex has no fail-closed setting
+for hooks, so a missing `python3` or a timeout lets the call through. Read-only agents are
+held to reading by their `sandbox_mode`, because a hook cannot tell which agent called it.
+`$guardrails-help` lists the rules and the recent blocks.
+
 ## Browser tools for the accessibility skills
 
-The accessibility skills drive a real page. `$accessibility-scan` and
+The accessibility skills and the `ui_ux` agent drive a real page. `$accessibility-scan` and
 `$accessibility-diff` need Node and Chrome installed (they run AccessLint's CLI
 through `npx`, which starts Chrome itself).
 `$accessibility-inspect` needs Chrome DevTools connected to Codex, and
@@ -178,6 +268,19 @@ codex mcp add accesslint -- npx -y @accesslint/mcp@latest
 ```
 
 Restart Codex after adding them.
+
+## Tools for the security skills
+
+`$dockerfile-harden`, `$image-supply-chain`, `$ci-harden`, `$gcp-review` and `$gitlab-migration`
+use whichever of hadolint, dockle, trivy, grype, syft, cosign, zizmor, actionlint, `gh`, `glab`
+and `gcloud` are installed, say which are missing, and never install them. Anything that would
+change a registry, a project, a pipeline setting or a cloud resource is drafted for you to run.
+
+`$security-scan` runs whichever of gitleaks, osv-scanner, grype, semgrep, trivy and checkov are
+installed, lists the rest with an install command, and never installs anything itself.
+`$threat-model` and `$compliance-map` download the NIST SP 800-53 catalog and the other
+sources they cite when they run, to a cache under `${XDG_CACHE_HOME:-~/.cache}/codex-pack/`,
+so they need network access. All scripts use only the Python standard library.
 
 ## Models
 

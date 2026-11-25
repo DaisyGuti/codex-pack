@@ -1,0 +1,1 @@
+../../../scripts/gcp_collect.py

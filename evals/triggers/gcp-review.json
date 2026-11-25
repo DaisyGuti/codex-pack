@@ -1,0 +1,82 @@
+[
+  {
+    "query": "review the security of our GCP project, read-only please",
+    "should_trigger": true
+  },
+  {
+    "query": "write Terraform for a new storage bucket with CMEK",
+    "should_trigger": false
+  },
+  {
+    "query": "check IAM in project acme-prod for owner and editor roles and service account keys",
+    "should_trigger": true
+  },
+  {
+    "query": "review my Dockerfile",
+    "should_trigger": false
+  },
+  {
+    "query": "are there any allUsers or allAuthenticatedUsers bindings in our Google Cloud project?",
+    "should_trigger": true
+  },
+  {
+    "query": "harden our GitHub Actions workflow",
+    "should_trigger": false
+  },
+  {
+    "query": "audit our org policies and VPC Service Controls, we're preparing for FedRAMP Moderate on Assured Workloads",
+    "should_trigger": true
+  },
+  {
+    "query": "how do I list my GCP projects with gcloud?",
+    "should_trigger": false
+  },
+  {
+    "query": "is Workload Identity Federation set up safely for our GitHub Actions deploys? look at the pool and provider conditions in GCP",
+    "should_trigger": true
+  },
+  {
+    "query": "estimate the monthly cost of our Cloud Run services",
+    "should_trigger": false
+  },
+  {
+    "query": "do we have Data Access audit logs on and CMEK for our storage buckets? check with gcloud",
+    "should_trigger": true
+  },
+  {
+    "query": "sign our container images and enforce Binary Authorization",
+    "should_trigger": false
+  },
+  {
+    "query": "just fix the overly broad IAM binding in our GCP project",
+    "should_trigger": true
+  },
+  {
+    "query": "fix the 500 on the login endpoint",
+    "should_trigger": false
+  },
+  {
+    "query": "harden the Cloud Run services and GKE clusters in this project, report what's wrong first",
+    "should_trigger": true
+  },
+  {
+    "query": "write the keyless auth step in our .gitlab-ci.yml for GCP",
+    "should_trigger": false
+  },
+  {
+    "query": "give me an evidence report of our GCP security configuration for the assessors, with gaps",
+    "should_trigger": true
+  },
+  {
+    "query": "scan the repo for vulnerable dependencies",
+    "should_trigger": false
+  },
+  {
+    "query": "which service account keys in our project are older than 90 days?",
+    "should_trigger": true
+  },
+  {
+    "query": "explain the difference between IAM roles and permissions",
+    "should_trigger": false
+  }
+]

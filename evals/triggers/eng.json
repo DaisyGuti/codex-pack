@@ -78,5 +78,13 @@
   {
     "query": "pick the next three ready tickets and work them in parallel worktrees",
     "should_trigger": false
+  },
+  {
+    "query": "have engineering take this: the webhook handler retries forever on a 400, make it stop and open the PR",
+    "should_trigger": true
+  },
+  {
+    "query": "what do the engineering standards say about string literals?",
+    "should_trigger": false
   }
 ]

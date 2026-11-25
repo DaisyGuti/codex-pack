@@ -38,7 +38,7 @@ If the fetch fails (including a refusal because the sandbox has no network acces
 
 `$ux-review` covers screenshot-confidence accessibility review, a WCAG checklist, visual craft and scored critique. This skill is the deeper, code-only pass: run it whenever real component or page source is the input rather than a picture, and whenever the ask is a broad implementation audit rather than a usability or visual-craft critique. The two overlap on some accessibility ground (focus-visible, `prefers-reduced-motion`, `transition: all`), but the forms, navigation-state, i18n, and hydration-safety categories here are not covered by `$ux-review`.
 
-A running page that needs an automated scan or a keyboard and screen-reader pass belongs to `$accessibility-scan` or `$accessibility-inspect`.
+A site built on the U.S. Web Design System loads `$uswds` first, then this skill for the rest. A running page that needs an automated scan or a keyboard and screen-reader pass belongs to `$accessibility-scan` or `$accessibility-inspect`.
 
 ## Findings only
 

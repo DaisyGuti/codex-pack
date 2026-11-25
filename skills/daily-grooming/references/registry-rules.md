@@ -1,0 +1,1 @@
+../../../references/registry-rules.md

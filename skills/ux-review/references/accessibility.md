@@ -11,6 +11,23 @@ Use this list when reviewing a design (screenshot, mockup, prototype) or UI code
 
 Criteria cited are from WCAG 2.2 (W3C Recommendation).
 
+## Contents
+
+- [What a screenshot can and cannot show](#what-a-screenshot-can-and-cannot-show)
+- [Color and contrast](#color-and-contrast)
+- [Keyboard and focus](#keyboard-and-focus)
+- [Names, roles, structure](#names-roles-structure)
+- [Forms and errors](#forms-and-errors)
+- [Size, reflow and text spacing](#size-reflow-and-text-spacing)
+- [Motion, time and media](#motion-time-and-media)
+- [Reviewing implementation code](#reviewing-implementation-code)
+- [Grading findings](#grading-findings)
+- [Contrast beyond WCAG ratios (APCA)](#contrast-beyond-wcag-ratios-apca)
+- [Cognitive and neurodiversity accommodations](#cognitive-and-neurodiversity-accommodations)
+- [Testing methodology](#testing-methodology)
+- [Live and automated testing: when a page is running](#live-and-automated-testing-when-a-page-is-running)
+- [Output shape](#output-shape)
+
 ## What a screenshot can and cannot show
 
 Judgeable from a static image:

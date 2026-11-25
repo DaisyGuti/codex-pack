@@ -1,0 +1,82 @@
+[
+  {
+    "query": "we're going for FedRAMP Moderate. map what's in this repo to the 800-53 controls and tell me where the gaps are",
+    "should_trigger": true
+  },
+  {
+    "query": "build the VPAT for our product with the Section 508 criteria filled in",
+    "should_trigger": false
+  },
+  {
+    "query": "a DoD customer asked for CMMC Level 2 evidence from our repo. what do we have and what is missing?",
+    "should_trigger": true
+  },
+  {
+    "query": "scan this repo for leaked secrets and vulnerable dependencies and give me one list",
+    "should_trigger": false
+  },
+  {
+    "query": "can you do a gap analysis of this service against NIST 800-171? I need it as input for our system security plan",
+    "should_trigger": true
+  },
+  {
+    "query": "threat model the new file upload feature before we build it, with a data flow diagram",
+    "should_trigger": false
+  },
+  {
+    "query": "are we ready for an ATO? go through the repo and list evidence per control, no hand-waving",
+    "should_trigger": true
+  },
+  {
+    "query": "harden our Dockerfile, it runs as root",
+    "should_trigger": false
+  },
+  {
+    "query": "what will a government customer ask us for around secure development? we use GitLab CI, check the repo against SSDF",
+    "should_trigger": true
+  },
+  {
+    "query": "fix the failing date parser in src/dates.ts",
+    "should_trigger": false
+  },
+  {
+    "query": "go through our Terraform and CI and tell me which AU and AC controls have evidence and which don't, we target impact level 4",
+    "should_trigger": true
+  },
+  {
+    "query": "what is the difference between FedRAMP and StateRAMP in one paragraph? no repo work",
+    "should_trigger": false
+  },
+  {
+    "query": "our contracting officer wants the CISA secure software attestation. what does the repo show for each practice?",
+    "should_trigger": true
+  },
+  {
+    "query": "review src/components/CheckoutForm.tsx against the web interface guidelines",
+    "should_trigger": false
+  },
+  {
+    "query": "write the control-by-control evidence table for SC-13 and IA-7, we need to know whether we use FIPS validated crypto",
+    "should_trigger": true
+  },
+  {
+    "query": "we need to write our incident response policy for the SSP, draft the document from scratch",
+    "should_trigger": false
+  },
+  {
+    "query": "prep the evidence for our 3PAO: 800-53 moderate baseline, what can the repo show and what is for the policy owners",
+    "should_trigger": true
+  },
+  {
+    "query": "how many tokens did my last Codex run use?",
+    "should_trigger": false
+  },
+  {
+    "query": "Is this system FedRAMP compliant? check the code and give me a yes or no",
+    "should_trigger": true
+  },
+  {
+    "query": "pin our GitHub Actions to commit SHAs and remove the long-lived GCP key",
+    "should_trigger": false
+  }
+]

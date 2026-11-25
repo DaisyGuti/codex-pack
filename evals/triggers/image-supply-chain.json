@@ -1,0 +1,82 @@
+[
+  {
+    "query": "scan this container image for CVEs: us-docker.pkg.dev/acme/app/api:1.4.2",
+    "should_trigger": true
+  },
+  {
+    "query": "write a production Dockerfile for the node service",
+    "should_trigger": false
+  },
+  {
+    "query": "generate CycloneDX and SPDX SBOMs for our image",
+    "should_trigger": true
+  },
+  {
+    "query": "review our Dockerfile for non-root and secrets in layers",
+    "should_trigger": false
+  },
+  {
+    "query": "sign our images with cosign keyless in CI and add provenance",
+    "should_trigger": true
+  },
+  {
+    "query": "scan the source repo for secrets and vulnerable dependencies",
+    "should_trigger": false
+  },
+  {
+    "query": "verify this image was built by our pipeline, here's the digest",
+    "should_trigger": true
+  },
+  {
+    "query": "pin our GitHub Actions to commit SHAs",
+    "should_trigger": false
+  },
+  {
+    "query": "block unsigned images on GKE and Cloud Run with Binary Authorization",
+    "should_trigger": true
+  },
+  {
+    "query": "audit IAM bindings in our GCP project",
+    "should_trigger": false
+  },
+  {
+    "query": "what CVEs are in our container? group them by base image versus our dependencies",
+    "should_trigger": true
+  },
+  {
+    "query": "the docker build fails on the npm ci step, why?",
+    "should_trigger": false
+  },
+  {
+    "query": "push to Artifact Registry with immutable tags and scanning on, draft the setup",
+    "should_trigger": true
+  },
+  {
+    "query": "map our repo evidence to FedRAMP controls",
+    "should_trigger": false
+  },
+  {
+    "query": "do a container supply chain review for the release: scan, SBOM, signature, attestations",
+    "should_trigger": true
+  },
+  {
+    "query": "explain what an SBOM is",
+    "should_trigger": false
+  },
+  {
+    "query": "should we sign with a KMS key or keyless? the repo is private and we don't want it in the public log",
+    "should_trigger": true
+  },
+  {
+    "query": "add a pipeline stage that runs unit tests",
+    "should_trigger": false
+  },
+  {
+    "query": "check the signature on this image against the GitHub workflow identity we expect",
+    "should_trigger": true
+  },
+  {
+    "query": "threat model the image build process design",
+    "should_trigger": false
+  }
+]

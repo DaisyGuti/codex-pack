@@ -1,0 +1,7 @@
+interface:
+  display_name: "Threat Model"
+  short_description: "STRIDE threat model of a design, feature or repo"
+  icon_small: "./assets/threat-model-small.svg"
+  icon_large: "./assets/threat-model.png"
+  brand_color: "#C2410C"
+  default_prompt: "Use $threat-model to threat model this feature before we build it."

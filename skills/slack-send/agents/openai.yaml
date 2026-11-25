@@ -1,0 +1,7 @@
+interface:
+  display_name: "Slack Send"
+  short_description: "Post an approved message after one confirmation"
+  icon_small: "./assets/slack-send-small.svg"
+  icon_large: "./assets/slack-send.png"
+  brand_color: "#BE123C"
+  default_prompt: "Use $slack-send to post the draft I approved to #platform-eng."

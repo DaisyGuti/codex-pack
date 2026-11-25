@@ -1,0 +1,82 @@
+[
+  {
+    "query": "my git push failed with guardrails[git-push-protected], what does that mean",
+    "should_trigger": true
+  },
+  {
+    "query": "write a pre-commit hook that runs ruff on staged files",
+    "should_trigger": false
+  },
+  {
+    "query": "which commands does the guardrails hook block?",
+    "should_trigger": true
+  },
+  {
+    "query": "set up branch protection on main in our GitLab project",
+    "should_trigger": false
+  },
+  {
+    "query": "show me what guardrails blocked today",
+    "should_trigger": true
+  },
+  {
+    "query": "why did codex refuse to cat my .env file",
+    "should_trigger": true
+  },
+  {
+    "query": "add a PreToolUse hook to my own hooks.json that logs every shell command",
+    "should_trigger": false
+  },
+  {
+    "query": "how do I let our repo make the docs bucket public without guardrails blocking it",
+    "should_trigger": true
+  },
+  {
+    "query": "my curl -k call was blocked as tls-verify-off, how do I get past that the right way",
+    "should_trigger": true
+  },
+  {
+    "query": "explain what --force-with-lease does in git",
+    "should_trigger": false
+  },
+  {
+    "query": "the edit failed with guardrails[secret-in-content] on a test fixture, what now",
+    "should_trigger": true
+  },
+  {
+    "query": "scan this repo for leaked API keys",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to run a blocked command once myself, how?",
+    "should_trigger": true
+  },
+  {
+    "query": "rotate the GitLab token that leaked in the last commit",
+    "should_trigger": false
+  },
+  {
+    "query": "list the guardrails rules and why each one exists",
+    "should_trigger": true
+  },
+  {
+    "query": "how do I configure the Codex sandbox to allow network access",
+    "should_trigger": false
+  },
+  {
+    "query": "guardrails[cannot-decide] keeps showing up for my push, why?",
+    "should_trigger": true
+  },
+  {
+    "query": "review this Dockerfile for running as root",
+    "should_trigger": false
+  },
+  {
+    "query": "turn off the guardrails rule for gcp public access in this repo",
+    "should_trigger": true
+  },
+  {
+    "query": "what does chmod -R 755 do to a directory",
+    "should_trigger": false
+  }
+]

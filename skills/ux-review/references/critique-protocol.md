@@ -6,6 +6,17 @@ reworded; see [../LICENSE-sumi.txt](../LICENSE-sumi.txt). Use this when the ask 
 fast, opinionated, scored pass rather than the open-ended Core UX lens in `SKILL.md`:
 "roast this," "grade this," "what's wrong with this in the next 60 seconds."
 
+## Contents
+
+- [Step 1 — statements of meaning, before any criticism](#step-1--statements-of-meaning-before-any-criticism)
+- [Step 2 — questions before opinions](#step-2--questions-before-opinions)
+- [Step 3 — score 10 dimensions](#step-3--score-10-dimensions)
+- [Step 4 — classify every finding](#step-4--classify-every-finding)
+- [Step 5 — top 3 strengths to keep](#step-5--top-3-strengths-to-keep)
+- [Step 6 — one-line verdict](#step-6--one-line-verdict)
+- [Output shape](#output-shape)
+- [Quality bar](#quality-bar)
+
 ## Step 1 — statements of meaning, before any criticism
 
 List 3–5 strengths with specific reasoning: what stands out and why, what

@@ -1,0 +1,1 @@
+../../../scripts/security_doc_check.py

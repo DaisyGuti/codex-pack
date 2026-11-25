@@ -1,0 +1,82 @@
+[
+  {
+    "query": "My React Native FlatList janks when I scroll through 2,000 items. How do I fix it?",
+    "should_trigger": true
+  },
+  {
+    "query": "My Next.js page has slow server rendering. How do I speed it up?",
+    "should_trigger": false
+  },
+  {
+    "query": "Review this Expo screen for performance: images, lists and safe area handling.",
+    "should_trigger": true
+  },
+  {
+    "query": "Does this mobile app mockup read clearly for a first-time user?",
+    "should_trigger": false
+  },
+  {
+    "query": "I want a smooth Reanimated animation on press for a card. What are the right patterns?",
+    "should_trigger": true
+  },
+  {
+    "query": "Refactor this React web component to use compound components.",
+    "should_trigger": false
+  },
+  {
+    "query": "How should I load custom fonts in an Expo app so they are embedded at build time?",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a Swift function that parses JSON on iOS.",
+    "should_trigger": false
+  },
+  {
+    "query": "Our monorepo has a React Native app and native dependency versions keep conflicting between packages. How do we structure it?",
+    "should_trigger": true
+  },
+  {
+    "query": "Fix the Android Gradle build error in our Flutter app.",
+    "should_trigger": false
+  },
+  {
+    "query": "Should I use the native navigator or a JS stack for this Expo Router app? Review our navigation setup.",
+    "should_trigger": true
+  },
+  {
+    "query": "Audit src/App.tsx against the Web Interface Guidelines for a React web app.",
+    "should_trigger": false
+  },
+  {
+    "query": "My text inside a <View> crashes with 'Text strings must be rendered within a <Text>'. What's the rule here?",
+    "should_trigger": true
+  },
+  {
+    "query": "Set up GitHub Actions to build an iOS app.",
+    "should_trigger": false
+  },
+  {
+    "query": "Use expo-image properly for an image gallery with a zoom transition.",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a README for our mobile app.",
+    "should_trigger": false
+  },
+  {
+    "query": "Review ScrollView content inset handling and keyboard avoidance in this React Native screen.",
+    "should_trigger": true
+  },
+  {
+    "query": "How do I optimize a PostgreSQL query?",
+    "should_trigger": false
+  },
+  {
+    "query": "Memoize list items correctly in this React Native list renderer and stop passing inline objects.",
+    "should_trigger": true
+  },
+  {
+    "query": "Add unit tests for the login reducer.",
+    "should_trigger": false
+  }
+]

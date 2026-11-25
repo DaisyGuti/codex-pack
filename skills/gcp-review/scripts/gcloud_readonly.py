@@ -1,0 +1,1 @@
+../../../scripts/gcloud_readonly.py

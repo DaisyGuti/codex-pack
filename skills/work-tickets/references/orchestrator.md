@@ -1,22 +1,42 @@
 # Ready-ticket orchestrator
 
-Process the **Ready** tickets of a project board, on GitHub or GitLab, that are
-assigned to the person running this command, by dispatching `ticket_worker` subagents
-in parallel waves. The tracker, board, lane names, labels and repos come from
-[registry.md](registry.md), which is the only place any of them is written down.
+Process the **Ready** tickets of a project board, on GitHub or GitLab, that are assigned to
+the person running this command, by starting `ticket_worker` subagents from a rolling pool of
+parallel workers. The tracker, board, lane names, labels and repos come from the registry
+([registry.md](registry.md), read through `registry.py show`), which is the only place any of
+them is written down.
 
-**Whose tickets.** The person running the command is whoever is signed in to the
-tracker CLI on this machine (**current-user**, resolved once in Phase 1). Only Ready
-tickets assigned to that login are worked. Unassigned tickets and tickets assigned
-only to others are left exactly as they are and counted in the report. There is no
-flag for working someone else's tickets: to do that, sign in as them.
+Paths used below:
 
-**Tracker operations.** Every action on the tracker below is a named operation, shown
-in bold (**list-items**, **set-lane**, ...). The exact commands for each are in
-`references/trackers/<tracker>.md` for the registry's tracker. Read that one file in
-full before Phase 1 and run each operation as written there; never improvise a
-command for one. A **review** is a pull request on GitHub and a merge request on
-GitLab.
+- `<scripts>` is `${CODEX_HOME:-~/.codex}/skills/work-tickets/scripts`: `registry.py`,
+  `resolve_model.py`, `ticket_state.py`, `check_ticket.py` and `watch_board.py`.
+- `STATE_ROOT` is `${CODEX_HOME:-$HOME/.codex}/state`, expanded to an absolute path everywhere
+  it is written, dispatch messages included. It holds the run record and the workers'
+  worktrees.
+- `<budget-check>` is
+  `${CODEX_HOME:-~/.codex}/skills/codex-project-setup/scripts/check_context_budget.py`.
+
+**Whose tickets.** The person running the command is whoever is signed in to the tracker CLI
+on this machine (**current-user**, resolved once in Phase 1). Only Ready tickets assigned to
+that login are worked. Unassigned tickets and tickets assigned only to others are left exactly
+as they are and counted in the report. There is no flag for working someone else's tickets: to
+do that, sign in as them.
+
+**Tracker operations.** Every action on the tracker below is a named operation, shown in bold
+(**list-items**, **set-lane**, ...). The exact commands for each are in
+`trackers/<tracker>.md` for the registry's tracker. Read that one file in full before Phase 1
+and run each operation as written there; never improvise a command for one. A **review** is a
+pull request on GitHub and a merge request on GitLab.
+
+## Contents
+
+- Invocation
+- Labels a ticket must carry
+- Mechanics
+- The run record
+- Phase 1: capture the board
+- Orchestration (steps 1 to 8, with the context preflight, 5a, and Cleanup)
+- Notes
 
 ## Invocation
 
@@ -25,377 +45,545 @@ $work-tickets                          # every Ready ticket across the default b
 $work-tickets --dry-run                # the queue and nothing else
 $work-tickets --priority P1            # only P1 tickets
 $work-tickets --project 2 --owner me   # a different board (a pasted board URL works too)
-$work-tickets --max-parallel 5         # explicit default wave size
+$work-tickets --max-parallel 8         # a bigger pool
 ```
 
-No arguments are needed, and you never ask the user for a project number or a repo
-list. Defaults, applied when the flag is absent:
+No arguments are needed, and you never ask the user for a project number or a repo list.
+Defaults, applied when the flag is absent:
 
 - **tracker, host, board:** the registry's Tracker and Board sections
 - **repos:** every repo in the registry's table; keep no list here
 - **priority:** no filter; any priority, and none, is eligible
-- **max-parallel:** 5. **limit:** 30
+- **max-parallel:** 5, the number of workers kept running at once. **limit:** 30
 
 Overrides:
 
-- `--priority P0|P1|P2|P3`, repeatable: priority roles from the registry's Priority
-  table. It narrows within Ready and never replaces it.
-- `--project N` / `--owner OWNER`, or a pasted board URL of either tracker, per the
-  registry's "Resolving a project board argument".
-- `--repo NAME:PATH[:REMOTE]`, repeatable, restricting the run to those repos (REMOTE
-  defaults to `<owner or board path>/<NAME>`).
-- `--context FILE`, repeatable: the brief used for plan validation. Absent, each
-  worker gets its own repo's brief from the registry.
+- `--priority P0|P1|P2|P3`, repeatable: priority roles from the registry's Priority table. It
+  narrows within Ready and never replaces it.
+- `--project N` / `--owner OWNER`, or a pasted board URL of either tracker, per
+  [registry-rules.md](registry-rules.md) ("Resolving a project board argument"; `registry.py
+  board-url URL` resolves a URL).
+- `--repo NAME`, repeatable, restricting the run to those registry repos.
+- `--context FILE`, repeatable: the brief used for plan validation. Absent, each worker gets
+  its own repo's brief from the registry.
 - `--max-parallel N`, `--limit N` (each minimum 1), `--dry-run`, `--clear-skipped`.
 
-A ticket's lane equal to the registry's ready lane value, and the signed-in login among
-its assignees, are always the gate.
+A ticket's lane equal to the registry's ready lane value, and the signed-in login among its
+assignees, are always the gate.
 
 ## Labels a ticket must carry
 
 A ticket missing either set was never groomed and is not dispatched.
 
-**A model label** picks the worker's model. The registry's Model labels table maps
-each tier (`fast`, `workhorse`, `frontier`) to the label that means it; a ticket's
-tier is the tier whose label it carries. Labels the table does not list still resolve
-when they are `model:haiku`, `model:sonnet` or `model:opus` (the same three tiers) or
-the legacy `model:claude-haiku-*`, `model:claude-sonnet-*` or `model:claude-opus-*`
-forms; map those to a tier name before calling the resolver, which does not know the
-dated names. A registry with no Model labels table means `model:fast`,
-`model:workhorse` and `model:frontier`. No model label: `blocked[]`,
-`reason="no model label"`. A label that starts with `model:` and maps to no tier:
-`blocked[]`, `reason="unrecognized model label: <value>"`. Several model labels:
-`blocked[]`, `reason="conflicting model labels: <values>"`.
+**A model label** picks the worker's model. `registry.py show` prints `model_labels`, the
+registry's Model labels table: tier (`fast`, `workhorse`, `frontier`) to the label that means
+it. A ticket's tier is the tier whose label it carries. Labels the table does not list still
+resolve when they are `model:fast`, `model:workhorse`, `model:frontier`, `model:haiku`,
+`model:sonnet` or `model:opus` (the resolver accepts those), or the legacy
+`model:claude-haiku-*`, `model:claude-sonnet-*` or `model:claude-opus-*` forms; map those to a
+tier name before calling the resolver, which does not know the dated names. These tickets are
+not dispatched; record each with `ticket_state.py skip` and the reason, and list it under "Not
+dispatched" in the report:
 
-**`effort:<level>`** (optional) sets the reasoning effort.
+- no model label: `reason="no model label"`;
+- a label that starts with `model:` and maps to no tier:
+  `reason="unrecognized model label: <value>"`;
+- labels for different tiers: `reason="conflicting model labels: <values>"`.
+
+**`effort:<level>`** (optional) sets the worker's reasoning effort.
 
 **The run-worker label or the run-solo label** (registry Labels roles `run_worker` and
-`run_solo`; `run:worker` and `run:solo` by default), exactly one.
+`run_solo`), exactly one.
 
-- run-worker: a worker can finish it end to end, and it is self-contained. That is
-  what makes it safe in a parallel wave. It keeps the label even when its last step is
+- run-worker: a worker can finish it end to end, and it is self-contained. That is what makes
+  it safe to run beside the others in the pool. It keeps the label even when its last step is
   a live action no worker can take; the worker builds the rest and stops at
   `needs_manual_action`.
 - run-solo: nothing to build at all. Skipped, never dispatched.
-- Neither: `blocked[]`, `reason="no run label: ticket has not been groomed"`.
+- Neither: not dispatched, `reason="no run label: ticket has not been groomed"`.
 
-[ticket-labels.md](ticket-labels.md) has the full rule for both labels. Concurrency
-safety is a per-ticket property decided when the ticket is groomed
-(the run-worker label means self-contained), so there is no pairwise conflict check here.
+[ticket-labels.md](ticket-labels.md) has the full rule for both labels. Concurrency safety is
+a per-ticket property decided when the ticket is groomed (the run-worker label means
+self-contained), so there is no pairwise conflict check here. With batching on, each child of
+a batch is checked here like any ticket; a child that fails is not dispatched and its batch
+goes without it.
 
 ## Mechanics
 
-- **Roots.** Let `STATE_ROOT=${CODEX_HOME:-$HOME/.codex}/state`, expanded to an
-  absolute path everywhere it is written, payloads included. The **board key** is
-  `<owner>-<number>` on GitHub, and on GitLab the board's group or project path with
-  each `/` written `-`, then `-` and the board id (or the board name lower-cased with
-  runs of other characters written `-`, when the registry gives only a name). `<login>`
-  is the signed-in login from **current-user**.
-  - State file: `$STATE_ROOT/ready-worker-<board key>-<login>.json`
-  - Lock: the same path plus `.lock`
-  - Worktrees: `$STATE_ROOT/ready-worktrees/<board key>-<login>/<slot_id>/<repo>`
+- **Board key.** On GitHub `<owner>-<number>`. On GitLab the board's group or project path
+  with each `/` written `-`, a hyphen, then the board id (or the board name lower-cased with
+  runs of other characters written `-`, when the registry gives only a name). `<login>` is the
+  signed-in login from **current-user**. Every `ticket_state.py` call takes
+  `--board-key <board key> --login <login>`; its file is
+  `$STATE_ROOT/ready-worker-<board key>-<login>.json`, so each board and login has its own
+  record and two people on one machine never share one.
+- **Worktrees.** Codex gives a subagent no worktree of its own, so you create every worker's
+  worktree from the registry's clone with `git worktree add` (step 7a), one per repo of the
+  slot, at `$STATE_ROOT/ready-worktrees/<board key>-<login>/<slot_id>/<repo>`. The folder
+  `$STATE_ROOT/ready-worktrees/<board key>-<login>` is the dispatch message's `worktree_root`,
+  where the worker also makes its sub-workers' worktrees and a held batch child's patch.
+- **Pushes.** Every worker lands its change by review, whatever the repo's own rules say: it
+  pushes its own branch, never the default branch, and opens a pull or merge request with no
+  blocked label. The ticket ends `review_opened`, a successful end, and merging the review
+  closes the issue. No worker closes an issue or moves a card to done; `$daily-grooming`
+  settles closed issues to done. A ticket that ends in `needs_manual_action` pushes its own
+  branch and opens a review carrying the registry's blocked label on every repo, so nobody
+  merges it before the live step.
+- **Blocker isolation.** A blocked ticket halts only its own slot; the rest of the pool keeps
+  running and the freed slot takes the next ticket.
+- **One poller.** The board watcher is the only thing that polls the tracker
+  ([board-watcher.md](board-watcher.md) has the events and how to run it). Codex cannot stream
+  a background command's lines into this session, so the run ticks it itself:
+  `python3 <scripts>/watch_board.py --once` after each reap (at most once a minute) and once in
+  step 7d. The memory file dedupes, so each tick prints only new events. Exit 5 means the user
+  runs a long-running watcher on this board: tick no more, and read its terminal when this
+  session can. Exit 3 or 4: say once in the report that the watcher could not run, and go on
+  without it; exit 1 is one failed tick. Act on its lines:
+  - `QUEUE_READY` (a review ready to merge or queue): enqueue it when the user has asked this
+    session to enqueue reviews; otherwise list it for the user. Nothing here merges a review.
+  - `MERGED` (a review that merged): its worktrees go in step 7d's sweep.
+  - `CONFLICT` (a review that conflicts with its target branch): list it under "Conflicts" in
+    the report with its link. Codex has no local tool that wakes a session to fix a review, so
+    the user resolves it, or asks `$ticket-worker` to; Codex cloud's GitHub or GitLab
+    integration can review a request when someone mentions `@codex` or turns on automatic
+    reviews (a team setting this skill never changes).
+  - `NEW_READY`: the queue was fixed in step 3; the next `$work-tickets` run picks it up.
 
-  Each `(board, login)` pair gets its own state file and worktree root, so runs
-  against different boards cannot collide, and two people on one machine never share
-  a slot table. Run one orchestrator per board and login at a time:
-  a worker moves its card out of Ready as soon as it starts, but two orchestrators
-  would queue the same Ready tickets until then.
-- **Pushes.** Every worker lands its change by review, whatever the repo's own rules
-  say (protocol section 8): it pushes its own branch, never the default branch, and
-  opens a pull or merge request with no blocked label. The ticket ends `review_opened`,
-  a successful end, and merging the review closes the issue. No worker closes an issue
-  or moves a card to done; `$daily-grooming` settles closed issues to done. A ticket that
-  ends in `needs_manual_action` pushes its own branch and opens a review carrying the
-  registry's blocked label, on every repo, so nobody merges it before the live step.
-- **Blocker isolation.** A blocked ticket halts only its own slot; the rest of the
-  wave finishes and the next wave dispatches.
-- **Preflight**, before the first slot is created: you can write under `STATE_ROOT`,
-  **auth-check** passes, and `git -C <one primary clone> fetch origin --prune`
-  succeeds (network, credentials, a writable Git directory). When a check fails,
-  stop before touching the board and tell the user to relaunch Codex with full
-  access. The default `workspace-write` sandbox cannot run this skill, even with
-  extra writable directories, because it keeps every `.git` read-only and both
-  `git worktree add` and each worker's commits write there.
-- **Notifications.** One desktop notification where the platform has a command for
-  it: `osascript -e 'display notification "<text>" with title "Codex Ready Worker"'`
-  on macOS, `notify-send` on Linux. If none works, say so in the report.
-- **Locking.** Every read-modify-write of the state file takes the exclusive
-  advisory lock:
+  Never start a polling loop per review or per worker: the tracker's rate limit is shared by
+  every worker and session on the machine.
+- **Preflight**, before the first slot is created: `STATE_ROOT` is writable, **auth-check**
+  passes, and `git -C <one primary clone> fetch origin --prune` succeeds (network,
+  credentials, a writable Git directory). When a check fails, stop before touching the board
+  and tell the user what failed. The default `workspace-write` sandbox cannot run this skill,
+  even with extra writable directories, because it keeps every `.git` read-only and both
+  `git worktree add` and each worker's commits write there: tell the user to relaunch Codex
+  with full access ([codex-ticket-notes.md](codex-ticket-notes.md)).
+- **One run per board and login at a time.** `ticket_state.py` takes an exclusive lock around
+  each write, so a second run waits for it rather than corrupting the record, but two runs
+  would still queue the same Ready tickets until a worker moves its card out of Ready. Do not
+  start a second run while workers from the first are still going: step 2 would treat their
+  slots as unfinished and dispatch them again.
+- **Context budget.** Codex loads the AGENTS.md files from the repo root down to the folder it
+  works in, and drops text past `project_doc_max_bytes`; one oversized guide read by every
+  worker in the pool can use up a plan's usage limit, or be cut off unread. When
+  `<budget-check>` does not exist, say once that it is missing, skip the preflight in step 5a
+  and continue. Never halt on it.
+- **Notifications.** One desktop notification where the platform has a command for it, for
+  each slot that blocks and at completion:
+  `osascript -e 'display notification "<text>" with title "Codex Ready Worker"'` on macOS,
+  `notify-send` on Linux. If none works, say so in the report.
+- **Orchestrate; never implement.** You never edit a ticket's code. Workers return a paragraph,
+  their Follow-ups and one `RESULT` line; the run record holds the detail, so do not ask for
+  logs.
 
-  ```bash
-  (
-    flock -x 200
-    # read state, mutate, write back
-  ) 200>"$STATE_LOCK"
-  ```
+## The run record
 
-  Where `flock` is not installed, Python's `fcntl.flock(fd, fcntl.LOCK_EX)` on the
-  same lock file takes the same lock.
-
-## State file
-
-If the file does not exist, create it:
-
-```json
-{ "schema_version": 3, "project": {}, "active": [], "completed": [], "blocked": [], "skipped": [] }
-```
-
-If `schema_version` is not `3`, halt with "State schema version <N> is not
-supported. Delete or migrate <state_file>." The orchestrator owns inserts into
-`active[]`, moves to `completed[]` and `blocked[]`, `skipped[]` inserts, and the
-worktree lifecycle. A worker mutates only its own slot in `active[]`, found by
-`slot_id`.
-
-Slot record in `active[]`:
+`<scripts>/ticket_state.py` is the only writer of the run record (workers never touch it):
+`init`, `show`, `set-project`, `next-slot`, `begin`, `finish`, `skip`, `clear-skipped`,
+`forget`. Its header documents each. A slot's JSON for `begin`:
 
 ```json
 {
-  "slot_id": "slot-1",
-  "ticket_number": 182,
-  "repos": ["<repo>"],
-  "ticket_repo": "<repo>",
-  "item_ref": "<tracker handle for the board item, null where the tracker needs none>",
-  "worktree_paths": { "<repo>": "<abs worktree path>" },
-  "slot_branch": "slot-1-ticket-182",
-  "resolved_tier": "workhorse",
-  "resolved_model": "<slug>",
-  "resolved_effort": "medium",
-  "step": "synced",
-  "status": "running",
-  "reason": null,
-  "pre_step_sha": {},
-  "changed_files": {},
-  "commit_sha": {},
-  "plan": null,
+  "slot_id": "slot-1", "ticket_number": 182, "ticket_repo": "shop-app",
+  "repos": ["shop-app"], "item_ref": "<handle or null>",
+  "worktree_paths": { "shop-app": "<abs worktree path>" },
+  "resolved_tier": "workhorse", "resolved_model": "<slug>", "resolved_effort": "medium",
   "started_at": "<ISO 8601>"
 }
 ```
+
+A worker's `RESULT` line goes to `finish --json` as it is (it already carries `slot_id` and
+`status`). A batch slot (when batching is on) names its first child as `ticket_number` and
+`ticket_repo`, and adds `"parent": {"ref", "number", "repo", "title", "area", "url"}` and
+`"children": [{"ticket_number", "ticket_repo", "item_ref"}, ...]` in the plan's order. `begin`
+claims every child and refuses the slot (exit 3) when one is already tracked or another active
+slot holds the parent; `finish` keeps the children it began with and records the worker's
+`children_status` as sent; `forget` on a child drops it from its slot and, when it was the
+first, moves `ticket_number` and `ticket_repo` to the first child left. `active` holds slots
+that have started and not returned, `completed` holds `review_opened` tickets with their
+review links, `blocked` holds every other finished status, `skipped` is a record of what was
+not dispatched and why, re-evaluated on every run.
 
 ## Phase 1: capture the board
 
 At the start of every run, so a renamed lane or an edited registry takes effect:
 
-1. **current-user** gives the login this run works for. If it cannot be read, halt:
-   "Cannot tell who is signed in to the tracker CLI."
-2. **capture-board** with the registry's board, lanes and priorities gives
-   `tracker_ids`, `missing_lanes`, `missing_priorities` and `has_priority`. Without
-   priority support the run is fine unless `--priority` was passed, then halt:
-   "Priority filter requested but board <board key> has no priority support."
-3. From the registry take `lanes` (role to lane value for the configured tracker),
-   `priorities` (role to priority value, in rank order), `labels` (role to
-   `{name, color, description}`) and `model_labels` (tier to label). The ready lane
-   must not be in `missing_lanes`, or halt and print the raw output of
-   **capture-board**. Any other missing lane: warn, and workers will skip that move.
+1. **current-user** gives the login this run works for. If it cannot be read, halt: "Cannot
+   tell who is signed in to the tracker CLI." If `registry.py show` has a non-empty
+   `works_for` and it differs from that login (compared case-insensitively), halt: "Signed in
+   to the tracker CLI as <login>, but this registry works only for <works_for>. Switch
+   accounts (`gh auth switch` or `glab auth login`) and run again."
+2. **capture-board** with the registry's board, lanes and priorities gives `tracker_ids`,
+   `missing_lanes`, `missing_priorities`, `has_priority` and, on GitHub, `priority_mode`
+   (`field` or `label`, also stored in `tracker_ids`). Without priority support the run is
+   fine unless `--priority` was passed; then halt: "Priority filter requested but board
+   <board key> has no priority support."
+3. From `registry.py show`, take `lanes`, `priorities`, `labels`, `model_labels` and
+   `batching`. The ready lane must not be in `missing_lanes`, or halt and print the raw output
+   of **capture-board**. Any other missing lane: warn, and workers will skip that move.
 4. Build `repo_map` from the registry, or from `--repo` flags when passed:
-   `{ "<name>": { "primary_clone": "<abs path>", "remote": "<Remote>", "brief": "<abs path>", "default_branch": null } }`.
-   `default_branch` is filled in lazily, per repo, the first time a slot needs it
-   (section 7a).
-5. Write `state.project` under lock: `tracker`, `host`, `board` (the resolved board
-   identity: owner and number, or scope, path and id), `board_key`, `assignee` (the
-   login), `tracker_ids`, `repo_map`, `lanes`, `priorities`, `labels`, `model_labels`,
-   `captured_at`.
-
-If an existing `state.project` has a different board or assignee than the resolved
-ones, halt: two boards or two people have been pointed at one state file.
+   `{ "<name>": { "clone": "<abs path>", "remote": "<Remote>", "brief": "<abs path>" } }`.
+5. `ticket_state.py init`, then `set-project --json` with `tracker`, `host`, `board` (the
+   resolved board identity), `board_key`, `assignee` (the login), `tracker_ids`, `repo_map`,
+   `lanes`, `priorities`, `labels`, `model_labels` and `captured_at`. It refuses (exit 3) when
+   the record belongs to a different board or login: halt and say so.
 
 ## Orchestration
 
 ### 1. Parse arguments
 
-Apply the defaults above. On `--clear-skipped`, empty `state.skipped[]` under lock.
+Apply the defaults above. On `--clear-skipped`, run `ticket_state.py clear-skipped`.
 
-### 2. Resume crashed workers
+### 2. Resume unfinished slots
 
-A non-empty `state.active[]` is a run that did not finish cleanly. Treat those slots
-as the first wave and re-dispatch each from its stored record, after re-resolving its
-model (section 4). Check each worktree path still exists; if not, move the slot to
-`blocked[]` with `blocked_worktree_missing`. This first wave may exceed
-`--max-parallel`; log a warning.
+A non-empty `active` list in the record is a run that did not finish cleanly. Treat those
+slots as the first workers of the pool and dispatch each again with the same `slot_id`, after
+resolving its model again (step 4) and with `resumed: true` in its dispatch message; a batch
+slot keeps its parent and children. Reuse each worktree in its `worktree_paths` that
+`git -C <clone> worktree list --porcelain` still lists; make the others again as step 7a says.
+The worker finds its branch on the remote and continues from what was pushed; work that never
+reached the remote is redone. This first batch may exceed `--max-parallel`; log a warning.
 
 ### 3. Fetch and filter the queue
 
-Run **list-items** on the ready lane. Each item carries `item_ref`, `number`, `repo`,
-`type`, `title`, `lane`, `priority`, `labels` and `assignees`. Keep items whose `lane`
-equals the ready lane's value, then drop:
+Run **list-items** on the ready lane. Each item carries `item_ref`, `number`, `repo`, `type`,
+`title`, `lane`, `priority`, `labels` and `assignees`. Keep items whose `lane` equals the
+ready lane's value, then drop:
 
-- `type != "issue"` to `skipped[]`, `reason="not an issue: reviews are merged, not
-  worked"`. Handed a pull request or merge request, a worker would open a second
-  branch for a change that already has one.
-- a null `number` to `skipped[]`, `reason="null content number"`.
+- `type != "issue"`: `skip` with `reason="not an issue: a person merges reviews"`. Handed a
+  pull request or merge request, a worker would open a second branch for a change that
+  already has one.
+- a null `number`: `skip` with `reason="null content number"`.
 
-Then split what is left by assignee, with logins compared case-insensitively. An item
-whose `assignees` include `state.project.assignee` stays. An item with no assignees
-adds one to the **unassigned** count; an item assigned only to other people adds one
-to the **assigned to others** count. Both are left exactly as they are: not
-dispatched, not in `skipped[]`, not in `blocked[]`, and nothing written to the ticket.
-Keep the two counts for the dry run and the completion report. Then take out the
-**held** tickets: any remaining item whose `labels` include `labels.blocked`'s name is
-somebody's open hold (a dependency, a decision, a live action or a failure; see
-[ticket-labels.md](ticket-labels.md)). Never dispatch it, never put it in `blocked[]`, never touch it.
-Count it as held, keeping its number and `repo` for the report. Then drop:
+Then split what is left by assignee, with logins compared case-insensitively. An item whose
+`assignees` include the signed-in login stays. An item with no assignees adds one to the
+**unassigned** count; an item assigned only to other people adds one to the **assigned to
+others** count. Both are left exactly as they are: not dispatched, not recorded, and nothing
+written to the ticket. Keep the two counts for the dry run and the report. Then take out the
+**held** tickets: any remaining item whose `labels` include the blocked label is somebody's
+open hold (a dependency, a decision, a live action or a failure; see
+[ticket-labels.md](ticket-labels.md)). Never dispatch it, never touch it. Count it as held,
+keeping its number and `repo` for the report. Then drop:
 
-- anything already in `completed[]`, `blocked[]` or `active[]`, matched on the pair
-  `(ticket_number, ticket_repo)` and never on the number alone: issue numbers are
-  per repo, so two repos routinely reuse one number. `ticket_repo` here is the last
-  part of the item's `repo`, which is available before section 4.
-- the run-solo label to `skipped[]`, `reason="run:solo label: human-in-loop required"`.
-- neither run label to `blocked[]`, `reason="no run label: ticket has not been
-  groomed"`.
-- with `--priority`, any item whose `priority` is not the registry value of a
-  requested role to `skipped[]`, `reason="priority <X> not in filter"`.
+- anything already in `completed`, `blocked` or `active`, matched on the pair
+  `(ticket_number, ticket_repo)` and never on the number alone: issue numbers are per repo, so
+  two repos routinely reuse one number. `ticket_repo` here is the last part of the item's
+  `repo`. A batch entry matches on each pair in its `children` too, not only on its own
+  top-level pair: a child that is not the slot's first is tracked all the same.
+- the run-solo label: `skip` with `reason="run:solo label: human-in-loop required"`.
+- neither run label: `skip` with `reason="no run label: ticket has not been groomed"`.
+- with `--priority`, any item whose `priority` is not the registry value of a requested role:
+  `skip` with `reason="priority <X> not in filter"`.
 
 ### 4. Resolve repos and the model
 
-**Repos** follow the registry's "Resolving a ticket to its repo": parent repo, then
-`repo:<name>`, then `project:<name>`, then a body keyword scan; no match skips with
-`reason="no repo could be inferred"`, never a guess. The repo the issue lives in is
+**Repos** follow [registry-rules.md](registry-rules.md) ("Resolving a ticket to its repo"):
+parent repo, then `repo:<name>`, then `project:<name>`, then a body keyword scan; no match
+skips with `reason="no repo could be inferred"`, never a guess. The repo the issue lives in is
 the owning repo; a ticket may resolve to several.
 
-**Model.** Find the ticket's model label as in "Labels a ticket must carry", turn it into a tier
-name (`fast`, `workhorse` or `frontier`), and run the skill's
-`scripts/resolve_model.py <tier> --effort <effort>`,
-with the effort from the ticket's `effort:<level>` label when present, otherwise
-`high` for `fast`, `medium` for `workhorse` and `medium` for `frontier`. Store the
-printed `tier`, `model` and `effort` as `resolved_tier`, `resolved_model` and
-`resolved_effort`. A slot resumed from an earlier run is resolved again from its
-`resolved_tier` and `resolved_effort`, so a retired slug never reaches a spawn.
+**Model.** Find the ticket's tier as in "Labels a ticket must carry" and run
+`python3 <scripts>/resolve_model.py <tier> --effort <effort>`, with the effort from the
+ticket's `effort:<level>` label when present, otherwise `high` for `fast`, `medium` for
+`workhorse` and `medium` for `frontier`. Keep the printed `tier`, `model` and `effort` as
+`resolved_tier`, `resolved_model` and `resolved_effort`. A slot resumed from an earlier run is
+resolved again from the labels the ticket carries now, so a retired slug never reaches a
+spawn. Exit 3 is `skip` with `reason="no model available for tier <tier>"`; any other non-zero
+exit is `skip` with the script's error as the reason; the ticket is not enqueued. Show any
+`notes` the script prints (a fallback slug, a clamped effort) on that ticket's dry-run and
+report line.
 
-- Exit 3: `blocked[]`, `reason="no model available for tier <tier>"`.
-- Any other non-zero exit: `blocked[]` with the script's error as the reason.
-- A missing or unrecognized label: blocked as in "Labels a ticket must carry".
-
-Show any `notes` the script prints (a fallback slug, a clamped effort) on that
-ticket's dry-run and report lines. Blocked tickets are not enqueued.
+**Batches, when batching is on.** **read-parent** for each ticket left (or one
+**list-parents** per repo, which gives the same mapping in fewer calls, batch parents only),
+and group the tickets by batch parent; a ticket with no parent, or a parent with `batch`
+false (its title does not start with `Batch: `), stays a single. For each parent,
+**read-parent-item**: its `### Final Plan` and addenda give the children's order (`### #<n>`
+sections in turn, then the addenda). A Ready child the plan does not cover is not dispatched:
+`skip` with `reason="not in its batch plan: run $plan-ticket or $daily-grooming"`. The slot
+takes the children in that order, at most the registry's Batch `size` of them, and only those
+in the parent's owning repo (the first child's repo). Any further child, or one in another
+repo, is not dispatched this run and not recorded: it **waits** for a later slot of that
+parent and is named in the dry run and the report. The batch's tier is the strongest
+`resolved_tier` among the slot's children (frontier over workhorse over fast) and its effort
+the highest `resolved_effort` (`low` < `medium` < `high` < `xhigh` < `max`); resolve that tier
+at that effort once more for the batch's model. `parent.area` is the `<area>` its title names
+([batches.md](batches.md), "A batch parent's title"), lower-cased with every run of other
+characters than letters, digits and hyphens made one hyphen; `parent.number` is its number
+(an epic's iid); `parent.url` its link.
 
 ### 5. Sort, then cap
 
-Sort by priority in the rank order of the registry's Priority table (P0 first by default), then unset, stable within a priority, then keep
-the first `--limit`.
+Sort by priority in the rank order of the registry's Priority table (P0 first by default),
+then unset, stable within a priority, except that a flaky-test or CI ticket (judged from its
+title and labels) goes ahead of the rest of its priority, then keep the first `--limit`. With
+batching on, a batch sorts and counts as one item, at its highest child's priority.
+
+### 5a. Context preflight
+
+For each slot (a batch counts as one), take the paths its plan's **Files to touch** names (the
+latest `### Final Plan` comment and any addenda, from **read-issue**; a batch: every child's),
+drop any `:12-30` or `::symbol` suffix, and group them by repo (`other-repo: src/a.py` belongs
+to that repo's clone in `repo_map`). Run, once per repo, in that repo's primary clone:
+
+```sh
+python3 <budget-check> <clone> --path <folder> --path <folder> --json
+```
+
+with one `--path` per distinct folder of those paths (a file's folder; a folder as written;
+for a folder that does not exist yet, its nearest existing parent). A plan that names no files
+gets no `--path`, so only the root guides count. Keep per slot the sum of `total_tokens_est`
+(bytes / 4, an estimate), the `large` files (each over the per-file limit, whatever the repo's
+baseline holds) with their sizes from `files`, and `total_over_by` (several guides that each
+fit but together pass the total limit, or Codex's `project_doc_max_bytes` cap). Exit 0 and 1
+both give a report; exit 2 or a missing script is "no estimate" for the slot, shown as such. A
+slot with a large file or a positive `total_over_by` still dispatches. It gets a warning that
+names the file, or the guides when only the total is over, and says to split them, and its
+dispatch message carries `large_guides`: the large files that are inside the repo. The root
+AGENTS.md counts too: a worker's worktree is not the folder its session started in, so it reads
+the worktree's guides itself ([codex-ticket-notes.md](codex-ticket-notes.md), "Instruction
+files a worker sees").
 
 ### 6. Dry run
 
-With `--dry-run`, print the queue, the skipped list and the existing `blocked[]`,
-then exit. The only side effects are Phase 1 capture and `--clear-skipped`. The "In
-review" lines come from the `completed[]` entries that carry `review_refs`, each checked
-with **review-state** on its first `review_refs` entry; list only those still `open`,
-with their links. A review that merged or closed drops out of the line.
+With `--dry-run`, print the queue (each line ends with its step 5a estimate, and an
+over-budget slot is followed by its warning), the skipped list and the existing `blocked`
+list, then exit. The only side effects are Phase 1 capture and `--clear-skipped`. The "In
+review" lines come from the `completed` entries that carry `review_refs`, each checked with
+**review-state** on its first `review_refs` entry; list only those still `open`, with their
+links. A review that merged or closed drops out of the line.
 
 ```text
 Ready queue: board <board key> for <login> (max-parallel=<M>, limit=<L>, to-process=<K>)
-  #182 "title" repos=[<repo>] owning=<repo> workhorse <slug> medium P1
+  #182 "title" repos=[<repo>] owning=<repo> workhorse <slug> medium P1 context ~31k tokens (est.)
+  #190 "title" repos=[<repo>] owning=<repo> workhorse <slug> medium P2 context ~110k tokens (est.)
+    WARNING backend/AGENTS.md is 395 KB, 379 KB over the 16 KB limit: split it into area guides
 Left alone: <A> Ready tickets assigned to others, <U> unassigned
 Held (carry the blocked label, not dispatched): <H>
   #71 <repo>: Blocked: dependency
+Batches (with batching on, one slot each): <B>
+  parent <ref> "title" repos=[<repo>] children=#183,#184 frontier <slug> medium P1
+  waiting for a later slot: #186 (over Batch size), other-repo#12 (another repo)
 In review (opened by earlier runs, still open): <R>
   #120 <repo>: <review URL>
-Skipped this run:
+Not dispatched:
   #60 "title": run:solo label: human-in-loop required
-Blocked (not enqueued):
   #64 "title": no run label: ticket has not been groomed
 ```
 
-### 6.5. Plan validation
+### 7. Dispatch loop (a rolling pool)
 
-Every payload carries `validate_plan_first: true`. The worker reads the ticket's
-existing `### Final Plan`, checks it for drift, uses it as is when clean, and
-otherwise re-plans in one pass. Pass the owning repo's brief from the registry as
-`context_files`, or the `--context` files when given.
+Keep `--max-parallel` workers running until the queue is empty. Never wait for the rest of the
+pool before starting the next ticket: a worker that returns frees a slot, and the next ticket
+takes it at once. The pool starts full, so a queue at least as long as `--max-parallel` starts
+that many workers together.
 
-### 7. Wave dispatch loop
+**Pool size and the thread limit.** If the Codex config sets
+`agents.max_concurrent_threads_per_session` (older name `agents.max_threads`) below
+`--max-parallel`, that is the pool size; say so in the report. Keep your own count of
+**running** workers: those you dispatched in this run that have not returned. The pool size is
+measured against that count, not against `active`, because a slot whose worker ended without a
+`RESULT` stays in `active` with nothing running.
 
-While the queue or `state.active[]` is non-empty:
+**7a. Fill the pool.** Take tickets from the front of the queue until the running count
+reaches the pool size. A freed slot takes the front ticket, so flaky-test and CI tickets fill
+slots first and the pool never waits for the rest of its workers. Slots resumed in step 2 come
+first and the pool is topped up behind them. For each ticket:
 
-**7a. Assign slots.** If this is the first wave and `active[]` was non-empty at
-invocation, the wave is those slots; go to 7b. Otherwise take up to `--max-parallel`
-tickets from the front of the queue and, for each:
+1. Get `ticket_state.py next-slot` (one id at a time, calling `begin` right after each so the
+   next call sees it).
+2. `begin` the slot with its JSON. Its `worktree_paths` are the paths it will use, one per repo
+   of the slot: `$STATE_ROOT/ready-worktrees/<board key>-<login>/<slot_id>/<repo>`. A `begin`
+   refusal (exit 3) means the ticket is already tracked: skip it. For a batch slot, read the
+   refusal:
 
-1. `slot_id` = `slot-<i>`, the smallest positive integer not used by any slot in
-   `active[]` or `blocked[]` (blocked slots keep their worktrees, so their ids stay
-   taken). Assign the whole wave's ids up front.
-2. Worktree path per repo: `$STATE_ROOT/ready-worktrees/<board key>-<login>/<slot_id>/<repo>`.
-3. Create it from the repo's `primary_clone`:
+   - **A child is tracked** (`ticket <repo>#<n> is already in <bucket>`): `skip` that child
+     with `reason="already in <bucket> of another slot"` and `begin` the slot again with the
+     same `slot_id` and its other children (the first one left names the slot). Repeat for
+     each refusal; a slot with no children left is dropped.
+   - **The parent is in an active slot** (`batch parent <ref> is already in active slot
+     <id>`): `skip` each of the slot's children with
+     `reason="its batch parent is in active slot <id>"`, and do not begin it this pass.
+3. Make each of its worktrees, `<wt-path>` being its entry in `worktree_paths` (a resumed
+   slot keeps the ones `git -C <clone> worktree list --porcelain` still lists):
+
    ```bash
-   git -C <primary_clone> worktree remove --force <wt-path> 2>/dev/null || true
-   git -C <primary_clone> worktree prune
-   git -C <primary_clone> fetch origin --prune
-   git -C <primary_clone> worktree add <wt-path> -b <slot_id>-ticket-<n> origin/<default_branch>
+   git -C <clone> fetch origin --prune
+   git -C <clone> worktree add --detach <wt-path> origin/<default_branch>
    ```
-   `<default_branch>` is the repo's `repo_map[<repo>].default_branch`. When it is null,
-   read it from the primary clone before the commands above:
-   `git -C <primary_clone> symbolic-ref --short refs/remotes/origin/HEAD` with the
-   leading `origin/` removed. If that fails, run `git -C <primary_clone> remote
-   set-head origin --auto` once and read it again. If it is still unknown, the slot is
-   `blocked_default_branch_unknown` with the repo named; append it to `blocked[]` and
-   continue with the rest of the wave. Store what you read in `repo_map` under lock.
-4. Append the slot record to `active[]` under lock with `step="synced"`,
-   `status="running"`.
 
-If worktree creation fails for a repo, mark the slot `blocked_worktree_create_failed`
-with the error, append it to `blocked[]`, and continue with the rest of the wave.
+   The worker names and makes its branch there (`<slot_id>-ticket-<n>`, or the batch branch,
+   with the `-r2` rule), as the protocol's "Where you work" says. `<default_branch>` is
+   `git -C <clone> symbolic-ref --short refs/remotes/origin/HEAD` with the leading `origin/`
+   removed; when that fails, run `git -C <clone> remote set-head origin --auto` once and read
+   it again. A path that already exists (a worktree an earlier run kept) goes through
+   **Cleanup** first; never `--force` it away. When the default branch is still unknown, the
+   path is still there, or `worktree add` fails, the slot is not dispatched: `finish` it with
+   `status=blocked_default_branch_unknown` or `blocked_worktree_create_failed` and the repo and
+   error (or the kept path), and go on with the next ticket.
 
-**7b. Dispatch in parallel.** In one turn, spawn one `ticket_worker` subagent per
-slot with `spawn_agent`, setting the model to the slot's `resolved_model` and the
-reasoning effort to `resolved_effort`. The agent file sets neither, so the spawn's
-values are the ones that run. The message is this payload:
+**7b. Dispatch.** Build one dispatch message per slot just begun or resumed, as the JSON in
+the `$ticket-worker` protocol's dispatch message section
+(`${CODEX_HOME:-~/.codex}/skills/ticket-worker/references/protocol.md`):
 
 ```json
 {
-  "slot_id": "<id>",
+  "mode": "dispatched",
+  "slot_id": "slot-1",
   "ticket_number": 182,
-  "repos": ["..."],
-  "item_ref": "<item_ref>",
+  "ticket_repo": "shop-app",
+  "repos": ["shop-app"],
+  "item_ref": "<board item handle, null where the tracker needs none>",
   "assignee": "<login>",
-  "worktree_paths": { "<repo>": "<wt-path>" },
-  "state_file": "<absolute state file path>",
-  "state_lock": "<absolute lock path>",
-  "model": "<resolved_model>",
+  "project": {
+    "tracker": "github", "host": "github.com", "board": {},
+    "tracker_ids": {}, "lanes": {}, "priorities": {}, "labels": {}, "model_labels": {}
+  },
+  "repo_map": { "shop-app": { "clone": "/abs/clone", "remote": "owner/shop-app", "brief": "/abs/README.md" } },
+  "worktree_root": "<abs $STATE_ROOT/ready-worktrees/<board key>-<login>>",
+  "worktree_paths": { "shop-app": "<abs worktree path from 7a>" },
+  "files": {
+    "adapter": "/abs/references/trackers/<tracker>.md",
+    "labels": "/abs/references/ticket-labels.md",
+    "ticket_template": "/abs/skills/write-ticket/assets/ticket-template.md",
+    "check_ticket": "/abs/scripts/check_ticket.py"
+  },
+  "model": "<resolved model>",
   "validate_plan_first": true,
-  "context_files": ["<owning repo's brief>"]
+  "context_files": ["/abs/brief.md"],
+  "large_guides": ["backend/AGENTS.md"]
 }
 ```
 
-The worker reads the tracker, board, lanes, labels and `repo_map` from `state.project`
-and hardcodes none of them. Each worker returns one short paragraph (ticket, final step
-and status, commit or review links, what blocks it); the slot in the state file is the
-record, so do not ask for logs. Wait for every worker in the wave before reaping.
+`project` comes from `set-project`. `files` are absolute paths with every symlink resolved
+(`realpath`): this skill's `references/trackers/<tracker>.md` and `references/ticket-labels.md`,
+`${CODEX_HOME:-~/.codex}/skills/write-ticket/assets/ticket-template.md` and
+`<scripts>/check_ticket.py`. `context_files` is the owning repo's brief, or the `--context`
+files. `large_guides` is the slot's over-budget files from step 5a; leave it out when there
+are none. Add `resume_worktrees` for a slot resumed after a locked signing key (7c) and
+`resumed: true` for every slot dispatched again under its earlier `slot_id` (step 2 and 7c).
+A batch slot also sends its `parent`, its ordered `children` and `files.batches` (this skill's
+`references/batches.md`, resolved), and its model and effort are the batch's; a single sends
+none of them. The worker reads the tracker, board, lanes, labels and `repo_map` from the
+message and hardcodes none of them.
 
-- **Thread limit.** If the Codex config sets `agents.max_concurrent_threads_per_session`
-  (older name `agents.max_threads`) below `--max-parallel`, use it as the wave size and
-  say so in the report. If a spawn still fails for lack of a free thread, spawn that
-  slot again as soon as a worker in the wave returns, and reap only after it finishes
-  too. After reaping a wave, close its worker threads, since open threads count against
-  the limit.
-- **Any other spawn error** (for example "agent type is currently not available",
-  meaning the agent file is missing or installed as a symlink) puts that slot in
-  `blocked[]` with the error text, and the report tells the user to rerun the pack's
-  `install.sh`. Never retry it in a loop.
+Then, in one turn, spawn one `ticket_worker` subagent per slot just begun or resumed, with the
+dispatch message as its message, the model set to the slot's `resolved_model` and the
+reasoning effort to its `resolved_effort`. The agent file sets neither, so the spawn's values
+are the ones that run. Do not poll the workers: wait on the running ones, and handle each the
+moment it finishes. Print nothing from step 8 until every dispatched worker has returned:
+ending the run earlier abandons the workers still going.
 
-**7c. Reap.** For each slot, under lock, re-read its entry:
+- **No free thread.** When a spawn fails for lack of a free thread, lower the pool size to the
+  number running, say so in the report, and spawn that slot again as soon as a worker returns;
+  if it fails a second time, `finish` it with `status=blocked_spawn_failed` and the error text
+  and clean up its worktrees.
+  Close each worker's thread once its result is recorded, since open threads count against the
+  limit.
+- **Any other spawn error** (for example "agent type is currently not available", meaning the
+  agent file is missing or installed as a symlink) puts that slot in `blocked` through
+  `finish` with `status=blocked_spawn_failed` and the error text, its worktrees are cleaned
+  up, and the report tells the user to rerun the pack's `install.sh`. Never retry it in a loop.
 
-- `status` starts with `blocked_`, or equals `needs_decision` or `needs_manual_action`:
-  copy the full record into `blocked[]` (keep `worktree_paths`), remove it from
-  `active[]`, leave the worktree (the branch and reviews may still need it),
-  print the reason and paths, and send one notification. `needs_manual_action` lands
-  in `blocked[]` like the others, told apart by its `status` and by the
-  `manual_action_refs` (review URLs) in its record. A `blocked_not_assigned` slot means
-  the ticket was reassigned after the queue was built: it is reported, nothing on the
-  ticket was touched, and it will not be dispatched again until it is assigned back.
-- `status == "review_opened"`: the worker built and tested the ticket and opened a
-  review; this is successful work, not a block. Copy `{ticket_number, repos,
-  ticket_repo, commit_sha, review_refs, started_at, resolved_tier, resolved_model,
-  resolved_effort}` into `completed[]`, remove it from `active[]`, then
-  ```bash
-  git -C <primary_clone> worktree remove --force <wt-path>
-  git -C <primary_clone> worktree prune
-  git -C <primary_clone> branch -D <slot_branch> 2>/dev/null || true
-  ```
-  The branch is on the remote, so nothing is lost; the report says the worktree was
-  removed. The issue stays open until the review merges.
-- `status == "running"` at an intermediate step (the worker returned without finishing
-  or blocking): anomalous. Leave it in `active[]` to resume next run, log a warning,
-  and dispatch no further waves this run.
+**7c. Reap and refill.** Each time a worker returns, handle that one slot straight away; do
+not wait for the others. The worker's last line is `RESULT {...}`:
 
-**7d.** Repeat from 7a until the queue and `active[]` are empty.
+- `status` starts with `blocked_`, or equals `needs_decision` or `needs_manual_action`: run
+  `finish` with the RESULT JSON. Leave its worktrees (the branch and reviews may still need
+  them). Print the reason and paths, and send one notification. `needs_manual_action` lands in
+  `blocked` like the others, told apart by its `status` and by `manual_action_refs` (review
+  URLs). A `blocked_not_assigned` slot means the ticket was reassigned after the queue was
+  built: it is reported, nothing on the ticket was touched, and it will not be dispatched
+  again until it is assigned back.
+- `status` is `blocked_sandbox` and the `reason` is a locked signing key: the worker kept its
+  staged change in the trees named in `worktree_paths` and held the ticket. Run `finish` with
+  the RESULT JSON like any blocked status. Ask the user once, at the first such stop, to
+  unlock the key, naming every ticket stopped this way; stops that arrive before they answer
+  join the same ask. Do not ask per worker. When the user says it is unlocked, that is the
+  person clearing the hold: resume all of those workers together. For a single,
+  **remove-label** the blocked label, **comment** `Unblocked: signing key unlocked.`, run
+  `ticket_state.py forget`, `begin` it again with the same `slot_id` and its
+  `worktree_paths`, and dispatch it as in 7b with `resume_worktrees` set from its
+  `worktree_paths` and `resumed: true`, all in one turn. For a batch slot: `forget` every
+  child of the slot; **remove-label** and the `Unblocked` comment only on the children whose
+  `children_status` is the signing-key stop; then `begin` it again with the same `slot_id` and
+  its children minus those held for any other reason (they stay blocked and are named in the
+  report), and dispatch it the same way. A stop that arrives after that asks again.
+- `status == "review_opened"`: the worker built and tested the ticket and opened a review;
+  this is successful work. Run `finish` with the RESULT JSON. The branch is on the remote, so
+  nothing is lost. The issue stays open until the review merges. Any `follow_up_refs` ride
+  along in the record; the worker already filed those tickets. A batch slot opens one review
+  for every finished child; its `children_status` names each child that was left out and
+  held, and those count as blocked in the report. Once `finish` has recorded it, clean up that
+  worker's worktrees (**Cleanup**, below).
+- No `RESULT` line, or a status that is not one of those: the worker ended without finishing
+  (a crash, or a thread that was closed). Leave the slot in `active` so the next run resumes
+  it, log a warning with the worker's last paragraph, and start no further tickets this run (a
+  halt); keep reaping the workers still running.
+
+After reaping, run a watcher tick (**One poller**) and go back to 7a so the freed slot takes
+the next ticket.
+
+**Cleanup.** A worktree left behind costs disk and slows every `git worktree` command in its
+clone, so clean up after every worker as it is reaped, never only at the end of the run, once
+its slot is recorded. The review's branch holds the commits, so removing the worktree loses
+nothing. For each path in the RESULT's `worktree_paths` (skip one that is already gone),
+remove it only when every check passes. `<path>` is written the way
+`git worktree list --porcelain` prints it: resolved, with no trailing slash, which is also how
+`lsof` prints directories; `cd <path> && pwd -P` gives that form.
+
+1. `git -C <path> status --porcelain --untracked-files=all` prints nothing.
+2. `git -C <path> symbolic-ref -q HEAD` succeeds: it is on a branch, not detached.
+3. `git -C <path> fetch origin <branch>` succeeds and
+   `git -C <path> merge-base --is-ancestor HEAD FETCH_HEAD` succeeds: every commit is on the
+   remote branch. When the fetch fails with `couldn't find remote ref` (the branch was deleted
+   after its review merged), the check passes only if the review reads `merged` or `closed`;
+   the local branch keeps the commits.
+4. No process has its working directory inside it: `lsof -d cwd -Fn` exits 0, writes nothing
+   to stderr and lists no `n` line equal to `<path>` or starting with `<path>/` (a bare prefix
+   also matches a sibling such as `<path>-2`). Any non-zero exit (127 for a missing `lsof`) or
+   any stderr warning fails the check. It sees only a working directory, and only of your own
+   user: a process of another user is hidden without a warning on Linux, and a process that
+   writes into the worktree from a cwd outside it (a file watcher, a Docker bind mount) is
+   invisible too, so the worker's own cleanup (stop what you started) is the guard
+   ([codex-ticket-notes.md](codex-ticket-notes.md), "Checked on Linux and macOS").
+
+A worktree made in 7a whose worker never started (a failed spawn, a slot blocked before
+dispatch) is clean and detached at `origin/<default_branch>`: check 1 alone decides it.
+
+Then, with `<clone>` the registry clone of that repo:
+
+```bash
+git -C <clone> worktree list --porcelain       # a "locked" line under <path>: keep it
+git -C <clone> worktree remove <path>          # never --force
+git -C <clone> worktree prune
+```
+
+Codex locks no worktree, so a locked one was locked by someone else, another tool or a
+person: never unlock it; keep it and list it under "Worktrees kept" as locked. Never pass
+`--force`: a refusal means one of the checks missed something, so keep the worktree and
+report it. When `remove` fails with `failed to delete`, git has already deleted part of the
+tree and unregistered it: keep the leftover directory, never `rm -rf` it, and report it as an
+orphan under "Worktrees kept". The local branch stays.
+
+One removal per worktree at a time: only the step that reaps a slot removes its worktrees, and
+it never starts a second `remove` of a path while one is still running (a retry, or a second
+reaper of the same slot). When `remove` fails with `could not open directory` or `is not a
+working tree`, treat it as another removal of that path in progress or just finished. Re-check
+first: run `git -C <clone> worktree list --porcelain` and test whether `<path>` still exists.
+Neither listed nor on disk: it is removed, so report it removed. Still listed: list it under
+"Worktrees kept" with the error and the words `another removal may be in progress`. On disk
+but no longer listed: report it as an orphan, as above.
+
+Keep, and list in the report with the failed check, the worktrees of workers still running, of
+every `blocked_*`, `needs_decision` and `needs_manual_action` slot whose worker ran (the
+branch and review may still need them), of a slot with no `RESULT`, and any that fail a check.
+
+**7d.** The loop ends when no worker is still running and either the queue is empty or a halt
+stopped new tickets. Slots a halt left in `active` go in the report as "Unfinished". Then run
+one last watcher tick, and sweep: for each worktree of this run still on disk (the
+`worktree_paths` of the run's `completed` and `blocked` entries) whose review **review-state**
+reads `merged` or `closed` (a `MERGED` line already says so), run the same checks and
+**Cleanup** commands. Run `git -C <clone> worktree prune` in every registry clone once more.
 
 ### 8. Completion
 
@@ -403,38 +591,59 @@ record, so do not ask for logs. Wait for every worker in the wave before reaping
 === work-tickets complete: board <board key> for <login> ===
 In review: <R>
   #190 <repo>: <review URL> (slot-2, workhorse <slug> medium, 9m; merging closes the issue)
+  parent <ref> <repo>: <review URL> (slot-3, frontier <slug> medium, closes #183 #184; #185 blocked)
+Waiting for a later batch slot: <Wb>
+  #186 <repo> (parent <ref>: over Batch size; or: another repo than the parent's)
+Follow-ups: <F>
+  #201 <repo>: <title> (from #190; a `not_filed` item is listed with its reason)
 Blocked: <M>
   #50 <repo>: blocked_push_rejected: non-fast-forward (worktree: ...)
   #189 <repo>: needs_manual_action: create the product for plan B and set PRICE_ID_B
     in the hosting env vars. Review https://... (worktree: ...)
-Skipped: <K>
+Not dispatched: <K>
   #60 "title": run:solo label: human-in-loop required
-Pre-existing blocked[] (carried over): <L>
+Unfinished (resume with the next run): <L>
+Over context budget: <G>
+  backend/AGENTS.md (<repo>): 395 KB, 379 KB over the limit; slots 2, 4, 5 read ~110k tokens each
+Conflicts and reviews ready to queue (from the board watcher): <C>
+  CONFLICT <repo>!<n>: <review URL>
+Worktrees kept: <W>
+  #50 <repo>: <path> (blocked_push_rejected; a failed check, a locked worktree or an orphan directory is named)
 Left alone: <A> Ready tickets assigned to others, <U> unassigned
 Held (carry the blocked label, not dispatched): <H>
   #71 <repo>: Blocked: dependency
 ```
 
-An "In review" line is not a problem to fix: the ticket is built and tested and waits
-for its reviewer, so the sentence on what needs the user says which reviews are open to
-merge, with their links. A ticket stays open until its review merges. A `needs_manual_action` line's reason names the live action and the review
-links from `manual_action_refs`; that tells the user at a glance which Blocked items
-are a bug to fix and which are a click to make. Follow the block with one plain
-sentence on what needs the user: the held tickets and the blocked tickets of this run,
-each with the kind of its most recent `Blocked:` comment (**read-issue**; a run's own
-`blocked_*` is a `failure`, `needs_decision` a `decision`, `needs_manual_action` a
-`live action`, and a blocked label with no such comment is "no Blocked comment"), and
-the manual actions with their links, and say that the "left alone" tickets are not this
-person's to work (the unassigned ones need an assignee before `$work-tickets` will
-pick them up). Then send the notification:
-`Ready worker complete: R in review, M blocked, K skipped (board <board key>, <login>)`.
-In review counts this run's `review_opened` tickets.
+An "In review" line needs nothing from anyone but its reviewer: the ticket is built and
+tested, and stays open until its review merges. A "Follow-ups" line comes from the
+`follow_up_refs` of `completed` and `blocked` entries: a new backlog ticket (or a comment on an
+existing one) for something the worker left undone, declined in review or noticed along the
+way, assigned to the same person and waiting for grooming. A `needs_manual_action` line's
+reason names the live action and the review links from `manual_action_refs`, which tells the
+user at a glance which Blocked items are a bug to fix and which are a click to make. An "Over
+context budget" line lists each file step 5a found over its limit, with the slots that loaded
+it and the advice to split it into area guides linked from the index; it is the user's to fix,
+and no worker edits it. A "Worktrees kept" line is one the cleanup left on purpose or could
+not remove; the user removes it (`git worktree remove <path>`) once its work is done. Follow
+the block with one plain sentence on what needs the user: the held tickets and the blocked
+tickets of this run, each with the kind of its most recent `Blocked:` comment
+(**read-issue**; a run's own `blocked_*` is a `failure`, `needs_decision` a `decision`,
+`needs_manual_action` a `live action`, and a blocked label with no such comment is "no Blocked
+comment"), the manual actions with their links, which reviews are open to merge and which
+conflict, and that the "left alone" tickets are not this person's to work (the unassigned ones
+need an assignee before `$work-tickets` will pick them up). Then send the notification:
+`Ready worker complete: R in review, M blocked, K not dispatched (board <board key>, <login>)`.
 
 ## Notes
 
-- **Full restart for one board and login:** delete its state file, then per repo in
-  `repo_map` run `git -C <primary_clone> worktree prune`, then remove
-  `$STATE_ROOT/ready-worktrees/<board key>-<login>/`.
-- **Retry** a completed or blocked ticket by removing its entry from `completed[]` or
-  `blocked[]`. The orchestrator never auto-retries a blocker.
-- `skipped[]` persists across runs; `--clear-skipped` empties it.
+- **Full restart for one board and login:** delete
+  `$STATE_ROOT/ready-worker-<board key>-<login>.json`, then `git worktree prune` in each
+  registry clone, and remove the worktrees under
+  `$STATE_ROOT/ready-worktrees/<board key>-<login>/` with **Cleanup**.
+- **Retry** a completed or blocked ticket with `ticket_state.py forget --number N --repo R` (a
+  batch child is forgotten alone, and the slot's `ticket_number` and `ticket_repo` move to its
+  first child left; the slot goes with its last child). The orchestrator never retries a
+  blocker by itself.
+- `skipped` persists across runs; `--clear-skipped` empties it.
+- Codex custom agents have no turn cap (the source's `maxTurns`), so a worker that runs long
+  is not cut off; one that ends without a `RESULT` is handled in 7c.

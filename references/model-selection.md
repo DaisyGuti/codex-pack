@@ -122,13 +122,18 @@ Name which axis a weak result needs, in your report:
 - **A different kind of call.** The unit turned out to hold one of the frontier
   judgments in the table. Move up a tier.
 
+A ticket worker that ran on the wrong tier posts a model-fit note on the ticket after its
+review opens (the ticket-worker protocol). The next person who assigns a model label reads
+it.
+
 ## Delegating
 
 A subagent takes its model and effort from the spawn, then the `[agents]` defaults
 in `config.toml`, then the parent. A custom agent file that sets either value
 overrides all of them (measured 2026-10-07: a spawn that asked for `fast` ran on the
 file's `workhorse` model), so no agent file in this pack sets one and every spawn
-names both, resolved from the table above.
+names both, resolved from the table above. A spawned `eng` agent runs at `frontier` /
+`medium` unless the unit names a model and effort (a ticket's labels), which win.
 
 Each subagent starts with about 21–25K tokens of context before it does any work
 (measured 2026-10-07 on one-word tasks), most of it cached after its first call.
@@ -150,3 +155,37 @@ tier or more below the parent.
   validator's result counts as validation.
 - Write messages to other agents so a person can read them: full sentences, proper
   spacing.
+
+## Ticket work
+
+The ticket skills (`$write-ticket`, `$plan-ticket`, `$daily-grooming`, `$work-tickets`,
+`$ticket-worker`) apply this guide through a ticket's labels.
+
+**From ticket label to model.** A ticket carries one model label. The registry's Model labels
+table maps each label to a tier; the `model:haiku`, `model:sonnet` and `model:opus` forms and
+the dated `model:claude-*` forms map to `fast`, `workhorse` and `frontier` when the table does
+not list them. Labels for different tiers on one ticket conflict: report it and pick none.
+Resolve the tier as above, with `--effort` from the ticket's `effort:<level>` label (`low`,
+`medium`, `high`, `xhigh` or `max`) when it has one, otherwise the tier's start from "Which
+tier": `high` for `fast`, `medium` for `workhorse` and `frontier`. A level the model does not
+support is clamped and the resolver's notes say so; pass them on. The report names the model
+each worker ran on.
+
+**Planning runs on frontier.** A plan and its model label decide what a cheaper worker
+builds, so a wrong plan costs a whole worker run, while a plan of about 200 words costs little
+on any tier. Planning therefore runs on the `frontier` tier at `medium` whatever the
+session's model. `$plan-ticket` and `$write-ticket --ready` resolve
+`frontier --effort medium`; when the session already runs on the printed model they plan
+inline, and otherwise (or when they cannot tell) they spawn one planning subagent, the
+built-in `default` agent, with that model and effort. `$daily-grooming` starts each planning
+subagent the same way. The rest of a run (filing, settling, label sync, lane moves) stays on
+the session's model. Resolve every time and never write a slug, so planning moves to each
+new frontier model on its own.
+
+**Passing the model and effort at spawn.** A `ticket_worker` spawn, and every sub-worker or
+`reviewer` a worker starts, names its model and reasoning effort explicitly. The agent files
+set neither (see "Delegating"), so the spawn's values are the ones that run.
+
+**Weight.** The tier is also the ticket's planned size. When the registry's Model labels table
+gives a tier a weight, planning sets the issue's weight to it (the pack's
+`references/ticket-labels.md`, "Model label").

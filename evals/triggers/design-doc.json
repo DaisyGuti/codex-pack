@@ -1,0 +1,82 @@
+[
+  {
+    "query": "write a design doc for adding rate limiting to the public API",
+    "should_trigger": true
+  },
+  {
+    "query": "I need an RFC for moving our batch jobs to a queue, can you draft it",
+    "should_trigger": true
+  },
+  {
+    "query": "compare approaches for caching user permissions and write up the design",
+    "should_trigger": true
+  },
+  {
+    "query": "tech spec for the new export service, with options and a recommendation",
+    "should_trigger": true
+  },
+  {
+    "query": "propose how we should build offline sync for the mobile app",
+    "should_trigger": true
+  },
+  {
+    "query": "write up the design for replacing our cron jobs with a scheduler. include security considerations",
+    "should_trigger": true
+  },
+  {
+    "query": "before we build the audit log, help me think through the options and write them down in docs",
+    "should_trigger": true
+  },
+  {
+    "query": "draft an RFC: should we adopt a feature flag service or keep config files",
+    "should_trigger": true
+  },
+  {
+    "query": "design doc please for the SSO migration, our reviewers want the data handled and trust boundaries spelled out",
+    "should_trigger": true
+  },
+  {
+    "query": "write the design for a webhook retry system, with rollout and open questions",
+    "should_trigger": true
+  },
+  {
+    "query": "we decided on Postgres for the audit log. record it as an ADR",
+    "should_trigger": false
+  },
+  {
+    "query": "write the API reference for the export service",
+    "should_trigger": false
+  },
+  {
+    "query": "give me a quick pros and cons list for Redis vs Memcached, no document needed",
+    "should_trigger": false
+  },
+  {
+    "query": "review the design in docs/design/0004-queue.md and tell me what is weak",
+    "should_trigger": false
+  },
+  {
+    "query": "write a threat model for the login flow",
+    "should_trigger": false
+  },
+  {
+    "query": "implement the rate limiter we discussed",
+    "should_trigger": false
+  },
+  {
+    "query": "draft a status update on the design work for Friday",
+    "should_trigger": false
+  },
+  {
+    "query": "write a runbook for restoring the database",
+    "should_trigger": false
+  },
+  {
+    "query": "write the product requirements for the export feature",
+    "should_trigger": false
+  },
+  {
+    "query": "summarize this RFC for the team in three bullets",
+    "should_trigger": false
+  }
+]

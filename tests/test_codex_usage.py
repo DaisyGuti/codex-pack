@@ -202,6 +202,7 @@ def guardian(codex: FakeCodex, n: int, at: float, tokens: dict[str, int]) -> str
 def no_real_catalog(monkeypatch: pytest.MonkeyPatch) -> None:
     """The unpriced-model check reads the live Codex catalog; no test may reach the real one."""
     monkeypatch.setattr(cu, "listed_catalog_slugs", lambda: [])
+    monkeypatch.setattr(cu, "model_tier", lambda slug: "frontier" if slug == "gpt-6-sol" else None)
 
 
 @pytest.fixture
@@ -563,6 +564,69 @@ def test_the_summary_aggregates_by_skill_and_by_model_with_medians(
     assert (
         next(line for line in out.splitlines() if line.startswith("gpt-6-luna")).split()[1] == "3"
     )
+
+
+# --- subagent roles, projects and frontier subagents that look mechanical ----------------------
+
+
+def _spawn(offset: float) -> dict[str, Any]:
+    return event(
+        offset, "response_item", {"type": "function_call", "name": "spawn_agent", "arguments": "{}"}
+    )
+
+
+def test_the_summary_splits_by_subagent_role_and_project_and_leads_with_mechanical_frontier_runs(
+    codex: FakeCodex, capsys: pytest.CaptureFixture[str]
+) -> None:
+    codex.thread(1, at=0, lines=rollout(0, tokens=usage(1000, 0, 100)))
+    # frontier children: a read-only scout, one that wrote a patch, one that spawned, one long
+    codex.thread(
+        2, at=1, parent=1, role="explorer", model="gpt-6-sol", prompt="list the call sites",
+        lines=rollout(1, model="gpt-6-sol", tokens=usage(2000, 0, 300)),
+    )  # fmt: skip
+    codex.thread(
+        3, at=2, parent=1, role="worker", model="gpt-6-sol", prompt="rename the flag",
+        lines=rollout(
+            2, model="gpt-6-sol", tokens=usage(2000, 0, 300),
+            extra=[_call(3, "custom_tool_call", "input", "*** Begin Patch\n*** End Patch")],
+        ),
+    )  # fmt: skip
+    codex.thread(
+        4, at=3, parent=1, role="worker", model="gpt-6-sol", prompt="split the job",
+        lines=rollout(3, model="gpt-6-sol", tokens=usage(2000, 0, 300), extra=[_spawn(4)]),
+    )  # fmt: skip
+    codex.thread(
+        5, at=4, parent=1, role="worker", model="gpt-6-sol", prompt="write the whole thing",
+        lines=rollout(4, model="gpt-6-sol", tokens=usage(2000, 0, cu.MECH_OUTPUT_MAX + 1)),
+    )  # fmt: skip
+    codex.thread(
+        6, at=5, parent=1, role="explorer", model="gpt-6-luna", prompt="list the files",
+        lines=rollout(5, tokens=usage(2000, 0, 300)),
+    )  # fmt: skip
+
+    assert cu.main(["--summary"]) == 0
+    out = capsys.readouterr().out
+    roles = {
+        line.split()[0]: line.split()[1]
+        for line in out.splitlines()
+        if line[:1].isalpha() or line[:1] == "("
+    }
+    assert roles["explorer"] == "2" and roles["worker"] == "3" and roles["(root)"] == "1"
+    assert any(line.startswith("/work/repo") for line in out.splitlines())
+    lead_block = out.split("look mechanical", 1)[1]
+    assert "explorer: 'list the call sites' on gpt-6-sol" in lead_block
+    assert "reads as search, list or summarize work" in lead_block
+    for skipped in ("rename the flag", "split the job", "write the whole thing", "list the files"):
+        assert skipped not in lead_block
+
+
+def test_a_frontier_subagent_with_no_readable_rollout_is_not_called_mechanical(
+    codex: FakeCodex, capsys: pytest.CaptureFixture[str]
+) -> None:
+    codex.thread(1, at=0, lines=rollout(0, tokens=usage(1000, 0, 100)))
+    codex.thread(2, at=1, parent=1, role="explorer", model="gpt-6-sol", lines=None)
+    assert cu.main(["--summary"]) == 0
+    assert capsys.readouterr().out.split("look mechanical", 1)[1].count("none") >= 1
 
 
 # --- unpriced models -----------------------------------------------------------------------

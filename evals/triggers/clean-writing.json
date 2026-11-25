@@ -1,0 +1,90 @@
+[
+  {
+    "query": "This README reads like ChatGPT wrote it. Clean it up: docs/README.md",
+    "should_trigger": true
+  },
+  {
+    "query": "de-slop this paragraph before I paste it into the design review: \"We have leveraged a robust, cutting-edge approach that seamlessly unlocks value.\"",
+    "should_trigger": true
+  },
+  {
+    "query": "tighten up the PR description I'm about to post, it's way too wordy",
+    "should_trigger": true
+  },
+  {
+    "query": "Can you make docs/adr/0007-queue.md clearer and shorter? Keep every number.",
+    "should_trigger": true
+  },
+  {
+    "query": "rewrite this ticket body in plain English so a new hire gets it on one read",
+    "should_trigger": true
+  },
+  {
+    "query": "Go through every file in docs/runbooks and cut the filler. Show me the changes before you touch anything.",
+    "should_trigger": true
+  },
+  {
+    "query": "this Slack message is too long, make it concise but keep the times and links: \"Hi all! Just a quick heads up that ...\"",
+    "should_trigger": true
+  },
+  {
+    "query": "Our architecture doc is 400 lines and nobody can find anything. Reorganize it with a contents list and better headings.",
+    "should_trigger": true
+  },
+  {
+    "query": "edit the release notes in CHANGELOG.md for clarity, just apply the fixes directly",
+    "should_trigger": true
+  },
+  {
+    "query": "Proofread my incident report for AI-sounding phrases and hedging like 'may have impacted'",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a brand new README for this CLI from scratch",
+    "should_trigger": false
+  },
+  {
+    "query": "Translate docs/onboarding.md into Spanish",
+    "should_trigger": false
+  },
+  {
+    "query": "Write marketing copy for our launch page hero, punchy and exciting",
+    "should_trigger": false
+  },
+  {
+    "query": "Review the diff on this branch for bugs before I merge",
+    "should_trigger": false
+  },
+  {
+    "query": "Fix the failing test in tests/test_dates.py",
+    "should_trigger": false
+  },
+  {
+    "query": "File a ticket for the login timeout bug",
+    "should_trigger": false
+  },
+  {
+    "query": "Optimize this system prompt for gpt-5 and tell me which model to run it on",
+    "should_trigger": false
+  },
+  {
+    "query": "Review this checkout screenshot for usability",
+    "should_trigger": false
+  },
+  {
+    "query": "Generate an AGENTS.md for this repo from its files",
+    "should_trigger": false
+  },
+  {
+    "query": "How many tokens did my Codex runs use this week?",
+    "should_trigger": false
+  },
+  {
+    "query": "Draft a Slack message for #platform asking someone to review PR 214 before Friday. It adds retries to the upload client.",
+    "should_trigger": false
+  },
+  {
+    "query": "We decided to move background jobs from Celery to Cloud Tasks. Write the ADR for it.",
+    "should_trigger": false
+  }
+]
