@@ -17,7 +17,7 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/write-ticket/`](skills/write-ticket/SKILL.md) | `$write-ticket`: checks the premise against the real repo, then files an issue in the shape and with the labels the ticket workers need |
 | [`skills/plan-ticket/`](skills/plan-ticket/SKILL.md) | `$plan-ticket`: writes a ticket's short build plan (files, pattern to copy, how to tell it's done) and sets its model and run labels, so the plan can be read before a worker builds it |
 | [`skills/daily-grooming/`](skills/daily-grooming/SKILL.md) | `$daily-grooming`: tidies the whole board: settles closed items, syncs priorities, flags duplicates and gaps, promotes to Ready and plans what is unplanned |
-| [`skills/work-tickets/`](skills/work-tickets/SKILL.md) | `$work-tickets`: works your Ready tickets in parallel waves, each on the model its label names |
+| [`skills/work-tickets/`](skills/work-tickets/SKILL.md) | `$work-tickets`: works your Ready tickets with a rolling pool of parallel workers, each on the model its label names |
 | [`skills/ticket-worker/`](skills/ticket-worker/SKILL.md) | `$ticket-worker`: works one issue from plan to an open pull or merge request; merging closes the issue |
 | [`skills/ux-review/`](skills/ux-review/SKILL.md) | `$ux-review`: reviews a screen, flow, mockup or screenshot for usability, accessibility and visual craft |
 | [`skills/web-design-guidelines/`](skills/web-design-guidelines/SKILL.md) | `$web-design-guidelines`: audits UI code against Vercel's Web Interface Guidelines, fetched fresh each run |
@@ -127,6 +127,16 @@ is a one-page picture of the flow below, from filing to merge.
   person can read the plan first; `$daily-grooming` does that for the whole board.
   `$work-tickets` builds your Ready tickets in parallel, and `$ticket-worker` builds
   one. A worker writes the plan itself when a ticket has none.
+- **Ready means planned.** A ticket reaches the ready lane only with a `### Final Plan`
+  and no open blocker; `$plan-ticket` and `$write-ticket --ready` post the plan and move
+  it there in one step. Planning runs on the frontier tier whatever the session's model,
+  and sets the issue's weight from its model tier when the registry gives one.
+- **Workers check their own work.** Ticket workers review their own diff (the `reviewer`
+  agent on large or risky diffs, then `codex review`, then one read-only Claude read when
+  the Claude CLI is installed), file unfixed findings and known gaps as follow-up tickets
+  (at most five per run), and can split a change across parallel `worker` sub-workers.
+  The Codex facts these rely on are in
+  [`references/codex-ticket-notes.md`](references/codex-ticket-notes.md).
 - **How work lands.** Every change the pack makes goes on a branch and into the
   default branch by pull request (merge request on GitLab); Codex never commits or
   pushes to the default branch itself, even where a repo's own instructions allow

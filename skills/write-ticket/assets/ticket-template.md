@@ -1,6 +1,6 @@
 ## Context
 
-<One paragraph. What this is, why it exists, and what it is conditional on. Name the bet or the failure it answers, not a restatement of the title.>
+<One paragraph. What this is, why it exists, and what it is conditional on. Name the bet or the failure it answers.>
 
 ## Acceptance Criteria
 
@@ -10,7 +10,7 @@
 
 ## Out of scope
 
-- <Only what a reader would otherwise reasonably include. Say which version it belongs to if it is deferred rather than rejected.>
+- <Only what a reader would otherwise reasonably include. Say which version it belongs to when it is deferred.>
 
 ## Dependencies
 
