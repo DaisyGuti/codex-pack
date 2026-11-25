@@ -32,6 +32,8 @@ for the P variants; `/write-ticket` is `$write-ticket`, `/plan-next` is
   `$dockerfile-harden`'s, a built image to scan, sign or verify is `$image-supply-chain`'s,
   a GitHub Actions or GitLab CI pipeline to audit is `$ci-harden`'s, a Google Cloud project to
   review is `$gcp-review`'s, and a GitHub-to-GitLab move is `$gitlab-migration`'s.
+  A request to clean up, tighten or de-slop existing writing (a doc, README, ADR, PR or
+  MR body, ticket, message or docs folder) is `$clean-writing`'s.
 - For a Slack catch-up, a Slack draft or send, a standup or weekly update, a design doc
   or RFC, or an architecture decision record, read and follow the matching skill:
   `${CODEX_HOME:-~/.codex}/skills/slack-catchup/SKILL.md`, `slack-draft`, `slack-send`,

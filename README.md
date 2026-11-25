@@ -19,6 +19,7 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/daily-grooming/`](skills/daily-grooming/SKILL.md) | `$daily-grooming`: tidies the whole board: settles closed items, syncs priorities, flags duplicates and gaps, promotes to Ready and plans what is unplanned |
 | [`skills/work-tickets/`](skills/work-tickets/SKILL.md) | `$work-tickets`: works your Ready tickets with a rolling pool of parallel workers, each on the model its label names |
 | [`skills/ticket-worker/`](skills/ticket-worker/SKILL.md) | `$ticket-worker`: works one issue from plan to an open pull or merge request; merging closes the issue |
+| [`skills/clean-writing/`](skills/clean-writing/SKILL.md) | `$clean-writing`: edits a doc, README, ADR, PR or MR body, ticket, message or docs folder to be clear and concise, keeping every fact; proposes a numbered table of rewrites before it edits a file |
 | [`skills/ux-review/`](skills/ux-review/SKILL.md) | `$ux-review`: reviews a screen, flow, mockup or screenshot for usability, accessibility and visual craft |
 | [`skills/web-design-guidelines/`](skills/web-design-guidelines/SKILL.md) | `$web-design-guidelines`: audits UI code against Vercel's Web Interface Guidelines, fetched fresh each run |
 | [`skills/composition-patterns/`](skills/composition-patterns/SKILL.md) | `$composition-patterns`: Vercel's React composition rules (compound components, state in providers, explicit variants) for component APIs |
@@ -50,13 +51,14 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/design-doc/`](skills/design-doc/SKILL.md) | `$design-doc`: design doc or RFC with a required security and compliance section, saved in the repo's docs folder |
 | [`skills/adr/`](skills/adr/SKILL.md) | `$adr`: numbered MADR architecture decision record, with superseded records linked |
 | [`skills/guardrails-help/`](skills/guardrails-help/SKILL.md) + [`hooks/hooks.json`](hooks/hooks.json) | The guardrails `PreToolUse` hook ([`scripts/guardrails.py`](scripts/guardrails.py)) blocks risky shell commands and edits; `$guardrails-help` explains a block and lists the rules and recent blocks |
-| [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, `ui_ux` (renders a page in Chrome, reviews the screenshots and fixes what is wrong), and the read-only `reviewer`, `forward_tester` and `security_auditor` |
+| [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, `writing_editor`, `ui_ux` (renders a page in Chrome, reviews the screenshots and fixes what is wrong), and the read-only `reviewer`, `forward_tester` and `security_auditor` |
 | [`references/model-selection.md`](references/model-selection.md) | Which model tier and effort for which kind of work |
 | [`references/ticket-labels.md`](references/ticket-labels.md) | When each ticket label goes on, and how held work is marked |
 | [`references/testing-without-api-spend.md`](references/testing-without-api-spend.md) | When to test with `codex exec` or the Codex SDK on the ChatGPT sign-in, and when an API key is really needed |
 | [`docs/connect-slack.md`](docs/connect-slack.md) | How to connect Slack to Codex as an MCP server, for the Slack skills |
 | [`references/trackers/`](references/trackers/) | How each tracker operation is done on GitHub (`gh`) and on GitLab (`glab`) |
 | [`scripts/resolve_model.py`](scripts/resolve_model.py) | Turns a tier into a model your account has, with a supported effort |
+| [`scripts/check_facts.py`](scripts/check_facts.py) | Lists the numbers, links and code an edit dropped, for `$clean-writing` |
 | [`scripts/codex_usage.py`](scripts/codex_usage.py) | Per-run usage from Codex's own records |
 | [`scripts/inventory_model_calls.py`](scripts/inventory_model_calls.py) | Finds every place a repository calls an AI model, with file:line evidence, for `$model-usage-audit` |
 | [`scripts/uswds_check.py`](scripts/uswds_check.py) | Installed against latest USWDS version, `usa-` classes the stylesheet does not define, and page facts, for `$uswds` |
@@ -64,7 +66,7 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`registry.example.md`](registry.example.md) | Template for the tracker, board, lanes, labels and repo list the ticket skills read |
 | [`evals/triggers/`](evals/triggers/) | For each skill, about 20 requests that should and should not trigger it, for testing its description |
 | [`docs/sources.md`](docs/sources.md) | The documentation and measurements behind the design |
-| [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | Where the UX and accessibility skills come from, and their licenses |
+| [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) | Where the UX, accessibility and writing skills come from, and their licenses |
 
 ## Install on a new machine
 
@@ -189,6 +191,7 @@ is a one-page picture of the flow below, from filing to merge.
 ```text
 $eng fix the failing date parser in src/dates.ts
 $prompt-optimizer --file path/to/prompt.md
+$clean-writing docs/runbook.md
 $write-ticket add rate limiting to the signup endpoint
 $plan-ticket
 $daily-grooming --dry-run

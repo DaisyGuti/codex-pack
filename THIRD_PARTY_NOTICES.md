@@ -16,6 +16,7 @@ Every copied or adapted file was modified for Codex; each notice file says how.
 | [`react-best-practices`](skills/react-best-practices/SKILL.md) | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) at `063bee9` | MIT | [`skills/react-best-practices/LICENSE.txt`](skills/react-best-practices/LICENSE.txt) |
 | [`react-native-skills`](skills/react-native-skills/SKILL.md) | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) at `063bee9` | MIT | [`skills/react-native-skills/LICENSE.txt`](skills/react-native-skills/LICENSE.txt) |
 | [`ux-review`](skills/ux-review/SKILL.md) (partly) | [phazurlabs/sumi](https://github.com/phazurlabs/sumi) | Apache-2.0 | [`skills/ux-review/LICENSE-sumi.txt`](skills/ux-review/LICENSE-sumi.txt) |
+| [`clean-writing`](skills/clean-writing/SKILL.md) (the plain-English rules and word swaps) | [AminBlg/SimpleEnglish](https://github.com/AminBlg/SimpleEnglish) | MIT | [`skills/clean-writing/LICENSE.txt`](skills/clean-writing/LICENSE.txt) |
 | [`eng`](skills/eng/SKILL.md) (the ExecPlan reference and the `reviewer` agent) | [openai/openai-cookbook](https://github.com/openai/openai-cookbook) | MIT | [OpenAI Cookbook notice](#openai-cookbook-mit) below |
 | [`prompt-optimizer`](skills/prompt-optimizer/SKILL.md) (partly) | [openai/openai-cookbook](https://github.com/openai/openai-cookbook) | MIT | [OpenAI Cookbook notice](#openai-cookbook-mit) below |
 | [`gcp-review`](skills/gcp-review/SKILL.md) (the CIS recommendation IDs and titles in one data file) | [prowler-cloud/prowler](https://github.com/prowler-cloud/prowler) | Apache-2.0 | none; the IDs and titles were read from Prowler's listing, attribution in the notes below |
@@ -60,6 +61,11 @@ Every copied or adapted file was modified for Codex; each notice file says how.
   [`skills/section-508-report/data/vpat-text.json`](skills/section-508-report/data/vpat-text.json)
   so a report follows the template. ITI's reuse terms were not checked when this pack was
   assembled. Confirm them before sharing the pack outside the team.
+- **AminBlg/SimpleEnglish.** In `clean-writing`, the plain-English pass in `SKILL.md`,
+  `references/plain-english.md` and the word-swap table in `references/slop-patterns.md`
+  are adapted from the `simple-english` skill and its references, read at commit
+  `300432a`. The text was shortened and reworded. It holds no ASD-STE100 standard or
+  dictionary text.
 - **WCAG 2.2 and the W3C ARIA documents.** `ux-review/references/accessibility.md`
   cites success criteria and short rule statements from
   [WCAG 2.2](https://www.w3.org/TR/WCAG22/) and
