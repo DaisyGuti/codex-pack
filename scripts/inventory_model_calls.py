@@ -35,6 +35,9 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from safe_git import git_argv, git_env  # noqa: E402
+
 PRUNE_DIRS = {
     ".git", "node_modules", ".venv", "venv", "env", "__pycache__", "dist", "build", "target",
     ".next", ".tox", ".mypy_cache", ".ruff_cache", ".pytest_cache", "coverage", "site-packages",
@@ -303,11 +306,11 @@ def tracked_env_files(root: Path) -> list[str]:
     try:
         # The scanned repo is untrusted: its config must not run commands (core.fsmonitor).
         out = subprocess.run(
-            ["git", "-c", "core.fsmonitor=false", "-C", str(root), "ls-files", "-z"],
+            git_argv(root, "ls-files", "-z"),
             capture_output=True,
             text=True,
             check=False,
-            env={**os.environ, "GIT_CONFIG_NOSYSTEM": "1"},
+            env=git_env(),
         )
     except FileNotFoundError:
         return []

@@ -950,16 +950,6 @@ def test_the_mirror_carries_no_config_from_the_repository(
     assert "fsmonitor" not in config and "bare = true" in config
 
 
-def test_git_gets_neither_system_nor_user_config(
-    branch_repo: tuple[Path, Path], monkeypatch: pytest.MonkeyPatch
-) -> None:
-    monkeypatch.setenv("GIT_DIR", "/elsewhere")
-    monkeypatch.setenv("GIT_CONFIG_COUNT", "1")
-    env = ss.isolated_git_env()
-    assert env["GIT_CONFIG_NOSYSTEM"] == "1" and env["GIT_CONFIG_GLOBAL"] == "/dev/null"
-    assert "GIT_DIR" not in env and "GIT_CONFIG_COUNT" not in env
-
-
 def test_the_gitleaks_history_pass_reads_the_mirror_not_the_repository(tmp_path: Path) -> None:
     raw = tmp_path / "raw"
     plain = ss.TOOLS["gitleaks"].commands(tmp_path, raw, "")

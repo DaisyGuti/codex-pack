@@ -42,6 +42,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from safe_git import isolated_git_env  # noqa: E402
+
 SEVERITY_ORDER = ["critical", "high", "medium", "low", "info", "unknown"]
 RANK = {name: index for index, name in enumerate(SEVERITY_ORDER)}
 # Within one severity, an exposed credential comes first because it needs no exploit.
@@ -553,22 +556,6 @@ def normalize_path(name: str) -> str | None:
 # the scanned repository's config at all: one isolated copy is made first (`git clone --mirror
 # --no-local`, which carries objects and refs and none of the config), and every later git call
 # runs on that copy with the system and user config switched off.
-
-
-def isolated_git_env() -> dict[str, str]:
-    """The environment for every git process this script (or a scanner) starts."""
-    env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_CONFIG_")}
-    for name in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR"):
-        env.pop(name, None)
-    env.update(
-        {
-            "GIT_CONFIG_NOSYSTEM": "1",
-            "GIT_CONFIG_GLOBAL": "/dev/null",
-            "GIT_OPTIONAL_LOCKS": "0",
-            "GIT_TERMINAL_PROMPT": "0",
-        }
-    )
-    return env
 
 
 @dataclass(frozen=True)

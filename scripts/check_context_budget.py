@@ -47,6 +47,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from safe_git import git_argv, git_env  # noqa: E402
+
 CONFIG_NAME = ".context-budget.toml"
 DEFAULT_GUIDE_BYTES = 16_384  # about 4k tokens: room for a root guide and an area guide
 DEFAULT_TOTAL_BYTES = 32_768  # Codex's default project_doc_max_bytes, global file included
@@ -174,11 +177,13 @@ def chain(root: Path, folder: Path, names: tuple[str, ...]) -> list[Path]:
 def repo_guides(root: Path, names: tuple[str, ...]) -> list[Path]:
     """Every instruction file in the repo, root first: tracked and unignored files in a git
     repo (fast, skips ignored dependencies), a walk otherwise."""
+    # The repo is untrusted: its config must not run programs (core.fsmonitor, gpg.program).
     git = subprocess.run(
-        ["git", "-C", str(root), "ls-files", "-z", "--cached", "--others", "--exclude-standard"]
+        git_argv(root, "ls-files", "-z", "--cached", "--others", "--exclude-standard")
         + [f"*{name}" for name in names],
         capture_output=True,
         check=False,
+        env=git_env(),
     )
     if git.returncode == 0 and (root / ".git").exists():
         found = {

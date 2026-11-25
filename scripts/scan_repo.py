@@ -24,6 +24,9 @@ from pathlib import Path
 from typing import Any, NoReturn
 from urllib.parse import urlparse
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from safe_git import git_argv, git_env  # noqa: E402
+
 # Directories that hold third-party or generated code; walking them only adds noise.
 SKIP_DIRS = {".git", "node_modules", "vendor", ".venv", "venv", "dist", "build", "__pycache__"}
 # Dockerfiles deeper than this are almost always fixtures or vendored examples.
@@ -59,9 +62,15 @@ INSTRUCTION_FILES = (
 
 
 def git(root: Path, *args: str) -> str | None:
-    """Run a read-only git command in `root`; return stdout, or None when git says no."""
+    """Run a read-only git command in `root`; return stdout, or None when git says no. The repo
+    is untrusted: its config must not run programs (see safe_git.py)."""
     proc = subprocess.run(
-        ["git", "-C", str(root), *args], capture_output=True, text=True, timeout=30, check=False
+        git_argv(root, *args),
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+        env=git_env(),
     )
     return proc.stdout.strip() if proc.returncode == 0 else None
 
@@ -259,15 +268,28 @@ def requirements_facts(files: list[Path], root: Path) -> list[dict[str, Any]]:
     return result
 
 
+def sampled_commits(root: Path) -> list[tuple[bool, str]]:
+    """(carries a signature, subject) for the latest commits. Read from the raw commit objects:
+    `%G?` would run gpg, and the repo's config must not choose which program that is. So this
+    reports a signature present, not verified."""
+    raw = git(root, "log", f"-n{COMMIT_SAMPLE}", "--no-show-signature", "--format=raw")
+    commits: list[tuple[bool, str]] = []
+    for line in (raw or "").splitlines():
+        if line.startswith("commit "):
+            commits.append((False, ""))
+        elif commits and line.startswith(("gpgsig ", "gpgsig-sha256 ")):
+            commits[-1] = (True, commits[-1][1])
+        elif commits and line.startswith("    ") and not commits[-1][1]:
+            commits[-1] = (commits[-1][0], line.strip())  # the subject: first message line
+    return commits
+
+
 def commit_facts(root: Path) -> dict[str, Any]:
-    log = git(root, "log", f"-n{COMMIT_SAMPLE}", "--format=%G?%x09%s")
-    rows = [r.split("\t", 1) for r in (log or "").splitlines() if "\t" in r]
-    signed = sum(1 for status, _ in rows if status != "N")
-    conventional = sum(1 for _, subject in rows if CONVENTIONAL.match(subject))
+    rows = sampled_commits(root)
     return {
         "sampled": len(rows),
-        "with_signature": signed,
-        "conventional_commits": conventional,
+        "with_signature": sum(1 for signed, _ in rows if signed),
+        "conventional_commits": sum(1 for _, subject in rows if CONVENTIONAL.match(subject)),
         "gpgsign_config": git(root, "config", "--get", "commit.gpgsign"),
     }
 
