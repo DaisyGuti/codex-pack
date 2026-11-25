@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -367,3 +368,21 @@ def test_text_report_lists_sections(tmp_path: Path, capsys: pytest.CaptureFixtur
     for heading in ("Call sites", "Model ids", "Dependencies", "Routing hints", "Not covered"):
         assert heading in text
     assert "app/llm.py:6" in text
+
+
+def test_repo_git_config_cannot_run_commands(tmp_path: Path) -> None:
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    marker = tmp_path / "ran"
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "config", "core.fsmonitor", f"touch {marker}; false"],
+        check=True,
+    )
+    (tmp_path / ".env").write_text("X=1\n")
+    subprocess.run(
+        ["git", "-C", str(tmp_path), "add", ".env"],
+        check=True,
+        env={**os.environ, "GIT_CONFIG_PARAMETERS": "'core.fsmonitor=false'"},
+    )
+    marker.unlink(missing_ok=True)
+    assert scan(tmp_path)["tracked_env_files"] == [".env"]
+    assert not marker.exists()

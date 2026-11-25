@@ -301,8 +301,13 @@ def settings_in(block: str) -> list[str]:
 
 def tracked_env_files(root: Path) -> list[str]:
     try:
+        # The scanned repo is untrusted: its config must not run commands (core.fsmonitor).
         out = subprocess.run(
-            ["git", "-C", str(root), "ls-files"], capture_output=True, text=True, check=False
+            ["git", "-c", "core.fsmonitor=false", "-C", str(root), "ls-files", "-z"],
+            capture_output=True,
+            text=True,
+            check=False,
+            env={**os.environ, "GIT_CONFIG_NOSYSTEM": "1"},
         )
     except FileNotFoundError:
         return []
@@ -310,8 +315,8 @@ def tracked_env_files(root: Path) -> list[str]:
         return []
     return [
         f
-        for f in out.stdout.splitlines()
-        if ENV_NAME.search(f) and not ENV_TEMPLATE.search(Path(f).name)
+        for f in out.stdout.split("\0")
+        if f and ENV_NAME.search(f) and not ENV_TEMPLATE.search(Path(f).name)
     ]
 
 
