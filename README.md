@@ -34,6 +34,7 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`references/testing-without-api-spend.md`](references/testing-without-api-spend.md) | When to test with `codex exec` or the Codex SDK on the ChatGPT sign-in, and when an API key is really needed |
 | [`references/trackers/`](references/trackers/) | How each tracker operation is done on GitHub (`gh`) and on GitLab (`glab`) |
 | [`scripts/resolve_model.py`](scripts/resolve_model.py) | Turns a tier into a model your account has, with a supported effort |
+| [`scripts/deps.py`](scripts/deps.py) | Finds dependency cycles, dependencies on a tracker or batch parent, dependencies whose work already merged, and holds that have cleared, from a board's tickets as JSON |
 | [`scripts/codex_usage.py`](scripts/codex_usage.py) | Per-run usage from Codex's own records |
 | [`registry.example.md`](registry.example.md) | Template for the tracker, board, lanes, labels and repo list the ticket skills read |
 | [`evals/triggers/`](evals/triggers/) | For each skill, about 20 requests that should and should not trigger it, for testing its description |

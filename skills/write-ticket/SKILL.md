@@ -89,8 +89,11 @@ label; apply it rather than restating it here.
   ticket unassigned.
 - **Blocked:** when a `Depends on:` issue is still open (**issue-state**), the ticket
   gets the registry's blocked label and a `Blocked: dependency` comment naming each open
-  dependency (shape in ticket-labels.md). It keeps the lane it was filed in. The
-  workers' unblock step frees it when the last dependency closes.
+  dependency (shape in ticket-labels.md), and goes to the blocked lane: the label and the
+  lane always agree. Name the issue that does the work, never a tracker or batch parent, and
+  never one whose own dependencies lead back here (`$plan-ticket`'s plan-one-ticket.md,
+  "Before naming a dependency").
+  `$daily-grooming` frees it when the last dependency closes.
 
 ## 5. File it
 
@@ -101,8 +104,8 @@ operations are fine, nothing is created.
    blocked), using the registry's color and description; `project:` labels get color
    `ededed` and the description "Product: <repo>". Area labels are never created.
 2. **create-issue** with the title, body and labels (this also adds it to the board).
-3. **set-priority**, then **set-lane**. When the ticket is blocked, **comment** with the
-   `Blocked: dependency` comment.
+3. **set-priority**, then **set-lane** (the blocked lane when the ticket is blocked). When
+   it is blocked, **comment** with the `Blocked: dependency` comment.
 4. **assign** when `--assignee` was given.
 
 `--ticket N`: run **read-issue** first and keep the old body. Stop and say so if the

@@ -27,7 +27,8 @@ The tracker, board, lanes, priorities, labels, model labels and repos come from
 its commands in `references/trackers/<tracker>.md` for the registry's tracker. Read
 that one file once and run each operation as written. If a role this skill needs is
 missing from the registry (the ready lane, say), stop and name the row to add. Bundled
-script: `scripts/resolve_model.py` (see the report).
+scripts: `scripts/resolve_model.py` (see the report) and `scripts/deps.py`, the dependency
+check [references/plan-one-ticket.md](references/plan-one-ticket.md) step 2 uses.
 
 ## 1. Pick the ticket
 

@@ -30,7 +30,7 @@ the steps, in order:
 2. fetch the items and settle closed or merged work to done, before anything else looks
    at it;
 3. flag duplicates;
-4. audit each open ticket, with the priority sync;
+4. audit each open ticket: the priority sync, the dependency check, held work;
 5. triage lanes, and order the Ready lane;
 6. apply the changes;
 7. make every Ready ticket dispatchable, planning each unplanned one with
@@ -43,7 +43,7 @@ Every tracker action is a named operation; its commands are in
 Priority, run, model and blocked labels mean what [references/ticket-labels.md](references/ticket-labels.md)
 says. Planning subagents take their model and effort from
 [references/model-selection.md](references/model-selection.md) through the bundled
-`scripts/resolve_model.py`.
+`scripts/resolve_model.py`; the dependency check is `scripts/deps.py`.
 
 The standing rules:
 
@@ -51,8 +51,12 @@ The standing rules:
   audited, prioritised, triaged or planned.
 - **Never touch a ticket a worker or a person put somewhere.** A ticket in progress, in
   the blocked lane, carrying the blocked label, or with an open linked review keeps its
-  lane and is never planned. Grooming only flags the ones that look wrong: a blocked label
-  with no `Blocked:` comment, and a ticket in the blocked lane without the label.
+  lane and is never planned. The one move grooming makes among them keeps the blocked label
+  and the blocked lane in agreement, both ways; it flags a blocked label with no `Blocked:`
+  comment.
+- **Holds that can never clear are reported.** `scripts/deps.py` finds dependency cycles,
+  dependencies on a tracker or batch parent, and dependencies whose work already merged; each
+  goes under Needs Attention with the re-point to make.
 - **Never change an assignee.** A Ready ticket with no assignee is listed under Needs
   Attention, because `$work-tickets` works only tickets assigned to its person.
 - **Preserve labels.** Remove only a priority label being replaced; add rather than remove

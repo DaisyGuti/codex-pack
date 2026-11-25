@@ -32,22 +32,53 @@ bold; run them as the adapter file writes them.
    - **one** targeted search for the primary symbol or file the ticket names.
 
    That is all. Do not survey the repo, and do not research other tickets.
-5. For each issue the body names on a `Depends on:`, `Blocked by:` or `Blocked on:`
-   line, run **issue-state**.
+5. For each issue the body names on a `Depends on:`, `Blocked by:` or `Blocked on:` line,
+   run **issue-state**, and check each open one by step 2's "Before naming a dependency".
 
 ## 2. Hold it instead, when there is nothing sound to plan
 
+**Before naming a dependency.** A hold that waits on something that waits on it never clears,
+so check every issue before it goes on a `Depends on:` line or in a `Blocked: dependency`
+comment, whether this ticket's body named it or the plan adds it:
+
+1. **read-issue** it and each open issue on its own `Depends on:`, `Blocked by:` or `Blocked
+   on:` lines, two levels down. A chain that leads back to this ticket, or to a ticket this
+   one was cut from, is a cycle: do not name that issue. Name the one link in the chain that
+   does the work this ticket needs, or hold with kind `decision` when none does, and say which
+   chain it was.
+2. **A tracker or a batch parent closes last**, so never name one. An issue is a tracker when
+   it was cut into parts (its parts' bodies say `Part <N> of <M>` and name it) and a batch
+   parent when it lists other tickets as its children. Name the open part or child whose work
+   this ticket needs instead.
+3. **Work already merged frees nothing.** Run **merged-reviews** on each open issue. One that
+   prints a review has its work on the default branch (a review that only said `Refs` leaves
+   its issue open): do not name it, and say in the returned line that it may be ready to close.
+
+On a grooming pass, `scripts/deps.py` (relative to this skill folder; its docstring holds the
+input) does all three for the whole board at once; use its report rather than reading the
+chains again.
+
+**Cutting a ticket into parts.** When a person accepts a cut (or asks for one) and the parts
+are filed, each part's body opens with `Part <N> of <M>, cut by layer from <ref>`, so
+`deps.py` and the next planner see the family. In the same step, run **list-open-issues** and
+read each body for the cut ticket's ref, and re-point every open ticket that names it on a
+`Depends on:` line, or in the latest `Blocked: dependency` comment, to the specific part it
+needs (**edit-issue** the line, then **comment** the change). A part never names the ticket it
+was cut from.
+
 Do not write a plan, and hold the ticket, in two cases:
 
-- **A dependency is still open** (step 1.5): kind `dependency`, naming each open issue.
+- **A dependency is still open** (step 1.5) and passes "Before naming a dependency" above:
+  kind `dependency`, naming each open issue.
 - **The ticket is too vague to plan.** A section would need more than a paragraph, or
   you cannot state what done looks like. Expanding the plan is the wrong response:
   kind `decision`, listing the missing facts as questions, each with your recommended
   answer.
 
 Holding follows [ticket-labels.md](ticket-labels.md), "Blocked": **ensure-label** and
-**add-label** for the registry's blocked label, then **comment** in the `Blocked:`
-shape. The ticket keeps its lane, because no one has started it. Return
+**add-label** for the registry's blocked label, then **comment** in the `Blocked:` shape,
+then **set-lane** with role `blocked` from whatever lane it sits in. The label and the
+blocked lane always agree: a held ticket never waits in the backlog or ready lane. Return
 `held: <kind>`. In a dry run, print what you would post and write nothing.
 
 ## 3. Write the plan, one pass
