@@ -25,13 +25,18 @@ Fail closed, as far as Codex allows
     hook itself fails, so a missing `python3` or a hook timeout lets the call through.
 
 Opting out of a rule (people only)
-    A repo lists rule ids, one per line, in `.codex/guardrails-allow.txt` at its git root (or
-    the session directory outside a repo). Nothing the model can set from inside a session
-    turns a rule off: the allowlist is read by this process, never from the command or its
-    environment, and writes to it (patches, shell redirects, sed -i, cp, mv, rm and friends)
-    are blocked by the `guardrails-tamper` rule, which cannot itself be listed. The same rule
-    guards this script, the hooks.json files that run it, the block log, and Codex settings
-    that switch hooks off.
+    A person lists rule ids, one per line, in `${CODEX_HOME:-~/.codex}/guardrails-allow/<key>.txt`.
+    The key names the repo: `<basename>-<16 hex>`, where the basename is the git root's last
+    path component with anything outside `A-Za-z0-9._-` turned into `-`, and the hex is the
+    first 16 digits of the SHA-256 of the git root's absolute path with symlinks resolved (the
+    session directory outside a repo). `guardrails.py --allow-path [DIR]` prints the file.
+    The waiver file lives outside the repo on purpose: a repo's own `.codex/guardrails-allow.txt`
+    is ignored (a cloned repo must not switch rules off), and the block message says so.
+    Nothing the model can set from inside a session turns a rule off: the allowlist is read by
+    this process, never from the command or its environment, and writes to it (patches, shell
+    redirects, sed -i, cp, mv, rm and friends) are blocked by the `guardrails-tamper` rule,
+    which cannot itself be listed. The same rule guards this script, the hooks.json files that
+    run it, the block log, and Codex settings that switch hooks off.
 
 Logging
     Every block (and every time an allowlisted rule would have fired) appends one JSON
@@ -55,6 +60,7 @@ from __future__ import annotations
 
 import fnmatch
 import glob
+import hashlib
 import json
 import math
 import os
@@ -172,8 +178,8 @@ RULES: list[Rule] = [
         "changing the guardrails allowlist, the hook script, hooks.json or the Codex settings "
         "that switch hooks off",
         "a rule that the agent can switch off mid-session is not a rule",
-        "Ask the user to edit `.codex/guardrails-allow.txt` through a reviewed change, or to "
-        "change the hook settings themselves.",
+        "Ask the user to edit their waiver file under `${CODEX_HOME:-~/.codex}/guardrails-allow/` "
+        "themselves, or to change the hook settings themselves.",
         allowlistable=False,
     ),
     Rule(
@@ -187,7 +193,9 @@ RULES: list[Rule] = [
 RULE_BY_ID: dict[str, Rule] = {r.id: r for r in RULES}
 
 ALLOW_FILE = "guardrails-allow.txt"
-ALLOW_DIR = ".codex"  # the allowlist lives at <project>/.codex/guardrails-allow.txt
+ALLOW_DIR = ".codex"  # <project>/.codex/guardrails-allow.txt is a repo-shipped waiver: ignored
+ALLOW_STORE = "guardrails-allow"  # under CODEX_HOME: one <key>.txt per repo, a person's own
+ALLOW_KEY_HEX = 16  # digits of the project path's SHA-256 in a waiver file's key
 LOG_DIR = "guardrails"  # under CODEX_HOME
 LOG_NAME = "blocks.log"
 HOOKS_FILE = "hooks.json"
@@ -770,6 +778,7 @@ class Ctx:
         self.guarded_files |= _both(os.path.join(self.codex_home, SKILL_SCRIPT))
         self.guarded_files |= _both(os.path.join(self.codex_home, HOOKS_FILE))
         self.guarded_dirs: set[str] = _both(self.data_dir)  # the block log
+        self.guarded_dirs |= _both(os.path.join(self.codex_home, ALLOW_STORE))  # the waivers
         # Where Codex keeps hook trust: deleting or truncating it untrusts every hook.
         self.config_files: set[str] = _both(os.path.join(self.codex_home, "config.toml"))
 
@@ -844,9 +853,23 @@ class Ctx:
         return False
 
 
-def load_allowlist(project_dir: str) -> set[str]:
-    """Rule ids a person listed in `<project>/.codex/guardrails-allow.txt`."""
-    path = os.path.join(project_dir, ALLOW_DIR, ALLOW_FILE)
+def allowlist_key(project_dir: str) -> str:
+    """The waiver file's name for a project: `<basename>-<16 hex of sha256(absolute path)>`."""
+    slug = re.sub(r"[^A-Za-z0-9._-]+", "-", os.path.basename(project_dir.rstrip("/")))
+    slug = slug.strip("-.") or "root"
+    digest = hashlib.sha256(project_dir.encode("utf-8")).hexdigest()[:ALLOW_KEY_HEX]
+    return f"{slug}-{digest}"
+
+
+def allowlist_path(codex_home: str, project_dir: str) -> str:
+    """`<codex_home>/guardrails-allow/<key>.txt`, outside every repo and under the tamper rule."""
+    return os.path.join(codex_home, ALLOW_STORE, allowlist_key(project_dir) + ".txt")
+
+
+def load_allowlist(codex_home: str, project_dir: str) -> set[str]:
+    """Rule ids a person listed in the project's waiver file under *codex_home*. A file the
+    repo ships is never read."""
+    path = allowlist_path(codex_home, project_dir)
     try:
         with open(path, encoding="utf-8") as fh:
             lines = fh.read().splitlines()
@@ -2036,7 +2059,7 @@ class Analyzer:
     def _mentions_guarded(self, code: str) -> bool:
         """Whether inline code (`python3 -c '...'`) names the allowlist, a hooks.json, this
         script or the block log."""
-        names = (ALLOW_FILE, HOOKS_FILE, _real(__file__), os.path.join(LOG_DIR, LOG_NAME))
+        names = (ALLOW_STORE, HOOKS_FILE, _real(__file__), os.path.join(LOG_DIR, LOG_NAME))
         return any(n in code for n in names)
 
     @staticmethod
@@ -2297,7 +2320,7 @@ def decide(raw: str, environ: Mapping[str, str]) -> tuple[int, str]:
         return 0, ""
 
     ctx = Ctx(payload, environ)
-    allowed = load_allowlist(ctx.project_dir)
+    allowed = load_allowlist(ctx.codex_home, ctx.project_dir)
     live = [f for f in findings if f.rule not in allowed]
     waived = [f for f in findings if f.rule in allowed]
     tool_input = payload.get("tool_input")
@@ -2325,7 +2348,13 @@ def decide(raw: str, environ: Mapping[str, str]) -> tuple[int, str]:
             "detail": redact(live[0].detail),
         },
     )
-    return 2, message_for(live[0], len(live) - 1)
+    text = message_for(live[0], len(live) - 1)
+    if os.path.isfile(os.path.join(ctx.project_dir, ALLOW_DIR, ALLOW_FILE)):
+        text += (
+            f" This repo ships {ALLOW_DIR}/{ALLOW_FILE}; repo-shipped waivers are ignored. "
+            f"Waivers are read from {allowlist_path(ctx.codex_home, ctx.project_dir)}."
+        )
+    return 2, text
 
 
 def default_data_dir(environ: Mapping[str, str]) -> str:
@@ -2386,8 +2415,14 @@ def main(argv: list[str]) -> int:
                 data_dir = argv[idx + 1] if idx + 1 < len(argv) else ""
             print(recent(data_dir or default_data_dir(os.environ), count))
             return 0
+        if argv[1] == "--allow-path":
+            ctx = Ctx({"cwd": argv[2] if len(argv) > 2 else os.getcwd()}, os.environ)
+            print(allowlist_path(ctx.codex_home, ctx.project_dir))
+            return 0
         print(
-            "usage: guardrails.py [--list-rules | --recent [N] [--data-dir DIR]]", file=sys.stderr
+            "usage: guardrails.py [--list-rules | --recent [N] [--data-dir DIR] | "
+            "--allow-path [DIR]]",
+            file=sys.stderr,
         )
         return 64
     try:

@@ -34,7 +34,9 @@ def test_frontmatter_follows_the_conventions() -> None:
 
 def test_skill_matches_the_hook() -> None:
     text = SKILL.read_text(encoding="utf-8")
-    assert f"{G.ALLOW_DIR}/{G.ALLOW_FILE}" in text
+    assert f"${{CODEX_HOME:-~/.codex}}/{G.ALLOW_STORE}/<key>.txt" in text
+    assert f"{G.ALLOW_DIR}/{G.ALLOW_FILE}" in text  # named only to say a repo's copy is ignored
+    assert f'python3 "{INSTALLED_SCRIPT}" --allow-path' in text
     for rule_id in ("gcp-public-access", "guardrails-tamper", "cannot-decide"):
         assert rule_id in G.RULE_BY_ID and rule_id in text
     for rule in G.RULES:

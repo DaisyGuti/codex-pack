@@ -236,9 +236,14 @@ shell command and `apply_patch` edit before it runs. It blocks protected-branch 
 force-pushes, skipped git hooks, downloaded code run unread, TLS verification turned off,
 public GCP access, service account key creation, privileged containers, destructive
 deletes, and credentials written into files or read from secret files. It also blocks
-changes to itself, its hook file and the settings that turn hooks off. A repo turns a rule
-off by committing `.codex/guardrails-allow.txt` (one rule id per line) through review;
-Codex cannot write that file. A person runs a blocked command in their own terminal.
+changes to itself, its hook file and the settings that turn hooks off. A person turns a rule
+off per repo in `${CODEX_HOME:-~/.codex}/guardrails-allow/<key>.txt` (one rule id per line;
+`guardrails.py --allow-path` prints the file). The key is `<basename>-<16 hex>`: the git root's
+last path component, then the first 16 hex digits of the SHA-256 of its absolute path (symlinks
+resolved; the session directory outside a repo). A repo's own `.codex/guardrails-allow.txt` is
+ignored, so a cloned repo cannot switch rules off, and Codex cannot write the waiver file: the
+same tamper rule that protects `hooks.json` covers it. A person runs a blocked command in their
+own terminal.
 
 Limits: it reads only the command line and the patch, not MCP tools, script files, aliases
 or computed values. It fails closed on its own errors, but Codex has no fail-closed setting

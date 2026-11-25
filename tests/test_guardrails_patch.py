@@ -246,6 +246,7 @@ def test_the_hook_script_and_hooks_files_are_tamper(world: World) -> None:
         world.repo / ".codex" / "hooks.json",
         world.repo / "sub" / ".codex" / "hooks.json",
         world.data / "blocks.log",
+        world.codex_home / "guardrails-allow" / "repo-0123.txt",
     ):
         assert world.patch(update_file(str(path), "-a\n+b")) == ["guardrails-tamper"], path
 

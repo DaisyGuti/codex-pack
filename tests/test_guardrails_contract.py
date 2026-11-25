@@ -4,6 +4,7 @@ the allowlist, the CLI the help skill uses, and the packaging that installs it."
 from __future__ import annotations
 
 import ast
+import hashlib
 import io
 import json
 import os
@@ -243,24 +244,55 @@ def test_log_rolls_over_when_large(world: World) -> None:
 # --- the allowlist -----------------------------------------------------------------
 
 
-def write_allowlist(root: Path, text: str) -> None:
-    (root / ".codex").mkdir(exist_ok=True)
-    (root / ".codex" / "guardrails-allow.txt").write_text(text, encoding="utf-8")
+def write_allowlist(world: World, root: Path, text: str) -> Path:
+    """A person's waiver file for the project at *root*, in the Codex home."""
+    path = Path(G.allowlist_path(str(world.codex_home), os.path.realpath(root)))
+    path.parent.mkdir(exist_ok=True)
+    path.write_text(text, encoding="utf-8")
+    return path
 
 
 def test_an_allowlisted_rule_lets_the_call_through_and_is_logged(world: World) -> None:
-    write_allowlist(world.repo, "# the team publishes this bucket on purpose\ngcp-public-access\n")
+    write_allowlist(
+        world, world.repo, "# the team publishes this bucket on purpose\ngcp-public-access\n"
+    )
     proc = world.run_hook(bash_payload(world, "gsutil iam ch allUsers:objectViewer gs://b"))
     assert proc.returncode == 0
     assert read_log(world)[0]["event"] == "allowed-by-config"
 
 
+def test_a_repo_cannot_ship_its_own_waivers(world: World) -> None:
+    shipped = world.repo / ".codex" / "guardrails-allow.txt"
+    shipped.parent.mkdir(exist_ok=True)
+    shipped.write_text("git-push-protected\ngcp-public-access\n", encoding="utf-8")
+    proc = world.run_hook(bash_payload(world, "git push origin main"))
+    assert proc.returncode == 2
+    assert "repo-shipped waivers are ignored" in proc.stderr
+    assert G.allowlist_path(str(world.codex_home), os.path.realpath(world.repo)) in proc.stderr
+    assert G.load_allowlist(str(world.codex_home), os.path.realpath(world.repo)) == set()
+    # no repo file, no note
+    shipped.unlink()
+    assert "ignored" not in world.run_hook(bash_payload(world, "git push origin main")).stderr
+
+
+def test_the_waiver_file_is_keyed_by_the_repos_absolute_path(world: World, tmp_path: Path) -> None:
+    key = G.allowlist_key("/work/My Repo")
+    assert key.startswith("My-Repo-") and len(key) == len("My-Repo-") + 16
+    assert key == G.allowlist_key("/work/My Repo")
+    assert key != G.allowlist_key("/other/My Repo")  # same name, another path
+    expected = hashlib.sha256(b"/work/My Repo").hexdigest()[:16]
+    assert key == f"My-Repo-{expected}"
+    out = run_cli("--allow-path", str(world.repo), env=world.env).stdout.strip()
+    assert out == G.allowlist_path(str(world.codex_home), os.path.realpath(world.repo))
+    assert Path(out).parent == world.codex_home / "guardrails-allow"
+
+
 def test_the_allowlist_at_the_git_root_applies_in_a_subdirectory(world: World) -> None:
-    write_allowlist(world.repo, "gcp-public-access\n")
+    write_allowlist(world, world.repo, "gcp-public-access\n")
     payload = bash_payload(world, "gsutil iam ch allUsers:objectViewer gs://b")
     payload["cwd"] = str(world.repo / "build")
     assert world.run_hook(payload).returncode == 0
-    write_allowlist(world.repo / "build", "git-push-protected\n")  # not the project root
+    write_allowlist(world, world.repo / "build", "git-push-protected\n")  # not the project root
     assert (
         world.run_hook({**payload, "tool_input": {"command": "git push origin main"}}).returncode
         == 2
@@ -272,41 +304,43 @@ def test_outside_a_repository_the_session_directory_holds_the_allowlist(
 ) -> None:
     outside = tmp_path / "outside"
     outside.mkdir()
-    write_allowlist(outside, "tls-verify-off\n")
+    write_allowlist(world, outside, "tls-verify-off\n")
     payload = bash_payload(world, "curl -k https://x.test")
     payload["cwd"] = str(outside)
     assert world.run_hook(payload).returncode == 0
 
 
 def test_allowlisting_one_rule_leaves_the_others_on(world: World) -> None:
-    write_allowlist(world.repo, "gcp-public-access\n")
+    write_allowlist(world, world.repo, "gcp-public-access\n")
     assert world.run_hook(bash_payload(world, "git push origin main")).returncode == 2
 
 
 def test_one_command_hitting_two_rules_needs_both_allowlisted(world: World) -> None:
     command = "git push --force origin main"
-    write_allowlist(world.repo, "git-force-push-protected\n")
+    write_allowlist(world, world.repo, "git-force-push-protected\n")
     assert world.run_hook(bash_payload(world, command)).returncode == 2
-    write_allowlist(world.repo, "git-force-push-protected\ngit-push-protected\n")
+    write_allowlist(world, world.repo, "git-force-push-protected\ngit-push-protected\n")
     assert world.run_hook(bash_payload(world, command)).returncode == 0
 
 
 @pytest.mark.parametrize("line", ["guardrails-tamper", "cannot-decide", "*", "all", "everything"])
 def test_unlistable_rules_and_wildcards_do_nothing(world: World, line: str) -> None:
-    write_allowlist(world.repo, f"{line}\n")
+    path = write_allowlist(world, world.repo, f"{line}\n")
     assert world.run_hook(bash_payload(world, "git push origin main")).returncode == 2
-    tamper = bash_payload(world, "echo x > .codex/guardrails-allow.txt")
+    tamper = bash_payload(world, f"echo x > {path}")
     assert world.run_hook(tamper).returncode == 2
 
 
 def test_comments_blank_lines_and_unknown_ids_are_ignored(world: World) -> None:
-    write_allowlist(world.repo, "\n# note\n  git-no-verify   # trailing note\nnot-a-rule\n")
-    assert G.load_allowlist(str(world.repo)) == {"git-no-verify"}
+    write_allowlist(world, world.repo, "\n# note\n  git-no-verify   # trailing note\nnot-a-rule\n")
+    codex_home = str(world.codex_home)
+    assert G.load_allowlist(codex_home, os.path.realpath(world.repo)) == {"git-no-verify"}
 
 
 def test_a_missing_allowlist_means_nothing_is_allowed(world: World, tmp_path: Path) -> None:
-    assert G.load_allowlist(str(world.repo)) == set()
-    assert G.load_allowlist(str(tmp_path / "nowhere")) == set()
+    codex_home = str(world.codex_home)
+    assert G.load_allowlist(codex_home, os.path.realpath(world.repo)) == set()
+    assert G.load_allowlist(codex_home, str(tmp_path / "nowhere")) == set()
 
 
 def test_the_agent_cannot_turn_a_rule_off_from_inside_a_session(world: World) -> None:

@@ -18,8 +18,9 @@ the agent does not.
    (`glab mr create`).
 3. Do not retry the same goal in another form: other flags, `sh -c`, a script file, a split
    command, a variable. That is the evasion the rules exist to stop.
-4. Never write to `.codex/guardrails-allow.txt`, the hook script, a `hooks.json` or the hook
-   settings in `config.toml`. The `guardrails-tamper` rule blocks it; only a person changes them.
+4. Never write to a waiver file under `${CODEX_HOME:-~/.codex}/guardrails-allow/`, the hook
+   script, a `hooks.json` or the hook settings in `config.toml`. The `guardrails-tamper` rule
+   blocks it; only a person changes them.
 
 ## Show the rules
 
@@ -38,30 +39,38 @@ python3 "${CODEX_HOME:-~/.codex}/skills/guardrails-help/scripts/guardrails.py" -
 
 It reads `${CODEX_HOME:-~/.codex}/guardrails/blocks.log`. Each line is JSON with `ts`, `event`,
 `rules`, `tool`, `cwd`, `session` and `command` (credential-shaped text replaced by
-`[redacted]`). `event` is `block`, or `allowed-by-config` when the repo's allowlist let a rule
-through. Group repeats by rule so the user sees patterns.
+`[redacted]`). `event` is `block`, or `allowed-by-config` when the person's waiver file let a
+rule through. Group repeats by rule so the user sees patterns.
 
 ## How a person runs a blocked command on purpose
 
 The hook fires only on the agent's tool calls, so a person has these routes:
 
 1. **One time:** run the command in their own terminal.
-2. **A repo that needs a rule off:** a person creates `.codex/guardrails-allow.txt` at the
-   repository root, one rule id per line, `#` for comments:
+2. **A repo that needs a rule off:** a person lists the rule ids, one per line with `#` for
+   comments, in `${CODEX_HOME:-~/.codex}/guardrails-allow/<key>.txt`. The key names the repo:
+   `<basename>-<16 hex>`, the git root's last path component (anything outside `A-Za-z0-9._-`
+   becomes `-`) and the first 16 hex digits of the SHA-256 of its absolute path with symlinks
+   resolved (the session directory outside a repo). Print the file's path rather than work it out:
+
+   ```sh
+   python3 "${CODEX_HOME:-~/.codex}/skills/guardrails-help/scripts/guardrails.py" --allow-path
+   ```
 
    ```text
-   # the docs bucket is public on purpose (reviewed in the pull request that added it)
+   # the docs bucket is public on purpose
    gcp-public-access
    ```
 
-   They write it in an editor or their own terminal, never through the agent, and commit it
-   through a pull or merge request: it applies to everyone working in that repo. Unknown ids are
-   ignored, so a typo leaves the rule on. `guardrails-tamper` and `cannot-decide` cannot be
-   listed.
+   They write it in an editor or their own terminal, never through the agent. It applies to that
+   checkout on that machine only. A `.codex/guardrails-allow.txt` committed in a repo is ignored
+   (a cloned repo must not switch rules off); the block message says so when one exists. Unknown
+   ids are ignored, so a typo leaves the rule on. `guardrails-tamper` and `cannot-decide` cannot
+   be listed.
 3. **Turn the hook off:** in Codex, `/hooks` (Settings > Hooks in the app) disables it, or the
    person removes the entry from `${CODEX_HOME:-~/.codex}/hooks.json`.
 
-Nothing a command or an environment variable says can turn a rule off. Only that file can.
+Nothing a command or an environment variable says can turn a rule off. Only the waiver file can.
 
 ## Install and trust
 
