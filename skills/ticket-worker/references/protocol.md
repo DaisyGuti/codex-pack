@@ -565,11 +565,11 @@ Then, on the owning repo:
      its closing reason does; otherwise file a new ticket and link the closed one.
    - Otherwise fill `files.ticket_template` into a temporary file as `$write-ticket` does:
      the Agent Instructions sections 1 to 3 and 5 copied exactly and section 4's audience
-     filled from the repo's brief (or "this repo's existing users"), the Agent Prompt,
-     `Depends on: None`, concrete acceptance criteria, a `- [ ] TBD: <the question>` bullet
-     for any fact you do not have, and no secret or controlled data. The last line of
-     Context is `Found in <review link> (<repo>#<n>).`, with the link of the review that
-     holds the code. Run `python3 <files.check_ticket> <file>` and fix what it prints; when
+     filled from the repo's brief (or "this repo's existing users"), the Agent Prompt, no
+     dependency line (a dependency is a blocked-by link, never body text), concrete
+     acceptance criteria, a `- [ ] TBD: <the question>` bullet for any fact you do not
+     have, and no secret or controlled data. The last line of Context is `Found in <review
+     link> (<repo>#<n>).`, with the link of the review that holds the code. Run `python3 <files.check_ticket> <file>` and fix what it prints; when
      it still fails on the second run, record the item as not filed with its output.
    - Labels and board, judged by `files.labels` (Priority, Run label, Model label):
      **ensure-label** for the run label, the model label and `project:<repo>` (its color and
@@ -614,10 +614,11 @@ is found later with **search-issues** on the keywords `Model-fit note`.
 **What you leave to the merge.** You do not close the issue, check that it closed, move the
 card to `done`, or clear the `dependency` hold on a ticket that waited on this one. The
 merge closes the issue through the closing keyword; the next `$daily-grooming` pass settles
-it to done and removes the blocked label from a dependent whose dependencies are all closed
-(`files.labels`, "Clearing it"). Conflicts and review comments that arrive later are picked
-up by the board watcher's `CONFLICT` events and the next `$work-tickets` run, or by Codex
-cloud's review when the team uses it; no local tool wakes a session for them.
+it to done and clears the hold on a dependent whose blockers (its blocked-by links,
+**list-blockers**) are all closed (`files.labels`, "Clearing it"). Conflicts and review
+comments that arrive later are picked up by the board watcher's `CONFLICT` events and the next
+`$work-tickets` run, or by Codex cloud's review when the team uses it; no local tool wakes a
+session for them.
 
 ## 9. Needs manual action
 

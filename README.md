@@ -59,7 +59,8 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`references/trackers/`](references/trackers/) | How each tracker operation is done on GitHub (`gh`) and on GitLab (`glab`) |
 | [`scripts/resolve_model.py`](scripts/resolve_model.py) | Turns a tier into a model your account has, with a supported effort |
 | [`scripts/check_facts.py`](scripts/check_facts.py) | Lists the numbers, links and code an edit dropped, for `$clean-writing` |
-| [`scripts/deps.py`](scripts/deps.py) | Finds dependency cycles, dependencies on a tracker or batch parent, dependencies whose work already merged, and holds that have cleared, from a board's tickets as JSON |
+| [`scripts/deps.py`](scripts/deps.py) | Finds dependency cycles, blocked-by links to a tracker or batch parent, links whose work already merged, and holds that have cleared, from a board's tickets as JSON |
+| [`scripts/links.py`](scripts/links.py) | Reads a board's native blocked-by links into `deps.py`'s input, and turns old `Depends on:` lines into links (a dry run unless `--apply`) |
 | [`scripts/codex_usage.py`](scripts/codex_usage.py) | Per-run usage from Codex's own records |
 | [`scripts/inventory_model_calls.py`](scripts/inventory_model_calls.py) | Finds every place a repository calls an AI model, with file:line evidence, for `$model-usage-audit` |
 | [`scripts/uswds_check.py`](scripts/uswds_check.py) | Installed against latest USWDS version, `usa-` classes the stylesheet does not define, and page facts, for `$uswds` |
