@@ -36,12 +36,13 @@ single-product board: otherwise each ticket is judged against its own repo's bri
    named operation shown in bold in the procedure.
 3. Read [references/grooming.md](references/grooming.md) in full. It holds the steps, in
    order: set up and capture the board; fetch the items and settle closed or merged work to
-   done before anything else looks at it; flag duplicates; audit each open ticket, with the
-   priority sync; group related tickets under batch and epic parents; triage lanes and order
-   the Ready lane; apply the changes; make every Ready ticket dispatchable; print the summary,
-   with the Ready lane cut into waves by `<scripts>/waves.py`. The batch steps run only when
-   batching is on (`registry.py show` prints `batching`, and its `mode` is not `off`); they
-   follow [references/batches.md](references/batches.md), which you then read in full too.
+   done before anything else looks at it; flag duplicates; audit each open ticket: the
+   priority sync, the dependency check with `<scripts>/deps.py`, held work; group related
+   tickets under batch and epic parents; triage lanes and order the Ready lane; apply the
+   changes; make every Ready ticket dispatchable; print the summary, with the Ready lane cut
+   into waves by `<scripts>/waves.py`. The batch steps run only when batching is on
+   (`registry.py show` prints `batching`, and its `mode` is not `off`); they follow
+   [references/batches.md](references/batches.md), which you then read in full too.
 4. Planning follows [references/plan-one-ticket.md](references/plan-one-ticket.md), the same
    procedure `$plan-ticket` uses, with its parent, batch, duplicate and grooming checks.
    Planning runs on the `frontier` tier whatever the session's model
@@ -59,8 +60,11 @@ single-product board: otherwise each ticket is judged against its own repo's bri
   audited, prioritised, triaged or planned.
 - **Never touch a ticket a worker or a person put somewhere.** A ticket in progress, in the
   blocked lane, carrying the blocked label, or with an open linked review keeps its lane and
-  is never planned. Grooming only flags the ones that look wrong: a blocked label with no
-  `Blocked:` comment, and a ticket in the blocked lane without the label.
+  is never planned. The one move grooming makes among them keeps the blocked label and the
+  blocked lane in agreement, both ways; it flags a blocked label with no `Blocked:` comment.
+- **Holds that can never clear are reported.** `<scripts>/deps.py` finds dependency cycles,
+  dependencies on a tracker or batch parent, and dependencies whose work already merged; each
+  goes under Needs Attention with the re-point to make.
 - **Never change an assignee.** A Ready ticket with no assignee is listed under Needs
   Attention, because `$work-tickets` works only tickets assigned to its person.
 - **Preserve labels.** Remove only a priority label being replaced; add rather than remove

@@ -20,8 +20,10 @@ $plan-ticket --project 2 --owner my-group   # a different board (a pasted board 
 $plan-ticket --context FILE        # use this brief instead of the repo's own (repeatable)
 ```
 
-Bundled scripts, run with stdin closed (`< /dev/null`): `scripts/registry.py` and
-`scripts/resolve_model.py`, both under `${CODEX_HOME:-~/.codex}/skills/plan-ticket/`.
+Bundled scripts, run with stdin closed (`< /dev/null`): `scripts/registry.py`,
+`scripts/resolve_model.py` and `scripts/deps.py` (the dependency check
+[references/plan-one-ticket.md](references/plan-one-ticket.md) step 2 uses), all under
+`${CODEX_HOME:-~/.codex}/skills/plan-ticket/`.
 
 ## 0. Set up
 

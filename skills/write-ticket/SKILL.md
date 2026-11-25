@@ -107,8 +107,10 @@ until it exits 0.
   unassigned.
 - **Blocked:** when a `Depends on:` issue is still open (**issue-state**), the ticket gets the
   registry's blocked label and a `Blocked: dependency` comment naming each open dependency
-  (shape in ticket-labels.md). It keeps the lane it was filed in. `$daily-grooming` frees it
-  when the last dependency closes.
+  (shape in ticket-labels.md), and goes to the blocked lane: the label and the lane always
+  agree. Name the issue that does the work, never a tracker or batch parent, and never one
+  whose own dependencies lead back here (plan-one-ticket.md, "Before naming a dependency").
+  `$daily-grooming` frees it when the last dependency closes.
 
 ## 5. File it
 
@@ -120,8 +122,8 @@ command or asked for a ticket in chat has asked for it, so file without a furthe
    with the registry's color and description for its own rows and the ones ticket-labels.md
    gives for `project:<repo>` ("Label colors and descriptions"). Area labels are never created.
 2. **create-issue** with the title, body file and labels (this also adds it to the board).
-3. **set-priority**, then **set-lane**. When the ticket is blocked, **comment** with the
-   `Blocked: dependency` comment.
+3. **set-priority**, then **set-lane** (the blocked lane when the ticket is blocked). When
+   it is blocked, **comment** with the `Blocked: dependency` comment.
 4. **assign** when `--assignee` was given.
 5. **Join a batch**, when batching is on and this is a new ticket (not `--ticket`): run
    **list-parents** for the repo and **attach-child** to an open parent that fits it, as
