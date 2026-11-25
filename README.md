@@ -21,6 +21,10 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/ticket-worker/`](skills/ticket-worker/SKILL.md) | `$ticket-worker`: works one issue from plan to an open pull or merge request; merging closes the issue |
 | [`skills/ux-review/`](skills/ux-review/SKILL.md) | `$ux-review`: reviews a screen, flow, mockup or screenshot for usability, accessibility and visual craft |
 | [`skills/web-design-guidelines/`](skills/web-design-guidelines/SKILL.md) | `$web-design-guidelines`: audits UI code against Vercel's Web Interface Guidelines, fetched fresh each run |
+| [`skills/composition-patterns/`](skills/composition-patterns/SKILL.md) | `$composition-patterns`: Vercel's React composition rules (compound components, state in providers, explicit variants) for component APIs |
+| [`skills/react-best-practices/`](skills/react-best-practices/SKILL.md) | `$react-best-practices`: Vercel's React and Next.js performance rules, ranked by impact |
+| [`skills/react-native-skills/`](skills/react-native-skills/SKILL.md) | `$react-native-skills`: Vercel's React Native and Expo rules: lists, animation, navigation, UI, state, monorepos |
+| [`skills/uswds/`](skills/uswds/SKILL.md) | `$uswds`: builds or reviews a UI with the U.S. Web Design System, fetching the current version, components and federal website standards, and checking templates for class names the stylesheet does not define |
 | [`skills/accessibility-scan/`](skills/accessibility-scan/SKILL.md) | `$accessibility-scan`: automated WCAG scan of one live page |
 | [`skills/accessibility-inspect/`](skills/accessibility-inspect/SKILL.md) | `$accessibility-inspect`: hands-on keyboard and screen-reader pass of one live page in Chrome |
 | [`skills/accessibility-audit/`](skills/accessibility-audit/SKILL.md) | `$accessibility-audit`: whole-site WCAG audit following the W3C's evaluation method |
@@ -34,15 +38,21 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/ci-harden/`](skills/ci-harden/SKILL.md) | `$ci-harden`: audits and hardens GitHub Actions and GitLab CI pipelines, and ships reference pipelines that build, scan, sign and push an image with keyless GCP auth |
 | [`skills/gcp-review/`](skills/gcp-review/SKILL.md) | `$gcp-review`: read-only security review of a Google Cloud project through an allowlisted gcloud wrapper; reports evidence, gaps and drafted fixes and changes nothing |
 | [`skills/gitlab-migration/`](skills/gitlab-migration/SKILL.md) | `$gitlab-migration`: plans a GitHub-to-GitLab move (inventory, importer limits, Actions translation, secrets, Workload Identity trust, cutover and rollback) and runs it only on an explicit go per step |
+| [`skills/section-508-report/`](skills/section-508-report/SKILL.md) | `$section-508-report`: builds an Accessibility Conformance Report on the ITI VPAT 2.5Rev template from audit findings and test notes; refuses a Supports row without a passing check run by a person and lists what still needs a tester |
+| [`skills/model-recommender/`](skills/model-recommender/SKILL.md) | `$model-recommender`: picks the OpenAI model tier and reasoning effort for a task, subagent or pipeline stage from the live catalog, and says how to verify and apply it |
+| [`skills/model-usage-audit/`](skills/model-usage-audit/SKILL.md) | `$model-usage-audit`: audits how a product's code calls AI models (any provider): call sites, model ids and lifecycle, limits, cost, data flow, secrets and evals, as a findings report |
 | [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` |
-| [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run |
-| [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, and the read-only `reviewer`, `forward_tester` and `security_auditor` |
+| [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run, split by model, subagent role and project, with frontier-tier subagent runs that look mechanical |
+| [`agents/`](agents/) | Custom subagents `eng`, `ticket_worker`, `prompt_optimizer`, `ui_ux` (renders a page in Chrome, reviews the screenshots and fixes what is wrong), and the read-only `reviewer`, `forward_tester` and `security_auditor` |
 | [`references/model-selection.md`](references/model-selection.md) | Which model tier and effort for which kind of work |
 | [`references/ticket-labels.md`](references/ticket-labels.md) | When each ticket label goes on, and how held work is marked |
 | [`references/testing-without-api-spend.md`](references/testing-without-api-spend.md) | When to test with `codex exec` or the Codex SDK on the ChatGPT sign-in, and when an API key is really needed |
 | [`references/trackers/`](references/trackers/) | How each tracker operation is done on GitHub (`gh`) and on GitLab (`glab`) |
 | [`scripts/resolve_model.py`](scripts/resolve_model.py) | Turns a tier into a model your account has, with a supported effort |
 | [`scripts/codex_usage.py`](scripts/codex_usage.py) | Per-run usage from Codex's own records |
+| [`scripts/inventory_model_calls.py`](scripts/inventory_model_calls.py) | Finds every place a repository calls an AI model, with file:line evidence, for `$model-usage-audit` |
+| [`scripts/uswds_check.py`](scripts/uswds_check.py) | Installed against latest USWDS version, `usa-` classes the stylesheet does not define, and page facts, for `$uswds` |
+| [`scripts/acr.py`](scripts/acr.py) | Builds and validates the Accessibility Conformance Report evidence file, for `$section-508-report` |
 | [`registry.example.md`](registry.example.md) | Template for the tracker, board, lanes, labels and repo list the ticket skills read |
 | [`evals/triggers/`](evals/triggers/) | For each skill, about 20 requests that should and should not trigger it, for testing its description |
 | [`docs/sources.md`](docs/sources.md) | The documentation and measurements behind the design |
@@ -163,6 +173,7 @@ $work-tickets --dry-run
 $work-tickets --priority P1
 $ticket-worker work issue 42 in my-repo
 $ux-review this checkout screenshot
+$uswds review these templates against the design system
 $accessibility-scan http://localhost:3000
 $security-scan --changed-since origin/main
 $threat-model the new file upload feature
@@ -174,6 +185,8 @@ $gcp-review project acme-prod
 $gitlab-migration plan the move of this repo to GitLab
 $codex-project-setup
 $codex-usage
+$model-recommender which model and effort for these three subagents
+$model-usage-audit path/to/repo
 ```
 
 Each skill shows a display name, icon and starter prompt in the desktop app's
@@ -181,7 +194,7 @@ Skills list (`skills/<name>/agents/openai.yaml`).
 
 ## Browser tools for the accessibility skills
 
-The accessibility skills drive a real page. `$accessibility-scan` and
+The accessibility skills and the `ui_ux` agent drive a real page. `$accessibility-scan` and
 `$accessibility-diff` need Node and Chrome installed (they run AccessLint's CLI
 through `npx`, which starts Chrome itself).
 `$accessibility-inspect` needs Chrome DevTools connected to Codex, and

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Model Usage Audit"
+  short_description: "Audit how a codebase calls AI models"
+  icon_small: "./assets/model-usage-audit-small.svg"
+  icon_large: "./assets/model-usage-audit.png"
+  brand_color: "#BE123C"
+  default_prompt: "Use $model-usage-audit to audit this repo's AI model usage."

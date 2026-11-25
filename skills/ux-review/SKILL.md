@@ -19,6 +19,8 @@ first on an ordinary review. Parts of the references are adapted from phazurlabs
 | A fast, opinionated, scored pass: "roast this", "grade this design" | [references/critique-protocol.md](references/critique-protocol.md) |
 | Reviewing code (not a screenshot) for accessibility in depth | [references/accessibility.md](references/accessibility.md), section "Reviewing implementation code" |
 | A broad implementation audit of real UI code: forms, focus, i18n, hydration, navigation state, dark mode, anti-patterns and accessibility | `$web-design-guidelines` (Vercel's Web Interface Guidelines, fetched fresh) |
+| The page is running and the ask is to look at it rendered and fix what is wrong | the `ui_ux` custom agent: it renders the page in a real browser, reviews the screenshots and edits the code. Spawn it at the workhorse tier, high effort |
+| The product uses the U.S. Web Design System (`@uswds/uswds`, `usa-` classes) | `$uswds` as well. Its tokens and components win over the numbers in [references/craft.md](references/craft.md) |
 | A live page or a running dev server is reachable and the ask goes deeper than a code read: an automated scan, a hands-on keyboard and screen-reader pass, a whole-site WCAG-EM audit, applying fixes, or a regression diff | `$accessibility-scan`, `$accessibility-inspect`, `$accessibility-audit`, `$accessibility-fix`, `$accessibility-diff` (AccessLint). See [references/accessibility.md](references/accessibility.md), section "Live and automated testing", for which one and the evidence-basis grading they use |
 
 More than one applies often. Lead with whichever is closest to what was actually

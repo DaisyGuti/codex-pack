@@ -1,0 +1,82 @@
+[
+  {
+    "query": "We're building the permit status lookup page for a federal agency using the U.S. Web Design System. I need a form with a permit number field and a submit button. Give me the markup.",
+    "should_trigger": true
+  },
+  {
+    "query": "Design a striking, experimental hero section for my photography portfolio. I want a look nobody has seen before.",
+    "should_trigger": false
+  },
+  {
+    "query": "Check these templates for usa- classes that the compiled stylesheet does not define. I think there is a typo somewhere.",
+    "should_trigger": true
+  },
+  {
+    "query": "Roast this SaaS landing page screenshot.",
+    "should_trigger": false
+  },
+  {
+    "query": "Does our agency site need the government banner? What do OMB M-23-22 and the 21st Century IDEA Act actually require?",
+    "should_trigger": true
+  },
+  {
+    "query": "Review src/components/Nav.tsx against Vercel's Web Interface Guidelines.",
+    "should_trigger": false
+  },
+  {
+    "query": "Upgrade our app from USWDS 3.7 to the latest. What changed for the components we use?",
+    "should_trigger": true
+  },
+  {
+    "query": "Run an automated accessibility scan on http://localhost:3000.",
+    "should_trigger": false
+  },
+  {
+    "query": "Make this look like a federal .gov site. We are a contractor building a portal for an agency.",
+    "should_trigger": true
+  },
+  {
+    "query": "Write an Accessibility Conformance Report from this audit evidence.",
+    "should_trigger": false
+  },
+  {
+    "query": "Review our base layout against USWDS: skip link, banner, lang, viewport, scripts.",
+    "should_trigger": true
+  },
+  {
+    "query": "Fix the failing build in our Node project.",
+    "should_trigger": false
+  },
+  {
+    "query": "How do I install and compile USWDS with Sass and set our own theme tokens?",
+    "should_trigger": true
+  },
+  {
+    "query": "Make this Tailwind site dark mode friendly.",
+    "should_trigger": false
+  },
+  {
+    "query": "What are the USWDS grid utilities for a three column layout on tablet and up?",
+    "should_trigger": true
+  },
+  {
+    "query": "Add a Bootstrap navbar to this page.",
+    "should_trigger": false
+  },
+  {
+    "query": "Pull the accordion component markup from designsystem.digital.gov and add it to our page.",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a privacy policy for our federal contractor website.",
+    "should_trigger": false
+  },
+  {
+    "query": "Is our product Section 508 compliant if we use USWDS components everywhere?",
+    "should_trigger": true
+  },
+  {
+    "query": "Optimize our React bundle size.",
+    "should_trigger": false
+  }
+]

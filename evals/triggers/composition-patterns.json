@@ -1,0 +1,82 @@
+[
+  {
+    "query": "My <Button> component has isPrimary, isDanger, isGhost, isLoading, isIconOnly and isFullWidth props and nobody knows which combinations are valid. How should I restructure it?",
+    "should_trigger": true
+  },
+  {
+    "query": "This React page takes four seconds to become interactive and the bundle is huge. What should I fix?",
+    "should_trigger": false
+  },
+  {
+    "query": "Two sibling components, a composer toolbar and a message list, both need the same draft state. Where should the state live and how do I share it cleanly?",
+    "should_trigger": true
+  },
+  {
+    "query": "Does this checkout screenshot look right? Check the hierarchy and contrast.",
+    "should_trigger": false
+  },
+  {
+    "query": "We are building a shared component library. Should our Dialog be a compound component or take a config object? Review how Dialog.tsx exposes its API.",
+    "should_trigger": true
+  },
+  {
+    "query": "Fix the failing date parser test in src/dates.ts.",
+    "should_trigger": false
+  },
+  {
+    "query": "I keep adding renderHeader, renderFooter and renderEmpty props to Table. Is there a better pattern than render props?",
+    "should_trigger": true
+  },
+  {
+    "query": "My React Native list janks when scrolling. How do I speed it up?",
+    "should_trigger": false
+  },
+  {
+    "query": "Review src/components/Composer.tsx for component architecture: too many modes, too many booleans.",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a Python class with many optional parameters and a builder pattern.",
+    "should_trigger": false
+  },
+  {
+    "query": "We upgraded to React 19. What do I clean up in our components, like forwardRef and useContext?",
+    "should_trigger": true
+  },
+  {
+    "query": "Audit src/components/CheckoutForm.tsx against Vercel's Web Interface Guidelines for focus states and forms.",
+    "should_trigger": false
+  },
+  {
+    "query": "Refactor this Card so variants like ProfileCard and CompactCard are explicit components rather than a mode prop.",
+    "should_trigger": true
+  },
+  {
+    "query": "Explain how React reconciliation works.",
+    "should_trigger": false
+  },
+  {
+    "query": "How do I let the parent swap the state implementation (useState vs a store) without changing the child components? We use a context provider.",
+    "should_trigger": true
+  },
+  {
+    "query": "Set up Storybook for our component library and add a Button story.",
+    "should_trigger": false
+  },
+  {
+    "query": "Review our design-system wrapper around Radix Select for API flexibility and composition.",
+    "should_trigger": true
+  },
+  {
+    "query": "Add dark mode tokens to our Tailwind config.",
+    "should_trigger": false
+  },
+  {
+    "query": "Our Modal takes twelve props and half are booleans. Redesign the API with composition instead.",
+    "should_trigger": true
+  },
+  {
+    "query": "Write unit tests for the useDebounce hook.",
+    "should_trigger": false
+  }
+]

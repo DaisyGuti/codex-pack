@@ -4,6 +4,19 @@ Use this file to answer one question about a UI: why does it look generic, templ
 
 Each rule has a symptom (what the reviewer sees), the reason it reads as default, and a fix with real values. Values are starting points that suit most interfaces; adjust to the product's existing tokens when it has them.
 
+## Contents
+
+- [Color and surfaces](#color-and-surfaces)
+- [Type](#type)
+- [Space and layout](#space-and-layout)
+- [Elevation and borders](#elevation-and-borders)
+- [Component states](#component-states)
+- [Motion](#motion)
+- [Content realism](#content-realism)
+- [Judging from a screenshot](#judging-from-a-screenshot)
+- [Exceptions](#exceptions)
+- [Reporting](#reporting)
+
 ## Color and surfaces
 
 **1. A saturated blue-to-purple gradient, or any gradient on a plain surface.**

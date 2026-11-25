@@ -12,7 +12,12 @@ Answer from Codex's own records with [scripts/codex_usage.py](scripts/codex_usag
 
 - "What did that run take?": `--last 1`, then `--run <id>` for one row per thread.
 - A period, a skill or an evaluation: `--since <date> --summary`, narrowed with
-  `--skill <name>` when asked.
+  `--skill <name>` when asked. The summary also splits usage by subagent role and by
+  project (the root thread's folder).
+- "Is a top-tier model doing mechanical work?": the same `--summary` ends with the
+  frontier-tier subagent runs that wrote no patch, spawned nothing and returned a short
+  answer (`--mech-output-max N` sets what counts as short; default 8000 output
+  tokens).
 - Data to aggregate elsewhere: `--csv <path>` (one row per thread). Write it where
   the user says; otherwise to `~/Documents/codex-usage-<since>.csv`, and give the
   path.
@@ -37,9 +42,24 @@ Answer from Codex's own records with [scripts/codex_usage.py](scripts/codex_usag
 - Credits show "n/a" for a model the rate table lacks. Say so and point to the
   pricing page for the missing rate; never estimate one.
 
+## Confirm each lead
+
+The mechanical-looking list is a set of leads, not verdicts. For each one, read its
+role and first message:
+
+- Search, list, inventory, count or summarize work is a real candidate: recommend the
+  `fast` or `workhorse` tier and the setting that applies it (the spawn names the model
+  and effort; see [references/model-selection.md](references/model-selection.md)).
+- Review, audit, design, security, root-cause or decision work is judgment: keep the
+  tier and say why.
+- A shell command can write files without a patch, so ask to see the commands before
+  recommending a smaller tier.
+
 ## Report
 
 Lead with the answer: tokens, estimated credits and plan percentage. Then the split
-by model and by subagent, the biggest contributor, and any row the script marks
-partial or overlapping. Quote no more of a conversation than the 40-character
+by model, subagent role and project, the biggest contributor, the confirmed leads with
+their credits now and the tier you would move them to (approximate: another model may
+use a different number of tokens), and any row the script marks partial or
+overlapping. Quote no more of a conversation than the 40-character
 preview the script prints.

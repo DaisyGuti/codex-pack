@@ -1,0 +1,7 @@
+interface:
+  display_name: "React Native Skills"
+  short_description: "Rules for React Native and Expo apps"
+  icon_small: "./assets/react-native-skills-small.svg"
+  icon_large: "./assets/react-native-skills.png"
+  brand_color: "#7C3AED"
+  default_prompt: "Use $react-native-skills to review this React Native code."

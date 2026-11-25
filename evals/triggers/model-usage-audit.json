@@ -1,0 +1,82 @@
+[
+  {
+    "query": "Audit how this repo uses AI models: every call site, the model ids, timeouts, and where the data goes.",
+    "should_trigger": true
+  },
+  {
+    "query": "Which model should my Codex subagents run on?",
+    "should_trigger": false
+  },
+  {
+    "query": "Find any deprecated or soon-to-be-retired model ids in our codebase before the retirement date.",
+    "should_trigger": true
+  },
+  {
+    "query": "How many tokens did my last Codex run use?",
+    "should_trigger": false
+  },
+  {
+    "query": "We are preparing to migrate from one OpenAI model to another. Inventory every place we call a model first.",
+    "should_trigger": true
+  },
+  {
+    "query": "Add exponential backoff to the one OpenAI call in client.py.",
+    "should_trigger": false
+  },
+  {
+    "query": "Check the AI data flow in this service before our security review: which provider, which region, what goes in the prompts?",
+    "should_trigger": true
+  },
+  {
+    "query": "Rewrite this prompt to be shorter and clearer.",
+    "should_trigger": false
+  },
+  {
+    "query": "What do the AI calls in this product cost per month? Break it down by call path.",
+    "should_trigger": true
+  },
+  {
+    "query": "Review this pull request for bugs.",
+    "should_trigger": false
+  },
+  {
+    "query": "Review our LLM usage: are we caching, streaming, setting max tokens, and handling retries?",
+    "should_trigger": true
+  },
+  {
+    "query": "Run a FedRAMP compliance assessment of our cloud environment.",
+    "should_trigger": false
+  },
+  {
+    "query": "Inventory every LangChain and LiteLLM call in the monorepo with file and line.",
+    "should_trigger": true
+  },
+  {
+    "query": "Audit our Terraform for security misconfigurations.",
+    "should_trigger": false
+  },
+  {
+    "query": "Do our logs capture prompts that might contain personal data? Look at how we call the model.",
+    "should_trigger": true
+  },
+  {
+    "query": "Write a threat model for our login flow.",
+    "should_trigger": false
+  },
+  {
+    "query": "Is our Anthropic and OpenAI API key handling safe across the codebase?",
+    "should_trigger": true
+  },
+  {
+    "query": "Optimize our Postgres queries.",
+    "should_trigger": false
+  },
+  {
+    "query": "Does every model call path in this repo have an eval? Report the gaps.",
+    "should_trigger": true
+  },
+  {
+    "query": "Explain what a context window is.",
+    "should_trigger": false
+  }
+]

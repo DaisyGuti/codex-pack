@@ -1,0 +1,7 @@
+interface:
+  display_name: "Model Recommender"
+  short_description: "Pick the Codex model and effort for a job"
+  icon_small: "./assets/model-recommender-small.svg"
+  icon_large: "./assets/model-recommender.png"
+  brand_color: "#B45309"
+  default_prompt: "Use $model-recommender to pick the model and effort for this job."

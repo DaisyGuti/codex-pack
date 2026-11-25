@@ -1,0 +1,7 @@
+interface:
+  display_name: "USWDS"
+  short_description: "Build or review with the U.S. Web Design System"
+  icon_small: "./assets/uswds-small.svg"
+  icon_large: "./assets/uswds.png"
+  brand_color: "#1D4ED8"
+  default_prompt: "Use $uswds to review these templates against the U.S. Web Design System."

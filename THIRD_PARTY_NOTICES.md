@@ -12,6 +12,9 @@ Every copied or adapted file was modified for Codex; each notice file says how.
 | [`accessibility-fix`](skills/accessibility-fix/SKILL.md) | [AccessLint/skills](https://github.com/AccessLint/skills) | MIT | [`skills/accessibility-fix/LICENSE.txt`](skills/accessibility-fix/LICENSE.txt) |
 | [`accessibility-diff`](skills/accessibility-diff/SKILL.md) | [AccessLint/skills](https://github.com/AccessLint/skills) | MIT | [`skills/accessibility-diff/LICENSE.txt`](skills/accessibility-diff/LICENSE.txt) |
 | [`web-design-guidelines`](skills/web-design-guidelines/SKILL.md) | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | MIT | [`skills/web-design-guidelines/LICENSE.txt`](skills/web-design-guidelines/LICENSE.txt) |
+| [`composition-patterns`](skills/composition-patterns/SKILL.md) | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) at `063bee9` | MIT | [`skills/composition-patterns/LICENSE.txt`](skills/composition-patterns/LICENSE.txt) |
+| [`react-best-practices`](skills/react-best-practices/SKILL.md) | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) at `063bee9` | MIT | [`skills/react-best-practices/LICENSE.txt`](skills/react-best-practices/LICENSE.txt) |
+| [`react-native-skills`](skills/react-native-skills/SKILL.md) | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) at `063bee9` | MIT | [`skills/react-native-skills/LICENSE.txt`](skills/react-native-skills/LICENSE.txt) |
 | [`ux-review`](skills/ux-review/SKILL.md) (partly) | [phazurlabs/sumi](https://github.com/phazurlabs/sumi) | Apache-2.0 | [`skills/ux-review/LICENSE-sumi.txt`](skills/ux-review/LICENSE-sumi.txt) |
 | [`eng`](skills/eng/SKILL.md) (the ExecPlan reference and the `reviewer` agent) | [openai/openai-cookbook](https://github.com/openai/openai-cookbook) | MIT | [OpenAI Cookbook notice](#openai-cookbook-mit) below |
 | [`prompt-optimizer`](skills/prompt-optimizer/SKILL.md) (partly) | [openai/openai-cookbook](https://github.com/openai/openai-cookbook) | MIT | [OpenAI Cookbook notice](#openai-cookbook-mit) below |
@@ -38,12 +41,25 @@ Every copied or adapted file was modified for Codex; each notice file says how.
   "MIT" under "License". The skill bundles no rules: it fetches the current guidelines
   at review time from
   [vercel-labs/web-interface-guidelines](https://github.com/vercel-labs/web-interface-guidelines)
-  (MIT).
+  (MIT). `composition-patterns`, `react-best-practices` and `react-native-skills` come from
+  the same repository at commit `063bee9`: `SKILL.md` adapted for Codex and the `rules/*.md`
+  files unmodified. Each `LICENSE.txt` reuses the copyright line of the web-interface-guidelines
+  repository, which carries a LICENSE file.
+- **U.S. Web Design System.** `uswds` bundles none of USWDS's code, markup or text: it
+  fetches the current component pages, tokens and website standards from
+  [designsystem.digital.gov](https://designsystem.digital.gov/) and
+  [standards.digital.gov](https://standards.digital.gov/) when it runs. Its references
+  paraphrase the primary federal sources they name and cite them.
 - **phazurlabs/sumi.** In `ux-review`, `references/critique-protocol.md` and three
   sections of `references/accessibility.md` (APCA contrast, cognitive and neurodiversity
   accommodations, testing methodology) are adapted from sumi's `a11y` and `roast`
   commands and two of its skills. The files were modified. The rest of `ux-review`,
   including `references/craft.md`, was written for this pack.
+- **ITI VPAT 2.5Rev wording.** `section-508-report` bundles the template's own wording and
+  criterion rows in
+  [`skills/section-508-report/data/vpat-text.json`](skills/section-508-report/data/vpat-text.json)
+  so a report follows the template. ITI's reuse terms were not checked when this pack was
+  assembled. Confirm them before sharing the pack outside the team.
 - **WCAG 2.2 and the W3C ARIA documents.** `ux-review/references/accessibility.md`
   cites success criteria and short rule statements from
   [WCAG 2.2](https://www.w3.org/TR/WCAG22/) and
