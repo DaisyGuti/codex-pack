@@ -26,7 +26,7 @@ held work is marked the same way for everyone (see [Ticket trackers](#ticket-tra
 | [`skills/accessibility-audit/`](skills/accessibility-audit/SKILL.md) | `$accessibility-audit`: whole-site WCAG audit following the W3C's evaluation method |
 | [`skills/accessibility-fix/`](skills/accessibility-fix/SKILL.md) | `$accessibility-fix`: fixes the violations a scan finds and re-scans to confirm |
 | [`skills/accessibility-diff/`](skills/accessibility-diff/SKILL.md) | `$accessibility-diff`: which accessibility problems a change added or fixed |
-| [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` |
+| [`skills/codex-project-setup/`](skills/codex-project-setup/SKILL.md) | `$codex-project-setup`: writes or refreshes a repo's `AGENTS.md` from a scan of its files, checks it, measures the `AGENTS.md` chain against Codex's read cap, and offers a CI size guard |
 | [`skills/codex-usage/`](skills/codex-usage/SKILL.md) | `$codex-usage`: tokens, estimated credits and plan percentage per run |
 | [`skills/slack-catchup/`](skills/slack-catchup/SKILL.md) | `$slack-catchup`: summarizes Slack channels, threads and DMs since a time into decisions, asks, blockers and FYIs, with links; read-only |
 | [`skills/slack-draft/`](skills/slack-draft/SKILL.md) | `$slack-draft`: drafts a Slack message or thread reply for a stated goal; drafts only |
